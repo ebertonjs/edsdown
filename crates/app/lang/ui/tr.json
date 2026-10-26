@@ -431,5 +431,7 @@
  "Background picture": "Arka plan resmi",
  "none (the theme's colors)": "yok (temanın renkleri)",
  "Picture visibility": "Resim görünürlüğü",
- "Hide": "Gizle"
+ "Hide": "Gizle",
+ "NetLAB dark": "NetLAB koyu",
+ "NetLAB light": "NetLAB açık"
 }

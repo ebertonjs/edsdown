@@ -1299,3 +1299,9 @@ msgstr "Sürüm {}"
 
 msgid "Hide"
 msgstr "Gizle"
+
+msgid "NetLAB dark"
+msgstr "NetLAB koyu"
+
+msgid "NetLAB light"
+msgstr "NetLAB açık"

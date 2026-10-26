@@ -431,5 +431,7 @@
  "Background picture": "Imagem de fundo",
  "none (the theme's colors)": "nenhuma (cores do tema)",
  "Picture visibility": "Visibilidade da imagem",
- "Hide": "Ocultar"
+ "Hide": "Ocultar",
+ "NetLAB dark": "NetLAB escuro",
+ "NetLAB light": "NetLAB claro"
 }

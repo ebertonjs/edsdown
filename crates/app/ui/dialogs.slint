@@ -131,6 +131,7 @@ component PairList inherits Rectangle {
     in-out property <int> current: -1;
     callback picked(int);
     background: Theme.panel;
+    border-radius: Theme.r-panel;
     border-width: 1px;
     border-color: Theme.line;
     VerticalLayout {
@@ -660,6 +661,7 @@ export component PropertiesDialog inherits ThemedWindow {
             border-width: 1px;
             border-color: Theme.line;
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             Text {
                 x: 8px;
                 width: parent.width - 16px;
@@ -898,6 +900,7 @@ export component SchedulerDialog inherits ThemedWindow {
             Rectangle {
                 vertical-stretch: 1;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 ListView {
@@ -992,6 +995,7 @@ export component SchedulerDialog inherits ThemedWindow {
             Rectangle {
                 vertical-stretch: 1;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 if root.tab == 0: VerticalLayout {
@@ -1309,6 +1313,7 @@ export component GrabberDialog inherits ThemedWindow {
         spacing: 8px;
         if !root.links-mode: Rectangle {
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             border-width: 1px;
             border-color: Theme.line;
             VerticalLayout {
@@ -1435,6 +1440,7 @@ export component GrabberDialog inherits ThemedWindow {
         Rectangle {
             vertical-stretch: 1;
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             border-width: 1px;
             border-color: Theme.line;
             VerticalLayout {
@@ -1903,6 +1909,7 @@ export component SettingsDialog inherits ThemedWindow {
             Rectangle {
                 width: 150px;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 VerticalLayout {
@@ -1920,6 +1927,7 @@ export component SettingsDialog inherits ThemedWindow {
             Rectangle {
                 horizontal-stretch: 1;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
 
@@ -1935,7 +1943,7 @@ export component SettingsDialog inherits ThemedWindow {
                         }
                         ComboBox {
                             width: 200px;
-                            model: [@tr("Light"), @tr("Dark"), @tr("Ocean blue"), @tr("Midnight purple"), @tr("Forest green"), @tr("Black"), @tr("Sunset"), @tr("Teal night"), @tr("Rose")];
+                            model: [@tr("Light"), @tr("Dark"), @tr("Ocean blue"), @tr("Midnight purple"), @tr("Forest green"), @tr("Black"), @tr("Sunset"), @tr("Teal night"), @tr("Rose"), @tr("NetLAB dark"), @tr("NetLAB light")];
                             current-index <=> root.theme;
                         }
                         Rectangle {
@@ -2892,6 +2900,7 @@ export component PlaylistDialog inherits ThemedWindow {
         Rectangle {
             vertical-stretch: 1;
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             border-width: 1px;
             border-color: Theme.line;
             VerticalLayout {

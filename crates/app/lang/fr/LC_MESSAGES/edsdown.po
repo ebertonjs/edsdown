@@ -1299,3 +1299,9 @@ msgstr "Version {}"
 
 msgid "Hide"
 msgstr "Masquer"
+
+msgid "NetLAB dark"
+msgstr "NetLAB sombre"
+
+msgid "NetLAB light"
+msgstr "NetLAB clair"

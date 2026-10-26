@@ -12,7 +12,7 @@ Gerenciador de downloads para Windows, escrito em Rust.
 
 <br>
 
-<img src="docs/images/main-claro.png" alt="Janela principal do EdsDown" width="800">
+<img src="docs/images/main-netlab-escuro.png" alt="EdsDown no tema NetLAB escuro" width="800">
 
 </div>
 
@@ -20,14 +20,19 @@ Gerenciador de downloads para Windows, escrito em Rust.
 
 ## Telas
 
+Visual padrão **NetLAB**: vidro fosco sobre o fundo de ondas do NetNOC, fonte Inter e destaque laranja. Escuro ou claro em **Exibir → Tema** (os temas antigos continuam disponíveis).
+
 <table>
 <tr>
-<td align="center"><b>Tema escuro</b><br><img src="docs/images/main-escuro.png" alt="EdsDown no tema escuro" width="420"></td>
-<td align="center"><b>Popup da extensão</b> (claro e escuro)<br><img src="docs/images/popup.png" alt="Popup da extensão" width="420"></td>
+<td align="center"><b>NetLAB claro</b><br><img src="docs/images/main-netlab-claro.png" alt="EdsDown no tema NetLAB claro" width="420"></td>
+<td align="center"><b>Opções</b><br><img src="docs/images/opcoes.png" alt="Janela de opções" width="360"></td>
 </tr>
 <tr>
+<td align="center"><b>Popup da extensão</b> (escuro e claro)<br><img src="docs/images/popup.png" alt="Popup da extensão" width="420"></td>
 <td align="center"><b>Botão "Baixar este vídeo"</b> sobre o player<br><img src="docs/images/botao-video.png" alt="Botão de download sobre o vídeo" width="420"></td>
-<td align="center"><b>Configurações da extensão</b><br><img src="docs/images/configuracoes.png" alt="Configurações da extensão" width="420"></td>
+</tr>
+<tr>
+<td align="center" colspan="2"><b>Configurações da extensão</b><br><img src="docs/images/configuracoes-extensao.png" alt="Configurações da extensão" width="640"></td>
 </tr>
 </table>
 

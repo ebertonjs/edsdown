@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3
+
+Visual NetLAB (o mesmo do NetNOC):
+- Dois temas novos, **NetLAB escuro** (padrão) e **NetLAB claro**: fundo de ondas, painéis de vidro translúcidos com cantos arredondados, fonte Inter embutida e destaque laranja.
+- Quem estava no tema padrão antigo (Claro) passa para o NetLAB escuro uma vez; quem escolheu outro tema continua nele.
+- Diálogos com o gradiente do NetLAB, menus e botões arredondados.
+- Extensão: popup, configurações e botão "Baixar este vídeo" no mesmo visual (vidro, ondas, Inter, laranja), claro e escuro automáticos.
+
 ## 0.1.2 — 2026-10-25
 
 Desempenho:

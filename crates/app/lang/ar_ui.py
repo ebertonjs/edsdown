@@ -449,4 +449,6 @@ AR = {
     "none (the theme's colors)": "بدون (ألوان المظهر)",
     "Picture visibility": "وضوح الصورة",
     "Hide": "إخفاء",
+    "NetLAB dark": "NetLAB داكن",
+    "NetLAB light": "NetLAB فاتح",
 }

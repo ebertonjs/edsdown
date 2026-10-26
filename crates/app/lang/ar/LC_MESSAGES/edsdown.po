@@ -1299,3 +1299,9 @@ msgstr "الإصدار {}"
 
 msgid "Hide"
 msgstr "إخفاء"
+
+msgid "NetLAB dark"
+msgstr "NetLAB داكن"
+
+msgid "NetLAB light"
+msgstr "NetLAB فاتح"

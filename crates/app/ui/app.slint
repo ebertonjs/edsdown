@@ -1,6 +1,6 @@
 // EdsDown – user interface (Slint)
 // Classic download-manager layout: menu bar, big icon toolbar, category and
-// queue tree, detailed list, one progress window per download. Nine themes.
+// queue tree, detailed list, one progress window per download. Eleven themes.
 
 import { Button, LineEdit, SpinBox, CheckBox, ComboBox, ListView, TabWidget, TextEdit, Palette } from "std-widgets.slint";
 import { DownloadRow, QueueRow, SegView, Cols, ColDef, CatRow, PairRow, LinkRow, Theme, ThemedWindow, P, Icon, G, TypeIcon, BigTypeIcon, ToolBtn, ToolSeparator, TreeItem, HeaderCell, Cell, MenuEntry, MenuSep, MenuLabel, Glyph } from "common.slint";
@@ -82,7 +82,7 @@ component DownloadItem inherits Rectangle {
             background: Theme.panel;
             border-width: 1px;
             border-color: Theme.line;
-            border-radius: 4px;
+            border-radius: Theme.netlab ? 12px : 4px;
             drop-shadow-blur: 10px;
             drop-shadow-color: #00000055;
             drop-shadow-offset-y: 3px;
@@ -347,7 +347,7 @@ component TreeMenu inherits PopupWindow {
         background: Theme.panel;
         border-width: 1px;
         border-color: Theme.line;
-        border-radius: 4px;
+        border-radius: Theme.netlab ? 12px : 4px;
         drop-shadow-blur: 10px;
         drop-shadow-color: #00000055;
         drop-shadow-offset-y: 3px;
@@ -1074,6 +1074,23 @@ export component MainWindow inherits ThemedWindow {
                 }
                 MenuSeparator { }
                 MenuItem {
+                    title: @tr("NetLAB dark");
+                    checkable: true;
+                    checked: Theme.mode == 9;
+                    activated => {
+                        root.set-theme(9);
+                    }
+                }
+                MenuItem {
+                    title: @tr("NetLAB light");
+                    checkable: true;
+                    checked: Theme.mode == 10;
+                    activated => {
+                        root.set-theme(10);
+                    }
+                }
+                MenuSeparator { }
+                MenuItem {
                     title: @tr("Appearance…");
                     activated => {
                         root.open-settings(9);
@@ -1153,7 +1170,7 @@ export component MainWindow inherits ThemedWindow {
             background: Theme.panel;
             border-width: 1px;
             border-color: Theme.line;
-            border-radius: 4px;
+            border-radius: Theme.netlab ? 12px : 4px;
             drop-shadow-blur: 10px;
             drop-shadow-color: #00000055;
             qm-list := VerticalLayout {
@@ -1184,6 +1201,15 @@ export component MainWindow inherits ThemedWindow {
         width: root.width;
         height: root.height;
         source: root.bg-image;
+        image-fit: cover;
+    }
+    // NetLAB themes: NetNOC's wave background (unless a picture was chosen)
+    if !root.has-bg-image && Theme.netlab: Image {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        source: Theme.dark ? @image-url("bg-netlab-dark.jpg") : @image-url("bg-netlab-light.jpg");
         image-fit: cover;
     }
     keys := FocusScope {
@@ -1383,19 +1409,21 @@ export component MainWindow inherits ThemedWindow {
 
             HorizontalLayout {
                 vertical-stretch: 1;
-                padding: 4px;
-                spacing: 4px;
+                padding: Theme.netlab ? 10px : 4px;
+                spacing: Theme.netlab ? 10px : 4px;
                 // ---- tree
                 if !root.hide-categories: Rectangle {
                     width: 210px;
                     background: Theme.panel;
                     border-width: 1px;
                     border-color: Theme.line;
+                    border-radius: Theme.r-panel;
+                    clip: true;
                     VerticalLayout {
-                        padding: 2px;
+                        padding: Theme.netlab ? 8px : 2px;
                         Rectangle {
                             height: 23px;
-                            background: Theme.window;
+                            background: Theme.netlab ? transparent : Theme.window;
                             Text {
                                 x: 6px;
                                 height: parent.height;
@@ -1569,8 +1597,9 @@ export component MainWindow inherits ThemedWindow {
                     background: Theme.panel;
                     border-width: 1px;
                     border-color: Theme.line;
+                    border-radius: Theme.r-panel;
                     VerticalLayout {
-                        padding: 1px;
+                        padding: Theme.netlab ? 6px : 1px;
                         Rectangle {
                             height: 24px;
                             background: @linear-gradient(180deg, Theme.header-top 0%, Theme.header-bottom 100%);
@@ -1665,7 +1694,7 @@ export component MainWindow inherits ThemedWindow {
             // ---- status bar
             Rectangle {
                 height: 22px;
-                background: Theme.window;
+                background: Theme.netlab ? transparent : Theme.window;
                 Rectangle {
                     width: parent.width;
                     height: 1px;
@@ -1895,6 +1924,7 @@ export component AddDialog inherits ThemedWindow {
             border-width: 1px;
             border-color: root.info-error ? Theme.err : Theme.line;
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             Text {
                 x: 10px;
                 width: parent.width - 20px;
@@ -2194,6 +2224,7 @@ export component BatchDialog inherits ThemedWindow {
                 vertical-stretch: 1;
                 min-height: 80px;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 Text {
@@ -2349,6 +2380,7 @@ export component DetailsDialog inherits ThemedWindow {
         }
         Rectangle {
             background: Theme.panel;
+            border-radius: Theme.r-panel;
             border-width: 1px;
             border-color: Theme.line;
             min-height: 176px;
@@ -2645,6 +2677,7 @@ export component DetailsDialog inherits ThemedWindow {
                 border-width: 1px;
                 border-color: Theme.line;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 clip: true;
                 for s in root.segs: Rectangle {
                     x: 1px + (parent.width - 2px) * s.start;
@@ -2668,6 +2701,7 @@ export component DetailsDialog inherits ThemedWindow {
             Rectangle {
                 height: 150px;
                 background: Theme.panel;
+                border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 VerticalLayout {

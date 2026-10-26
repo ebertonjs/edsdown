@@ -2,75 +2,65 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="stylesheet" href="netlab.css">
 <style>
-  :root {
-    --bg: #f4f6fa; --card: #fff; --line: #e6eaf0; --text: #1f2733; --muted: #6b7686;
-    --accent: #0e5fb8; --accent-h: #0a4c96; --accent-soft: #e8f1fc; --ok: #1a9e5a; --err: #d1342f; --input: #fff;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #12161e; --card: #1b2230; --line: #2a3344; --text: #e6ebf2; --muted: #93a0b4;
-      --accent: #1f8ad8; --accent-h: #2a9be8; --accent-soft: #1d3150; --ok: #4cd38a; --err: #ff6b66; --input: #141a25;
-    }
-  }
-  body { font: 14px/1.45 "Segoe UI", system-ui, sans-serif; color: var(--text); margin: 0; width: 420px; min-height: 260px; background: var(--bg); }
-  header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
-  header img { width: 26px; height: 26px; }
-  header b { font-size: 16px; }
-  .dot { margin-left: auto; font-size: 12px; color: var(--muted); }
-  .dot::before { content: "●"; margin-right: 4px; color: #8b95a3; }
-  .dot.on::before { color: var(--ok); }
-  .gear { background: none; color: var(--muted); font-size: 18px; padding: 2px 6px; }
-  .gear:hover { background: var(--accent-soft); color: var(--text); }
-  .bar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
-  .bar label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .seg { display: flex; flex: none; margin-left: auto; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-  .seg button { background: var(--card); color: var(--text); border-radius: 0; padding: 3px 10px; border-right: 1px solid var(--line); white-space: nowrap; }
-  .seg button:last-child { border-right: 0; }
-  .seg button:hover { background: var(--accent-soft); }
-  .seg button.on { background: var(--accent); color: #fff; }
-  .add { display: flex; gap: 6px; padding: 10px 16px 0; }
-  .add input { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--input); color: var(--text); font: inherit; }
-  .add input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-  .note { padding: 4px 16px 0; font-size: 12px; min-height: 16px; }
+  body { width: 420px; min-height: 300px; padding: 12px; }
+  header { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  header img { width: 28px; height: 28px; }
+  header b { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+  header .pill { margin-left: auto; }
+  .gear { width: 32px; height: 32px; border-radius: 50%; background: var(--btn); color: var(--text-2); font-size: 16px; display: grid; place-items: center; }
+  .gear:hover { background: var(--btn-hover); color: var(--text); }
+  .card { padding: 10px 12px; margin-bottom: 10px; }
+  .row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); }
+  .row + .row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--stroke); }
+  .row label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .seg { display: flex; margin-left: auto; flex: none; background: var(--btn); border-radius: var(--r-pill); padding: 3px; }
+  .seg button { background: transparent; color: var(--text-2); border-radius: var(--r-pill); padding: 3px 11px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .seg button:hover { color: var(--text); }
+  .seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-text); }
+  .add { display: flex; gap: 8px; }
+  .add input { flex: 1; min-width: 0; }
+  .note { font-size: 12px; min-height: 16px; margin: 6px 2px 0; }
   .note.ok { color: var(--ok); } .note.err { color: var(--err); }
-  section { padding: 6px 16px 14px; }
-  h3 { margin: 4px 0 6px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; display: flex; align-items: center; }
-  h3 button { margin-left: auto; text-transform: none; letter-spacing: 0; font-size: 12px; padding: 3px 9px; }
-  .media { background: var(--card); border-radius: 8px; margin: 8px 0; padding: 10px 12px; display: flex; gap: 8px; align-items: center; }
-  .media div { flex: 1; min-width: 0; }
-  .media small { display: block; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  button { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 5px 10px; cursor: pointer; font: inherit; }
-  button:hover { background: var(--accent-h); }
-  button:disabled { opacity: .55; cursor: default; }
-  .empty { color: var(--muted); }
+  .note:empty { display: none; }
+  h3 { display: flex; align-items: center; margin: 2px 2px 8px; }
+  h3 .btn { margin-left: auto; font-size: 12px; padding: 4px 11px; text-transform: none; letter-spacing: 0; }
+  .media { display: flex; gap: 10px; align-items: center; padding: 10px 12px; margin: 8px 0 0; border-radius: var(--r-md); background: var(--glass-2); border: 1px solid var(--stroke); }
+  .media div { flex: 1; min-width: 0; font-weight: 600; }
+  .media small { display: block; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty { color: var(--muted); font-size: 13px; padding: 4px 2px; }
 </style>
 </head>
 <body>
-  <header>
+  <header class="glass">
     <img src="icons/icon32.png" alt="">
     <b>EdsDown</b>
-    <span class="dot" id="status" data-i18n="checking"></span>
+    <span class="pill" id="status" data-i18n="checking"></span>
     <button class="gear" id="settings" data-i18n-title="settings">⚙</button>
   </header>
-  <div class="bar">
-    <label><input type="checkbox" id="intercept"> <span data-i18n="captureDownloads"></span></label>
-  </div>
-  <div class="bar">
-    <span data-i18n="buttonSize"></span>
-    <div class="seg" id="sizes">
-      <button data-size="small" data-i18n="sizeSmall"></button>
-      <button data-size="normal" data-i18n="sizeNormal"></button>
-      <button data-size="large" data-i18n="sizeLarge"></button>
+  <div class="glass card">
+    <div class="row">
+      <label><input type="checkbox" id="intercept"> <span data-i18n="captureDownloads"></span></label>
+    </div>
+    <div class="row">
+      <span data-i18n="buttonSize"></span>
+      <div class="seg" id="sizes">
+        <button data-size="small" data-i18n="sizeSmall"></button>
+        <button data-size="normal" data-i18n="sizeNormal"></button>
+        <button data-size="large" data-i18n="sizeLarge"></button>
+      </div>
     </div>
   </div>
-  <form class="add" id="addForm">
-    <input type="url" id="url" data-i18n-placeholder="pasteLink" autocomplete="off" spellcheck="false">
-    <button type="submit" data-i18n="send"></button>
-  </form>
-  <div class="note" id="note"></div>
-  <section>
-    <h3><span data-i18n="mediaOnPage"></span><button id="grab" data-i18n="grabVideo"></button></h3>
+  <div class="glass card">
+    <form class="add" id="addForm">
+      <input type="url" id="url" data-i18n-placeholder="pasteLink" autocomplete="off" spellcheck="false">
+      <button class="btn" type="submit" data-i18n="send"></button>
+    </form>
+    <div class="note" id="note"></div>
+  </div>
+  <section class="glass card">
+    <h3><span class="label" data-i18n="mediaOnPage"></span><button class="btn" id="grab" data-i18n="grabVideo"></button></h3>
     <div id="media"><div class="empty" data-i18n="nothingYet"></div></div>
   </section>
   <script src="i18n.js"></script>

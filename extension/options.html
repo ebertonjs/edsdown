@@ -3,31 +3,26 @@
 <head>
 <meta charset="utf-8">
 <title>EdsDown</title>
+<link rel="stylesheet" href="netlab.css">
 <style>
-  :root { --bg: #f4f6fa; --card: #fff; --line: #d5dbe4; --text: #1f2733; --muted: #6b7686; --accent: #0e5fb8; --accent-h: #0a4c96; --ok: #1a9e5a; --err: #d1342f; --input: #fff; }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #12161e; --card: #1b2230; --line: #2a3344; --text: #e6ebf2; --muted: #93a0b4; --accent: #1f8ad8; --accent-h: #2a9be8; --ok: #4cd38a; --err: #ff6b66; --input: #141a25; }
-  }
-  body { font: 14px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--text); margin: 0; padding: 18px 22px; min-width: 420px; background: var(--bg); }
-  h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; font-size: 18px; }
-  h2 img { width: 28px; height: 28px; }
-  .card { background: var(--card); border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-  label { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
-  select, input[type=number] { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; background: var(--input); color: var(--text); }
-  input[type=number] { width: 90px; }
-  button { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 4px 10px; cursor: pointer; font: inherit; }
-  button:hover { background: var(--accent-h); }
-  .test { font-size: 12px; margin: -4px 0 6px; min-height: 18px; }
+  body { padding: 22px; min-width: 460px; min-height: 360px; }
+  h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  h2 img { width: 32px; height: 32px; }
+  .card { padding: 6px 18px; }
+  label { display: flex; align-items: center; gap: 10px; padding: 12px 0; color: var(--text-2); }
+  label + label, .test + label { border-top: 1px solid var(--stroke); }
+  input[type=number] { width: 100px; }
+  .test { font-size: 12px; margin: -6px 0 8px; min-height: 18px; }
   .test.ok { color: var(--ok); } .test.err { color: var(--err); }
-  .saved { color: var(--ok); font-size: 12px; height: 16px; margin-top: 8px; }
+  .saved { color: var(--ok); font-size: 12px; height: 16px; margin: 10px 4px 0; }
 </style>
 </head>
 <body>
   <h2><img src="icons/icon48.png" alt=""><span data-i18n="settingsTitle"></span></h2>
-  <div class="card">
+  <div class="glass card">
     <label><input type="checkbox" id="intercept"> <span data-i18n="captureDownloads"></span></label>
     <label><span data-i18n="ignoreSmaller"></span> <input type="number" id="minSize" min="0"> KB</label>
-    <label><span data-i18n="appPort"></span> <input type="number" id="port" min="1024" max="65535"> <button id="test" data-i18n="testConnection"></button></label>
+    <label><span data-i18n="appPort"></span> <input type="number" id="port" min="1024" max="65535"> <button class="btn ghost" id="test" data-i18n="testConnection"></button></label>
     <div class="test" id="testResult"></div>
     <label><span data-i18n="bubbleSizeLabel"></span>
       <select id="bubbleSize">

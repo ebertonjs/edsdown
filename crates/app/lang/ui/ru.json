@@ -431,5 +431,7 @@
  "Background picture": "Фоновое изображение",
  "none (the theme's colors)": "нет (цвета темы)",
  "Picture visibility": "Видимость изображения",
- "Hide": "Скрыть"
+ "Hide": "Скрыть",
+ "NetLAB dark": "NetLAB тёмная",
+ "NetLAB light": "NetLAB светлая"
 }

@@ -22,6 +22,7 @@ function renderMedia(tab, items) {
     small.textContent = m.sub || "";
     info.appendChild(small);
     const btn = document.createElement("button");
+    btn.className = "btn";
     btn.textContent = T("download");
     btn.disabled = !!m.disabled;
     btn.addEventListener("click", () => {
@@ -64,6 +65,7 @@ async function init() {
     const ok = res && res.ok;
     el.textContent = ok ? T("connected") : T("notRunningShort");
     el.classList.toggle("on", !!ok);
+    el.classList.toggle("off", !ok);
   });
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

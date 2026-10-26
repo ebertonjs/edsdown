@@ -284,6 +284,15 @@ fn main() -> anyhow::Result<()> {
     }
     let tray = tray::Tray::new();
     let has_tray = tray.is_some();
+    // 0.1.3: the NetLAB look became the default. A copy still on the old
+    // default (Light) gets it once; a theme the user picked stays.
+    {
+        let mut s = mgr.settings();
+        if s.theme == 0 && !s.last_version.is_empty() && is_older(&s.last_version, "0.1.3") {
+            s.theme = NETLAB_DARK;
+            let _ = mgr.set_settings(s);
+        }
+    }
     {
         let s = mgr.settings();
         apply_theme(&ui, s.theme as i32);
@@ -607,7 +616,7 @@ fn wire_main(ui: &Ui) {
         let ui = ui.clone();
         main.on_set_theme(move |m| {
             let mut s = ui.ctx.mgr.settings();
-            s.theme = m.clamp(0, 8) as u32;
+            s.theme = m.clamp(0, LAST_THEME) as u32;
             let _ = ui.ctx.mgr.set_settings(s);
             apply_theme(&ui, m);
         });
@@ -1605,6 +1614,16 @@ pub(crate) fn set_language(ui: &Ui, lang: &str) {
 }
 
 /// Fonts of Options > Appearance > Font ("" = Windows' own).
+/// Themes 0..=10; 9 and 10 are NetLAB dark / light (the look of NetNOC).
+pub(crate) const LAST_THEME: i32 = 10;
+pub(crate) const NETLAB_DARK: u32 = 9;
+
+/// `a` is an older version than `b` ("0.1.2" < "0.1.3").
+fn is_older(a: &str, b: &str) -> bool {
+    let n = |v: &str| v.trim_start_matches('v').split('.').map(|p| p.parse::<u64>().unwrap_or(0)).collect::<Vec<_>>();
+    n(a) < n(b)
+}
+
 pub(crate) const FONTS: [&str; 7] = ["", "Tahoma", "Arial", "Calibri", "Verdana", "Times New Roman", "Courier New"];
 
 /// Everything that decides how the windows look.
@@ -1623,7 +1642,7 @@ pub(crate) struct Look {
 impl Look {
     pub(crate) fn of(s: &Settings) -> Look {
         Look {
-            mode: s.theme.min(8) as i32,
+            mode: s.theme.min(LAST_THEME as u32) as i32,
             scale: s.font_scale.clamp(80, 150) as f32 / 100.0,
             family: if FONTS.contains(&s.font_family.as_str()) { s.font_family.clone() } else { String::new() },
             background: s.background_image.clone(),
@@ -1664,6 +1683,8 @@ fn set_theme_of(t: Theme<'_>, look: &Look) {
     t.set_mode(look.mode);
     t.set_font_scale(look.scale);
     t.set_font_family(look.family.clone().into());
+    // the Inter font of the NetLAB themes has Latin letters only
+    t.set_latin(!matches!(i18n::current(), "ar" | "ru"));
 }
 
 /// Show `look` on every window right away.
@@ -1709,7 +1730,10 @@ pub(crate) fn apply_look(ui: &Ui, look: &Look) {
             }
             None => {
                 m.set_has_bg_image(false);
-                m.global::<Theme>().set_glass(0.0);
+                // NetLAB: the panels let the built-in wave background show
+                // through, like NetNOC's glass cards
+                let netlab = look.mode == 9 || look.mode == 10;
+                m.global::<Theme>().set_glass(if netlab { 0.35 } else { 0.0 });
             }
         }
     }

@@ -245,7 +245,7 @@ pub struct Settings {
     pub show_progress_window: bool,
     pub queues: Vec<QueueDef>,
     /// 0 Light, 1 Dark, 2 Ocean, 3 Midnight, 4 Forest, 5 Black, 6 Sunset,
-    /// 7 Teal night, 8 Rose
+    /// 7 Teal night, 8 Rose, 9 NetLAB dark, 10 NetLAB light
     pub theme: u32,
     /// how solid the main window is, 50..=100 (%)
     pub opacity: u32,
@@ -375,7 +375,8 @@ impl Default for Settings {
             min_split_kb: 256,
             schedule: Schedule::default(),
             show_progress_window: true,
-            theme: 0,
+            // NetLAB dark (the look of NetNOC)
+            theme: 9,
             opacity: 100,
             font_scale: 100,
             font_family: String::new(),

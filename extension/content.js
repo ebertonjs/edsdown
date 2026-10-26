@@ -141,39 +141,42 @@
   } catch (_) {
     // storage not reachable (add-in reloading): default size
   }
+  // NetNOC / NetLAB glass: a frosted pill with an orange icon
   const STYLE = `
     :host { all: initial; }
-    .wrap { font: 11px/1.25 "Segoe UI", system-ui, sans-serif; color: #1f2733; display: inline-block; zoom: var(--z, 1); }
-    .btn { display: inline-flex; align-items: center; gap: 5px; color: #fff; border: 1px solid #0a2a66;
-           background: linear-gradient(135deg, #0e5fb8, #0a2a66); border-radius: 4px; padding: 3px 7px;
-           cursor: grab; box-shadow: 0 1px 6px rgba(0,0,0,.35); font: inherit; font-weight: 600;
-           opacity: .88; transition: opacity .15s; user-select: none; white-space: nowrap; }
-    .btn:hover { opacity: 1; background: linear-gradient(135deg, #1679d6, #0e3a85); }
+    .wrap { font: 600 11px/1.25 "Inter", system-ui, "Segoe UI", sans-serif; color: #eef0f8; display: inline-block; zoom: var(--z, 1); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; color: #eef0f8; border: 1px solid rgba(255,255,255,.12);
+           background: rgba(36,38,64,.78); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2);
+           border-radius: 999px; padding: 4px 9px 4px 5px; cursor: grab; box-shadow: 0 8px 22px rgba(5,6,20,.45);
+           font: inherit; opacity: .92; transition: opacity .15s, background .15s; user-select: none; white-space: nowrap; }
+    .btn:hover { opacity: 1; background: rgba(52,55,88,.88); }
     .btn.drag { cursor: grabbing; opacity: 1; }
-    .ico { width: 13px; height: 13px; flex: none; }
-    .caret { font-size: 9px; opacity: .9; }
-    .x { margin-left: auto; opacity: .8; padding: 0 2px; cursor: pointer; }
+    .ico { width: 16px; height: 16px; flex: none; }
+    .caret { font-size: 9px; opacity: .7; }
+    .x { margin-left: 2px; opacity: .6; padding: 0 2px; cursor: pointer; }
     .x:hover { opacity: 1; }
-    .list { width: 240px; margin-top: 4px; background: #fff; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
-            overflow: hidden; max-height: 320px; overflow-y: auto; }
-    .item { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #eef1f5; }
+    .list { width: 250px; margin-top: 6px; background: rgba(36,38,64,.86); border: 1px solid rgba(255,255,255,.1);
+            backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+            border-radius: 16px; box-shadow: 0 18px 40px rgba(5,6,20,.5); overflow: hidden; max-height: 320px; overflow-y: auto; }
+    .item { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,.07); }
     .item:last-child { border-bottom: 0; }
-    .item:hover { background: #eef4fe; }
-    .t { font-weight: 600; }
-    .s { color: #6b7686; font-size: 11px; word-break: break-all; }
-    .msg { padding: 8px 10px; color: #1a9e5a; }
+    .item:hover { background: rgba(255,255,255,.07); }
+    .t { font-weight: 600; font-size: 12px; }
+    .s { color: #8c93ab; font-size: 11px; font-weight: 400; word-break: break-all; }
+    .msg { padding: 9px 12px; color: #36c06f; }
     .off { cursor: default; opacity: .7; }
-    .off:hover { background: #fff; }
-    .err { color: #d1342f; }
-    @media (prefers-color-scheme: dark) {
-      .list { background: #1b2230; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
-      .wrap { color: #e6ebf2; }
-      .item { border-bottom-color: #2a3344; }
-      .item:hover { background: #24324a; }
-      .off:hover { background: #1b2230; }
-      .s { color: #93a0b4; }
-      .msg { color: #4cd38a; }
-      .err { color: #ff6b66; }
+    .off:hover { background: transparent; }
+    .err { color: #ff6b66; }
+    @media (prefers-color-scheme: light) {
+      .wrap, .btn { color: #1c2333; }
+      .btn { background: rgba(240,244,250,.82); border-color: rgba(255,255,255,.8); box-shadow: 0 8px 22px rgba(48,70,110,.25); }
+      .btn:hover { background: rgba(255,255,255,.92); }
+      .list { background: rgba(240,244,250,.9); border-color: rgba(255,255,255,.8); box-shadow: 0 16px 36px rgba(48,70,110,.25); }
+      .item { border-bottom-color: rgba(28,35,51,.08); }
+      .item:hover { background: rgba(255,255,255,.7); }
+      .s { color: #6b778d; }
+      .msg { color: #168a4a; }
+      .err { color: #d23b32; }
     }`;
 
   function isMain(video) {
@@ -207,10 +210,10 @@
     svg.setAttribute("class", "ico");
     svg.setAttribute("viewBox", "0 0 16 16");
     const circle = document.createElementNS(svgNs, "circle");
-    for (const [k, v] of [["cx", "8"], ["cy", "8"], ["r", "7.5"], ["fill", "#fff"]]) circle.setAttribute(k, v);
+    for (const [k, v] of [["cx", "8"], ["cy", "8"], ["r", "7.5"], ["fill", "#f59e2e"]]) circle.setAttribute(k, v);
     const arrow = document.createElementNS(svgNs, "path");
     arrow.setAttribute("d", "M6.6 3.5h2.8v4.6h2.3L8 12 4.3 8.1h2.3z");
-    arrow.setAttribute("fill", "#0e5fb8");
+    arrow.setAttribute("fill", "#2a1600");
     svg.append(circle, arrow);
     const list = el("div", { class: "list", id: "list" });
     list.hidden = true;
