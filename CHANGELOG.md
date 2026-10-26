@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1
+## 0.1.1 — 2026-10-25
 
 Extensão do navegador:
 - Português e inglês (segue o idioma do navegador).
@@ -15,7 +15,7 @@ App:
 - `/resolve` informa `needLogin` e aceita `login: true` para usar os cookies direto.
 - Avisos de propriedades obsoletas do Slint corrigidos.
 
-## 0.1.0
+## 0.1.0 — 2026-10-25
 
 - Primeira versão do EdsDown.
 - Atualização automática assinada (Ed25519) a partir dos releases deste repositório.
