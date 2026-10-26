@@ -163,7 +163,10 @@ jobs:
           if ($LASTEXITCODE -eq 0) { Write-Host "v$env:VERSION is already released"; exit 0 }
           $files = @("dist/EdsDown-Setup.exe", "dist/version.json")
           if (Test-Path dist/edsdown-firefox.xpi) { $files += "dist/edsdown-firefox.xpi", "dist/firefox-updates.json" }
-          gh release create "v$env:VERSION" @files --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "EdsDown $env:VERSION" --notes "EdsDown $env:VERSION" --latest
+          # release page text: .github/release-notes.md (images and all), if present
+          $notes = @("--notes", "EdsDown $env:VERSION")
+          if (Test-Path ".github/release-notes.md") { $notes = @("--notes-file", ".github/release-notes.md") }
+          gh release create "v$env:VERSION" @files --repo "${{ github.repository }}" --target "${{ github.sha }}" --title "EdsDown $env:VERSION" @notes --latest
           if ($LASTEXITCODE -ne 0) { throw "could not create the release" }
           # only the newest release stays: older ones (and their tags) go
           $tags = gh release list --repo "${{ github.repository }}" --limit 100 --json tagName -q '.[].tagName'
