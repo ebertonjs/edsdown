@@ -1,4 +1,4 @@
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-escuro.png" alt="EdsDown 0.2.0" width="820"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-escuro-v020.png" alt="EdsDown 0.2.0" width="820"></p>
 
 ## Interface nova, no layout do NetLAB
 
@@ -9,8 +9,8 @@
 - **Ícones novos** em todo o app e ícone novo do programa.
 - Temas **NetLAB escuro** e **NetLAB claro** (botão laranja no topo). Os temas antigos migram sozinhos.
 
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-claro.png" alt="Tema NetLAB claro" width="640"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/menu-contexto.png" alt="Clique direito" width="640"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-claro-v020.png" alt="Tema NetLAB claro" width="640"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/menu-contexto-v020.png" alt="Clique direito" width="640"></p>
 
 ## Instalação
 

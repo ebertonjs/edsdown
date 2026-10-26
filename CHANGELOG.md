@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0
+## 0.2.0 — 2026-10-26
 
 Interface reformulada no layout do NetLAB:
 - Coluna lateral: velocidade total em destaque, gráfico do último minuto, downloads ativos, resumo do dia e filas (iniciar/parar).
