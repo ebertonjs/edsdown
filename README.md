@@ -1,16 +1,35 @@
 <div align="center">
 
+<img src="docs/images/icone.png" width="96" alt="EdsDown">
+
 # EdsDown
 
 Gerenciador de downloads para Windows, escrito em Rust.
 
 ![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0078D6?style=flat-square&logo=windows11&logoColor=white)
 ![Rust](https://img.shields.io/badge/Made%20with-Rust-B7410E?style=flat-square&logo=rust&logoColor=white)
-![Versão](https://img.shields.io/badge/vers%C3%A3o-0.1.0-informational?style=flat-square)
+[![Release](https://img.shields.io/github/v/release/ebertonjs/edsdown?style=flat-square&label=vers%C3%A3o)](https://github.com/ebertonjs/edsdown/releases/latest)
+
+<br>
+
+<img src="docs/images/main-claro.png" alt="Janela principal do EdsDown" width="800">
 
 </div>
 
 ---
+
+## Telas
+
+<table>
+<tr>
+<td align="center"><b>Tema escuro</b><br><img src="docs/images/main-escuro.png" alt="EdsDown no tema escuro" width="420"></td>
+<td align="center"><b>Popup da extensão</b> (claro e escuro)<br><img src="docs/images/popup.png" alt="Popup da extensão" width="420"></td>
+</tr>
+<tr>
+<td align="center"><b>Botão "Baixar este vídeo"</b> sobre o player<br><img src="docs/images/botao-video.png" alt="Botão de download sobre o vídeo" width="420"></td>
+<td align="center"><b>Configurações da extensão</b><br><img src="docs/images/configuracoes.png" alt="Configurações da extensão" width="420"></td>
+</tr>
+</table>
 
 ## Recursos
 

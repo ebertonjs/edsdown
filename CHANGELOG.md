@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2
+## 0.1.2 — 2026-10-25
 
 Desempenho:
 - Cada conexão junta até 2 MB antes de gravar e grava fora do lock, em thread própria: menos chamadas de disco e nenhuma conexão esperando outra.
