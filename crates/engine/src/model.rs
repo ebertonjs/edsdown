@@ -246,7 +246,7 @@ impl DownloadRecord {
 }
 
 /// Snapshot of a download for the UI.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DownloadView {
     pub id: DownloadId,
     pub url: String,

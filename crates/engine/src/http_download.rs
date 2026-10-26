@@ -23,6 +23,13 @@ use tokio_util::sync::CancellationToken;
 /// How long we wait for the next chunk before treating the connection as dead.
 const STALL_TIMEOUT: Duration = Duration::from_secs(30);
 
+/// Each connection gathers this much before it writes to the disk: a few big
+/// writes instead of thousands of 16 KB ones, and none under the table lock.
+const WRITE_BUF: usize = 2 * 1024 * 1024;
+/// ...or writes what it has after this long, so slow downloads still show
+/// their progress smoothly.
+const WRITE_EVERY: Duration = Duration::from_millis(300);
+
 #[derive(Clone)]
 pub struct HttpJob {
     pub url: String,
@@ -101,6 +108,11 @@ pub async fn run(
             // no ranges: always start over with one connection
             file.set_len(0)?;
             *table = vec![Segment::new(0, job.total_size.unwrap_or(u64::MAX))];
+        }
+        // bytes taken by an earlier run but never written are fetched again
+        segments::roll_back_inflight(&mut table);
+        if segmented {
+            segments::compact(&mut table);
         }
         for s in table.iter_mut() {
             s.active = false;
@@ -238,6 +250,42 @@ impl Worker {
         }
     }
 
+    /// Write `buf` (the bytes from file offset `at` on, already taken in the
+    /// segment: `pos` moved past them and `inflight` counts them) on a
+    /// blocking thread, outside the table lock, then count them as done.
+    /// Returns where the next buffer starts.
+    async fn flush(&self, idx: usize, buf: &mut Vec<u8>, at: u64) -> anyhow::Result<u64> {
+        let n = buf.len() as u64;
+        if n == 0 {
+            return Ok(at);
+        }
+        let data = std::mem::take(buf);
+        let file = self.file.clone();
+        let (res, mut data) = tokio::task::spawn_blocking(move || {
+            let r = write_at(&file, &data, at);
+            (r, data)
+        })
+        .await
+        .map_err(|e| anyhow!("disk writer crashed: {e}"))?;
+        {
+            let mut table = self.segs.lock().unwrap();
+            let s = &mut table[idx];
+            if res.is_ok() {
+                s.inflight = s.inflight.saturating_sub(n);
+            } else {
+                // not on the disk: this connection owns the segment, so
+                // everything from `at` on is fetched again
+                s.pos = at.max(s.start);
+                s.inflight = 0;
+            }
+        }
+        res?;
+        self.progress.bytes.fetch_add(n, Ordering::Relaxed);
+        data.clear();
+        *buf = data; // keep the allocation for the next round
+        Ok(at + n)
+    }
+
     async fn fetch_once(&self, idx: usize) -> anyhow::Result<()> {
         let (pos, end) = {
             let table = self.segs.lock().unwrap();
@@ -266,31 +314,51 @@ impl Worker {
         }
         let _guard = ConnGuard::new(&self.progress);
 
-        loop {
-            let chunk = match tokio::time::timeout(STALL_TIMEOUT, resp.chunk()).await {
-                Ok(r) => r?,
-                Err(_) => bail!("connection timed out"),
-            };
-            let Some(chunk) = chunk else { break };
-            self.shared.limiter.acquire(chunk.len()).await;
-            self.job.limiter.acquire(chunk.len()).await;
-            let finished = {
-                let mut table = self.segs.lock().unwrap();
-                let s = &mut table[idx];
-                // `end` may have moved down because another worker split us
-                let stop = s.end.min(req_end);
-                let room = stop.saturating_sub(s.pos);
-                let take = (chunk.len() as u64).min(room) as usize;
-                if take > 0 {
-                    write_at(&self.file, &chunk[..take], s.pos)?;
-                    s.pos += take as u64;
-                    self.progress.bytes.fetch_add(take as u64, Ordering::Relaxed);
+        // bytes received but not on the disk yet; they start at `buf_at`
+        let mut buf: Vec<u8> = Vec::with_capacity(WRITE_BUF);
+        let mut buf_at = pos;
+        let mut last_write = std::time::Instant::now();
+        let streamed: anyhow::Result<bool> = async {
+            loop {
+                let chunk = match tokio::time::timeout(STALL_TIMEOUT, resp.chunk()).await {
+                    Ok(r) => r?,
+                    Err(_) => bail!("connection timed out"),
+                };
+                let Some(chunk) = chunk else { return Ok(false) };
+                self.shared.limiter.acquire(chunk.len()).await;
+                self.job.limiter.acquire(chunk.len()).await;
+                // take the bytes now (under the lock, no disk work): a split
+                // by another worker then never hands them out again. `end`
+                // may have moved down because another worker split us.
+                let (take, full) = {
+                    let mut table = self.segs.lock().unwrap();
+                    let s = &mut table[idx];
+                    let stop = s.end.min(req_end);
+                    let take = (chunk.len() as u64).min(stop.saturating_sub(s.pos));
+                    s.pos += take;
+                    s.inflight += take;
+                    (take as usize, s.pos >= stop)
+                };
+                buf.extend_from_slice(&chunk[..take]);
+                if full || buf.len() >= WRITE_BUF || last_write.elapsed() >= WRITE_EVERY {
+                    buf_at = self.flush(idx, &mut buf, buf_at).await?;
+                    last_write = std::time::Instant::now();
                 }
-                s.pos >= stop
-            };
-            if finished {
-                return Ok(()); // dropping `resp` closes the connection
+                if full {
+                    return Ok(true); // dropping `resp` closes the connection
+                }
             }
+        }
+        .await;
+        // whatever arrived before an error is kept: the retry goes on from there
+        if !buf.is_empty() {
+            let flushed = self.flush(idx, &mut buf, buf_at).await;
+            if streamed.is_ok() {
+                flushed?;
+            }
+        }
+        if streamed? {
+            return Ok(());
         }
 
         // the server closed the stream

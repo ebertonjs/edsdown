@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.2
+
+Desempenho:
+- Cada conexão junta até 2 MB antes de gravar e grava fora do lock, em thread própria: menos chamadas de disco e nenhuma conexão esperando outra.
+- Bytes recebidos mas ainda não gravados nunca são salvos como baixados (retomada segura após fechar o app).
+- Segmentos terminados vizinhos são juntados ao retomar.
+- Junção de vídeo + áudio sem `faststart`: uma regravação completa do arquivo a menos.
+- `downloads.json` em JSON compacto, gravado fora do runtime e sem gravações sobrepostas.
+- Lista principal só é redesenhada quando algo muda; ordenação, contagens e seleção mais baratas.
+- Extensão: o monitor de mídia ignora imagens, scripts, CSS e fontes.
+
 ## 0.1.1 — 2026-10-25
 
 Extensão do navegador:

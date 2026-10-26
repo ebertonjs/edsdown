@@ -21,7 +21,7 @@ mod winfx;
 
 use slint::{ComponentHandle, Model, ModelRc, SharedString, Timer, TimerMode, VecModel, Weak};
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
@@ -145,6 +145,21 @@ pub(crate) struct Ui {
     /// the download list's columns (order + widths) as the header shows them
     columns_model: Rc<VecModel<ColDef>>,
     browser_list: Rc<RefCell<Vec<browser::Browser>>>,
+    /// what the list was last drawn from: an identical one is not drawn again
+    last_refresh: Rc<RefCell<Option<RefreshKey>>>,
+}
+
+/// Everything the main list depends on.
+#[derive(PartialEq)]
+pub(crate) struct RefreshKey {
+    views: Vec<DownloadView>,
+    settings_gen: u64,
+    view: String,
+    search: String,
+    sel: Vec<u64>,
+    focus: i32,
+    early: Option<u64>,
+    all_done: AfterDone,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -247,6 +262,7 @@ fn main() -> anyhow::Result<()> {
         updater: updater_dlg.as_weak(),
         columns_model: Rc::new(VecModel::default()),
         browser_list: Rc::new(RefCell::new(Vec::new())),
+        last_refresh: Rc::new(RefCell::new(None)),
     };
     main.set_rows(ModelRc::from(ui.rows.clone()));
     main.set_columns(ModelRc::from(ui.columns_model.clone()));
@@ -2460,12 +2476,32 @@ pub(crate) fn refresh(ui: &Ui) {
     let Some(w) = ui.ctx.main.upgrade() else { return };
     let mut views = ui.ctx.mgr.snapshot();
     // not in the list before Start is pressed in "Download File Info"
-    if let Some(early) = early_download(&ui.ctx) {
+    let early = early_download(&ui.ctx);
+    if let Some(early) = early {
         views.retain(|v| v.id != early);
     }
-    let settings = ui.ctx.mgr.settings();
     let view = w.get_view().to_string();
     let search = w.get_search().to_lowercase();
+
+    // nothing changed since the last time (no download running, nothing
+    // clicked): the list stays as it is, at almost no cost
+    views.sort_unstable_by_key(|v| v.id);
+    let key = RefreshKey {
+        views,
+        settings_gen: ui.ctx.mgr.settings_gen(),
+        view: view.clone(),
+        search: search.clone(),
+        sel: ui.sel.borrow().ids.clone(),
+        focus: w.get_selected_id(),
+        early,
+        all_done: ui.ctx.mgr.when_all_done(),
+    };
+    if ui.last_refresh.borrow().as_ref() == Some(&key) {
+        return;
+    }
+    let mut views = key.views.clone();
+    *ui.last_refresh.borrow_mut() = Some(key);
+    let settings = ui.ctx.mgr.settings();
 
     // the queue the toolbar's Start/Stop Queue work on
     let current_queue = view
@@ -2478,15 +2514,15 @@ pub(crate) fn refresh(ui: &Ui) {
     // sorting (header click / View > Arrange files)
     let order = |v: &DownloadView| state_of(v.status);
     match settings.sort_by.as_str() {
-        "name" => views.sort_by_key(|v| v.file_name.to_lowercase()),
+        "name" => views.sort_by_cached_key(|v| v.file_name.to_lowercase()),
         "size" => views.sort_by_key(|v| v.total_size.unwrap_or(v.downloaded)),
         "status" => views.sort_by_key(|v| (order(v), v.id)),
         "eta" => views.sort_by_key(|v| (v.eta_secs.unwrap_or(u64::MAX), v.id)),
         "speed" => views.sort_by_key(|v| (v.speed as u64, v.id)),
-        "desc" => views.sort_by_key(|v| (v.description.clone().unwrap_or_default().to_lowercase(), v.id)),
-        "saveto" => views.sort_by_key(|v| (v.save_path.parent().map(|p| p.to_path_buf()), v.id)),
-        "referer" => views.sort_by_key(|v| (v.referer().to_lowercase(), v.id)),
-        "parent" => views.sort_by_key(|v| (v.parent_page.clone().unwrap_or_default().to_lowercase(), v.id)),
+        "desc" => views.sort_by_cached_key(|v| (v.description.clone().unwrap_or_default().to_lowercase(), v.id)),
+        "saveto" => views.sort_by_cached_key(|v| (v.save_path.parent().map(|p| p.to_path_buf()), v.id)),
+        "referer" => views.sort_by_cached_key(|v| (v.referer().to_lowercase(), v.id)),
+        "parent" => views.sort_by_cached_key(|v| (v.parent_page.clone().unwrap_or_default().to_lowercase(), v.id)),
         "added" => views.sort_by_key(|v| (v.added_at, v.id)),
         _ => views.sort_by_key(|v| (v.finished_at.or(v.last_try).unwrap_or(v.added_at), v.id)),
     }
@@ -2509,48 +2545,62 @@ pub(crate) fn refresh(ui: &Ui) {
     let mut new_rows = new_rows;
     {
         let mut sel = ui.sel.borrow_mut();
-        sel.ids.retain(|id| views.iter().any(|v| v.id == *id));
+        let present: HashSet<u64> = views.iter().map(|v| v.id).collect();
+        sel.ids.retain(|id| present.contains(id));
         let focus = w.get_selected_id();
-        if sel.ids.is_empty() && focus >= 0 && views.iter().any(|v| v.id as i32 == focus) {
+        if sel.ids.is_empty() && focus >= 0 && present.contains(&(focus as u64)) {
             sel.ids.push(focus as u64);
         }
+        let chosen_ids: HashSet<u64> = sel.ids.iter().copied().collect();
         for r in new_rows.iter_mut() {
-            r.sel = sel.ids.contains(&(r.id as u64));
+            r.sel = chosen_ids.contains(&(r.id as u64));
         }
-        let chosen: Vec<&DownloadView> = views.iter().filter(|v| sel.ids.contains(&v.id)).collect();
+        let chosen: Vec<&DownloadView> = views.iter().filter(|v| chosen_ids.contains(&v.id)).collect();
         w.set_sel_count(chosen.len() as i32);
         w.set_can_resume(chosen.iter().any(|v| matches!(v.status, Status::Paused | Status::Failed)));
         w.set_can_stop(chosen.iter().any(|v| v.status == Status::Queued || v.status.is_running()));
     }
     update_model(&ui.rows, new_rows);
 
-    // sidebar: categories (General last) with their counts
-    let count = |f: &dyn Fn(&DownloadView) -> bool| {
-        let n = views.iter().filter(|v| f(v)).count();
-        if n > 0 {
-            SharedString::from(n.to_string())
+    // sidebar: categories (General last) with their counts, all counted in
+    // one pass over the list: (all, unfinished, finished)
+    let shown = |n: usize| if n > 0 { SharedString::from(n.to_string()) } else { SharedString::new() };
+    let mut per_cat: HashMap<&str, (usize, usize, usize)> = HashMap::new();
+    let (mut n_all, mut n_unf, mut n_fin) = (0usize, 0usize, 0usize);
+    for v in &views {
+        let done = v.status == Status::Completed;
+        let c = per_cat.entry(v.category.as_str()).or_default();
+        c.0 += 1;
+        n_all += 1;
+        if done {
+            c.2 += 1;
+            n_fin += 1;
         } else {
-            SharedString::new()
+            c.1 += 1;
+            n_unf += 1;
         }
-    };
+    }
     let builtin: Vec<String> = settings.categories.iter().filter(|c| c.builtin).map(|c| c.name.clone()).collect();
     let cat_rows: Vec<CatRow> = settings
         .category_names()
         .into_iter()
-        .map(|name| CatRow {
-            label: t(&name).into(),
-            kind: kind_of_category(&name).into(),
-            count: count(&|v| v.category == name),
-            unfinished: count(&|v| v.category == name && v.status != Status::Completed),
-            finished: count(&|v| v.category == name && v.status == Status::Completed),
-            builtin: name == "General" || builtin.contains(&name),
-            name: name.into(),
+        .map(|name| {
+            let (all, unf, fin) = per_cat.get(name.as_str()).copied().unwrap_or_default();
+            CatRow {
+                label: t(&name).into(),
+                kind: kind_of_category(&name).into(),
+                count: shown(all),
+                unfinished: shown(unf),
+                finished: shown(fin),
+                builtin: name == "General" || builtin.contains(&name),
+                name: name.into(),
+            }
         })
         .collect();
     update_model(&ui.cats, cat_rows);
-    w.set_count_all(count(&|_| true));
-    w.set_count_unfinished(count(&|v| v.status != Status::Completed));
-    w.set_count_finished(count(&|v| v.status == Status::Completed));
+    w.set_count_all(shown(n_all));
+    w.set_count_unfinished(shown(n_unf));
+    w.set_count_finished(shown(n_fin));
 
     let queue_rows: Vec<QueueRow> = settings
         .queues

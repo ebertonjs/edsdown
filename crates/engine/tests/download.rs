@@ -163,3 +163,69 @@ async fn chunked_requests_with_32_connections() {
     assert_eq!(progress.bytes.load(Ordering::Relaxed), data.len() as u64);
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// Bigger file, 16 connections, paused four times; every resume starts from
+/// the table as it is saved in downloads.json (JSON round trip, only bytes
+/// that reached the disk), like after closing the app.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn many_pauses_resume_from_saved_table() {
+    let data = test_data(12 * 1024 * 1024 + 4321);
+    let port = serve(data.clone()).await;
+    let url = format!("http://127.0.0.1:{port}/big.bin");
+    let shared = Arc::new(Shared::new(build_client().unwrap(), SpeedLimiter::new(0)));
+    let dir = std::env::temp_dir().join(format!("edsdown-many-{port}"));
+    std::fs::create_dir_all(&dir).unwrap();
+    let part = dir.join("big.sgpart");
+    let job = HttpJob {
+        url,
+        headers: RequestHeaders::default(),
+        user_agent: "test".into(),
+        total_size: Some(data.len() as u64),
+        resumable: true,
+        part_path: part.clone(),
+        connections: 16,
+        min_split: 64 * 1024,
+        retries: 3,
+        progress_base: 0,
+        max_request: None,
+        limiter: Arc::new(SpeedLimiter::new(0)),
+    };
+    let mut saved: Vec<edsdown_engine::segments::Segment> = Vec::new();
+    let mut pauses = 0;
+    for stop_at in [0.15, 0.35, 0.55, 0.8] {
+        let segs = Arc::new(Mutex::new(saved.clone()));
+        let progress = Arc::new(Progress::default());
+        let cancel = CancellationToken::new();
+        let (c2, p2) = (cancel.clone(), progress.clone());
+        let goal = (data.len() as f64 * stop_at) as u64;
+        tokio::spawn(async move {
+            while p2.bytes.load(Ordering::Relaxed) < goal {
+                tokio::time::sleep(Duration::from_millis(1)).await;
+            }
+            c2.cancel();
+        });
+        let r = http_download::run(shared.clone(), job.clone(), segs.clone(), progress, cancel).await;
+        if r.is_ok() {
+            break; // this machine is fast: it finished before the pause
+        }
+        pauses += 1;
+        let table = edsdown_engine::segments::persistable(&segs.lock().unwrap());
+        let json = serde_json::to_string(&table).unwrap();
+        saved = serde_json::from_str(&json).unwrap();
+        // what the saved table claims must really be in the file
+        let on_disk = std::fs::read(&part).unwrap();
+        for s in &saved {
+            let (a, b) = (s.start as usize, s.pos as usize);
+            assert!(on_disk[a..b] == data[a..b], "saved table claims bytes {a}..{b} that are not on the disk");
+        }
+    }
+    assert!(pauses >= 2, "the test needs real pauses (got {pauses})");
+    let segs = Arc::new(Mutex::new(saved));
+    let progress = Arc::new(Progress::default());
+    http_download::run(shared, job, segs.clone(), progress.clone(), CancellationToken::new()).await.unwrap();
+    let out = std::fs::read(&part).unwrap();
+    assert!(out == *data, "file differs from the source after several pauses");
+    assert_eq!(progress.bytes.load(Ordering::Relaxed), data.len() as u64, "progress counts every byte once");
+    assert!(segs.lock().unwrap().iter().all(|s| s.inflight == 0));
+    let _ = std::fs::remove_dir_all(&dir);
+}

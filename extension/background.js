@@ -441,7 +441,9 @@ chrome.webRequest.onHeadersReceived.addListener(
       ext: isHls ? "ts" : (type.split("/")[1] || "mp4").split(";")[0].replace("x-matroska", "mkv").replace("mpeg", "mp3"),
     });
   },
-  { urls: ["<all_urls>"] },
+  // only requests that can carry a video / audio / playlist: images,
+  // scripts, styles and fonts of every tab no longer wake the add-in
+  { urls: ["<all_urls>"], types: ["media", "xmlhttprequest", "main_frame", "sub_frame", "object", "other"] },
   ["responseHeaders"]
 );
 

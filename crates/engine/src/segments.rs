@@ -18,11 +18,16 @@ pub struct Segment {
     /// A connection is currently working on this segment (runtime only).
     #[serde(skip)]
     pub active: bool,
+    /// Bytes just below `pos` that a connection took but has not written to
+    /// the disk yet (runtime only). `pos` already counts them so no other
+    /// connection asks for them again; what is saved is `pos - inflight`.
+    #[serde(skip)]
+    pub inflight: u64,
 }
 
 impl Segment {
     pub fn new(start: u64, end: u64) -> Self {
-        Segment { start, pos: start, end, active: false }
+        Segment { start, pos: start, end, active: false, inflight: 0 }
     }
     pub fn remaining(&self) -> u64 {
         self.end.saturating_sub(self.pos)
@@ -52,6 +57,47 @@ pub fn plan(total: u64, connections: u32, min_size: u64) -> Vec<Segment> {
             Segment::new(start, end)
         })
         .collect()
+}
+
+/// The table as it may be saved: only bytes that are really on the disk.
+pub fn persistable(segs: &[Segment]) -> Vec<Segment> {
+    segs.iter()
+        .map(|s| {
+            let mut c = s.clone();
+            c.pos = c.pos.saturating_sub(c.inflight).max(c.start);
+            c.inflight = 0;
+            c.active = false;
+            c
+        })
+        .collect()
+}
+
+/// Forget bytes that were taken but never written (a cancelled write):
+/// they are downloaded again.
+pub fn roll_back_inflight(segs: &mut [Segment]) {
+    for s in segs.iter_mut() {
+        s.pos = s.pos.saturating_sub(s.inflight).max(s.start);
+        s.inflight = 0;
+    }
+}
+
+/// Glue finished neighbours together (`a` ends where `b` starts): long
+/// downloads split many times would otherwise carry hundreds of entries.
+/// Only safe while no connection works on the table (indexes change).
+pub fn compact(segs: &mut Vec<Segment>) {
+    segs.sort_by_key(|s| s.start);
+    let mut out: Vec<Segment> = Vec::with_capacity(segs.len());
+    for s in segs.drain(..) {
+        if let Some(last) = out.last_mut() {
+            if last.is_finished() && s.is_finished() && last.end == s.start && last.inflight == 0 && s.inflight == 0 {
+                last.end = s.end;
+                last.pos = s.end;
+                continue;
+            }
+        }
+        out.push(s);
+    }
+    *segs = out;
 }
 
 /// Total bytes already downloaded across all segments.
@@ -101,6 +147,30 @@ pub fn split_largest(segs: &mut Vec<Segment>, min_split: u64) -> Option<usize> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn persistable_leaves_out_unwritten_bytes() {
+        let mut s = Segment::new(100, 200);
+        s.pos = 150;
+        s.inflight = 30;
+        let saved = persistable(&[s.clone()]);
+        assert_eq!(saved[0].pos, 120);
+        assert_eq!(saved[0].inflight, 0);
+        let mut t = vec![s];
+        roll_back_inflight(&mut t);
+        assert_eq!((t[0].pos, t[0].inflight), (120, 0));
+    }
+
+    #[test]
+    fn compact_glues_finished_neighbours() {
+        let mut v = vec![Segment::new(50, 100), Segment::new(0, 50), Segment::new(100, 200), Segment::new(200, 300)];
+        v[0].pos = 100;
+        v[1].pos = 50;
+        v[3].pos = 300; // [100,200) not finished: stays apart
+        compact(&mut v);
+        assert_eq!(v.iter().map(|s| (s.start, s.end)).collect::<Vec<_>>(), vec![(0, 100), (100, 200), (200, 300)]);
+        assert_eq!(downloaded(&v), 200);
+    }
 
     #[test]
     fn plan_covers_whole_file() {

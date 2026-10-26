@@ -87,6 +87,10 @@ pub struct Manager {
     proxy: Mutex<ProxyConfig>,
     rt: Handle,
     data_dir: PathBuf,
+    /// downloads.json is being written on a blocking thread
+    saving: std::sync::atomic::AtomicBool,
+    /// goes up on every change of the settings (the UI redraws only then)
+    settings_gen: std::sync::atomic::AtomicU64,
 }
 
 /// Default place for settings.json and downloads.json
@@ -163,6 +167,8 @@ impl Manager {
             proxy: Mutex::new(proxy),
             rt: rt.clone(),
             data_dir,
+            saving: std::sync::atomic::AtomicBool::new(false),
+            settings_gen: std::sync::atomic::AtomicU64::new(0),
         });
 
         for q in startup_queues {
@@ -195,6 +201,7 @@ impl Manager {
         s.save(&self.data_dir.join("settings.json"))?;
         s.create_folders();
         *self.settings.write().unwrap() = s;
+        self.settings_gen.fetch_add(1, Ordering::Relaxed);
         self.pump();
         Ok(())
     }
@@ -714,6 +721,11 @@ impl Manager {
         inner.all_done_seen_active = false;
     }
 
+    /// Changes whenever the settings change.
+    pub fn settings_gen(&self) -> u64 {
+        self.settings_gen.load(Ordering::Relaxed)
+    }
+
     pub fn when_all_done(&self) -> AfterDone {
         self.inner.lock().unwrap().when_all_done
     }
@@ -802,6 +814,11 @@ impl Manager {
             }
             collect_records(&inner)
         };
+        // let a save still running on its thread finish first
+        let until = Instant::now() + Duration::from_secs(3);
+        while self.saving.load(Ordering::Acquire) && Instant::now() < until {
+            std::thread::sleep(Duration::from_millis(20));
+        }
         let _ = store::save_downloads(&self.data_dir.join("downloads.json"), &records);
     }
 
@@ -986,8 +1003,8 @@ impl Manager {
             let settings = self.settings();
             if let Some(e) = inner.entries.get_mut(&id) {
                 e.task = None;
-                e.rec.segments = e.segs.lock().unwrap().clone();
-                e.rec.audio_segments = e.audio_segs.lock().unwrap().clone();
+                e.rec.segments = segments::persistable(&e.segs.lock().unwrap());
+                e.rec.audio_segments = segments::persistable(&e.audio_segs.lock().unwrap());
                 e.rec.downloaded = e.progress.bytes.load(Ordering::Relaxed);
                 e.rec.parts_total = e.progress.parts_total.load(Ordering::Relaxed);
                 e.rec.parts_done = e.progress.parts_done.load(Ordering::Relaxed);
@@ -1488,7 +1505,18 @@ impl Manager {
             }
         };
         if let Some(records) = to_save {
-            let _ = store::save_downloads(&self.data_dir.join("downloads.json"), &records);
+            // on a blocking thread: a long history must not hold up the
+            // downloads; one save at a time, the next tick catches up
+            if !self.saving.swap(true, Ordering::AcqRel) {
+                let m = self.clone();
+                let path = self.data_dir.join("downloads.json");
+                tokio::task::spawn_blocking(move || {
+                    let _ = store::save_downloads(&path, &records);
+                    m.saving.store(false, Ordering::Release);
+                });
+            } else {
+                self.inner.lock().unwrap().dirty = true;
+            }
         }
         self.pump();
         self.check_schedule();
@@ -1737,8 +1765,8 @@ fn collect_records(inner: &Inner) -> Vec<DownloadRecord> {
         .map(|e| {
             let mut r = e.rec.clone();
             if r.status != Status::Completed {
-                r.segments = e.segs.lock().unwrap().clone();
-                r.audio_segments = e.audio_segs.lock().unwrap().clone();
+                r.segments = segments::persistable(&e.segs.lock().unwrap());
+                r.audio_segments = segments::persistable(&e.audio_segs.lock().unwrap());
                 r.downloaded = e.progress.bytes.load(Ordering::Relaxed);
                 r.parts_total = e.progress.parts_total.load(Ordering::Relaxed);
                 r.parts_done = e.progress.parts_done.load(Ordering::Relaxed);

@@ -68,10 +68,8 @@ pub fn merge(video: &Path, audio: &Path, output: &Path, final_name: &str) -> any
         .arg("-i")
         .arg(audio)
         .args(["-map", "0:v:0", "-map", "1:a:0", "-c", "copy"]);
-    if format == "mp4" {
-        // play while still loading, like normal web videos
-        cmd.args(["-movflags", "+faststart"]);
-    }
+    // no "-movflags +faststart": it rewrites the whole file a second time
+    // only to help streaming over the web; a local file plays the same
     cmd.args(["-f", format]).arg(output);
     hide_window(&mut cmd);
     let out = cmd.output().context("could not start ffmpeg")?;
