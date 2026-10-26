@@ -20,14 +20,29 @@ const chrome = {
   action: { setBadgeBackgroundColor: () => {}, setBadgeText: async () => {} },
   runtime: { onInstalled: on("inst"), onStartup: on("start"), onMessage: on("msg"), getManifest: () => ({ version: "1.0.4" }), reload: () => { reloads++; } },
   contextMenus: { removeAll: () => {}, create: () => {}, onClicked: on("ctx") },
-  cookies: { getAll: async () => [] },
+  cookies: { getAll: async ({ url }) => (/private\.example/.test(url) ? [{ domain: ".private.example", name: "sid", value: "s3cret", path: "/" }] : []) },
+  // texts from _locales/en, like the browser does
+  i18n: {
+    getMessage: (key, subs = []) => {
+      const m = require("path").join(__dirname, "..", "_locales", "en", "messages.json");
+      const e = JSON.parse(require("fs").readFileSync(m, "utf8"))[key];
+      if (!e) return "";
+      return e.message.replace(/\$([A-Z_]+)\$/g, (_, n) => {
+        const ph = (e.placeholders || {})[n.toLowerCase()];
+        return ph ? ph.content.replace(/\$(\d)/g, (__, i) => subs[i - 1] ?? "") : "";
+      });
+    },
+  },
 };
 const ytCalls = []; const browserDl = []; let appDown = false;
 const fetch = async (url, opts = {}) => {
   if (url.endsWith("/ping") && pingExt) return { ok: true, status: 200, json: async () => ({ ext: pingExt }) };
   if (url.endsWith("/add")) { if (appDown) throw new TypeError("Failed to fetch"); sent.push(JSON.parse(opts.body)); }
   if (url.endsWith("/resolve")) {
-    ytCalls.push(JSON.parse(opts.body));
+    const body = JSON.parse(opts.body);
+    ytCalls.push(body);
+    // a site that wants a login: answers needLogin until the cookies come
+    if (/private\.example/.test(body.url) && !body.login) return { ok: true, status: 200, json: async () => ({ ok: false, error: "Sign in to view", needLogin: true }) };
     await new Promise((r) => setTimeout(r, 30)); // yt-dlp takes a moment
     return { ok: true, status: 200, json: async () => ({ ok: true, title: "Real: Title", options: [
       { key: "1080p|MP4", label: "1080p · MP4", sub: "94 MB", quality: "1080p", videoUrl: "https://gv/137", audioUrl: "https://gv/140", ext: "mp4", size: 94e6, headers: [["User-Agent", "YtDlpUA"]] },
@@ -79,7 +94,7 @@ const tick = () => new Promise((r) => setTimeout(r, 20));
   await new Promise((r) => setTimeout(r, 150));
   assert.strictEqual(ytCalls.length, 1, "asked the app once");
   assert.strictEqual(ytCalls[0].url, "https://www.youtube.com/watch?v=BBBBBBBBBBB");
-  assert(Array.isArray(ytCalls[0].cookieList), "sends the site's cookies as a list");
+  assert(!ytCalls[0].cookieList, "no cookies when the site does not ask for a login");
   const labels = tabMsgs.map((m) => (m.items[0] || {}).label);
   assert(labels.includes("Getting video qualities…"), "shows progress while resolving");
   const final = tabMsgs[tabMsgs.length - 1].items;
@@ -143,5 +158,19 @@ const tick = () => new Promise((r) => setTimeout(r, 20));
   assert.strictEqual(reloads, 1, "same version: nothing");
   pingExt = null;
   console.log("self update: reloads once when the program has a newer add-in");
+  // ---- a site that wants a login: cookies only on the second ask
+  ytCalls.length = 0;
+  tabUrl = "https://private.example/video/1";
+  listeners.msg({ type: "edsdown-video-seen", page: tabUrl }, { tab: { id: 9, url: tabUrl } }, () => {});
+  await new Promise((r) => setTimeout(r, 200));
+  assert.strictEqual(ytCalls.length, 2, "asked again after needLogin");
+  assert(!ytCalls[0].cookieList && !ytCalls[0].login, "first ask without cookies");
+  assert.strictEqual(ytCalls[1].login, true);
+  assert.strictEqual(ytCalls[1].cookieList[0].name, "sid", "second ask with the site's cookies");
+  console.log("login sites: cookies sent only after the app asks for them");
+  // ---- a page cannot read the media of another tab
+  const other = await new Promise((resolve) => listeners.msg({ type: "edsdown-get-media", tabId: 7 }, { tab: { id: 99, url: "https://evil.example/" } }, resolve));
+  assert.strictEqual(other.length, 0, "only its own tab");
+  console.log("get-media: a page only sees its own tab");
   console.log("background simulation: all checks passed");
 })().catch((e) => { console.error(e); process.exit(1); });

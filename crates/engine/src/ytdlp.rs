@@ -444,7 +444,8 @@ fn run_ytdlp(tool: &Path, page_url: &str, cookie_file: Option<&Path>) -> anyhow:
     serde_json::from_slice(&out.stdout).context("yt-dlp returned something unexpected")
 }
 
-fn needs_login(msg: &str) -> bool {
+/// The error of yt-dlp says the site wants a login (cookies).
+pub fn needs_login(msg: &str) -> bool {
     let m = msg.to_ascii_lowercase();
     ["sign in", "log in", "login", "cookies", "age", "bot", "private", "registered users", "rate-limit", "empty media"]
         .iter()
@@ -456,11 +457,28 @@ fn needs_login(msg: &str) -> bool {
 /// that site only when the site asks for a login (Instagram, Facebook,
 /// age-limited YouTube videos, ...).
 pub fn resolve(page_url: &str, cookies: Option<&[BrowserCookie]>) -> anyhow::Result<YtInfo> {
+    resolve_with(page_url, cookies, false)
+}
+
+/// `resolve`; `cookies_first`: the caller already knows the site wants a
+/// login (an earlier look-up without cookies said so), so the cookies are
+/// used at once.
+pub fn resolve_with(page_url: &str, cookies: Option<&[BrowserCookie]>, cookies_first: bool) -> anyhow::Result<YtInfo> {
     let tool = find_tool("yt-dlp")
         .ok_or_else(|| anyhow!("yt-dlp.exe is missing. EdsDown gets it by itself in a minute (internet needed), then try again"))?;
-    let json = match run_ytdlp(&tool, page_url, None) {
+    let first = match cookies.filter(|c| cookies_first && !c.is_empty()) {
+        Some(list) => {
+            let file = cookie_file(list)?;
+            let r = run_ytdlp(&tool, page_url, Some(&file));
+            let _ = std::fs::remove_file(&file);
+            r
+        }
+        None => run_ytdlp(&tool, page_url, None),
+    };
+    let used_cookies = cookies_first && cookies.is_some_and(|c| !c.is_empty());
+    let json = match first {
         Ok(j) => j,
-        Err(e) => match cookies.filter(|c| !c.is_empty()) {
+        Err(e) => match cookies.filter(|c| !used_cookies && !c.is_empty()) {
             Some(list) if needs_login(&e.to_string()) => {
                 let file = cookie_file(list)?;
                 let r = run_ytdlp(&tool, page_url, Some(&file));

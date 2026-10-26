@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
   "name": "EdsDown",
-  "version": "0.1.0",
-  "description": "EdsDown - envia downloads do navegador para o EdsDown.",
+  "version": "0.1.1",
+  "description": "__MSG_extDescription__",
+  "default_locale": "en",
   "permissions": [
     "downloads",
     "cookies",
     "contextMenus",
     "storage",
-    "webRequest",
-    "tabs"
+    "webRequest"
   ],
   "host_permissions": [
     "<all_urls>"

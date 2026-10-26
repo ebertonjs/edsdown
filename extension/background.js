@@ -15,6 +15,15 @@ if (typeof importScripts === "function") importScripts("yt-core.js");
 
 const DEFAULTS = { port: 9614, intercept: true, minSizeKB: 0 };
 
+/** Text in the browser's language (_locales), English when missing. */
+function T(key, ...subs) {
+  try {
+    return chrome.i18n.getMessage(key, subs.map(String)) || key;
+  } catch {
+    return key;
+  }
+}
+
 async function getOpts() {
   return Object.assign({}, DEFAULTS, await chrome.storage.local.get(DEFAULTS));
 }
@@ -127,7 +136,7 @@ async function sendToApp({ url, audioUrl, referrer, fileName, headers, sourcePag
     },
     3000
   );
-  if (!r.ok) throw new Error(`EdsDown answered HTTP ${r.status}`);
+  if (!r.ok) throw new Error(T("appHttpError", r.status));
 }
 
 // ---------------------------------------------------------------- app options
@@ -329,9 +338,9 @@ async function itemsForTab(tabId) {
     if (res.resolved && res.resolved.options.length) {
       items.push(...optionItems(res.resolved, res.page));
     } else if (res.resolving) {
-      items.push({ label: "Getting video qualities…", sub: "This takes a few seconds", disabled: true });
+      items.push({ label: T("gettingQualities"), sub: T("takesSeconds"), disabled: true });
     } else if (res.resolveError && !media.length) {
-      items.push({ label: "Can't get this video", sub: res.resolveError, disabled: true });
+      items.push({ label: T("cantGetVideo"), sub: res.resolveError, disabled: true });
     }
   }
   if (yt) {
@@ -343,13 +352,13 @@ async function itemsForTab(tabId) {
       for (const o of buildOptions(yt.streams)) items.push({ label: o.label, sub: o.sub, yt: o });
       if (!items.length) {
         if (yt.resolving) {
-          items.push({ label: "Getting video qualities…", sub: "This takes a few seconds", disabled: true });
+          items.push({ label: T("gettingQualities"), sub: T("takesSeconds"), disabled: true });
         } else if (yt.resolveError) {
-          items.push({ label: "Can't get this video", sub: yt.resolveError, disabled: true });
+          items.push({ label: T("cantGetVideo"), sub: yt.resolveError, disabled: true });
         } else if (yt.sabr) {
           items.push({
-            label: "This video needs EdsDown",
-            sub: "Open EdsDown (with yt-dlp.exe next to it) and reload the page",
+            label: T("needsApp"),
+            sub: T("needsAppSub"),
             disabled: true,
           });
         }
@@ -359,7 +368,7 @@ async function itemsForTab(tabId) {
   const resolvedFound = items.some((i) => i.yt);
   for (const m of media) {
     // when the app already found the real qualities, raw streams are noise
-    if (resolvedFound && /HLS|video/i.test(m.type)) continue;
+    if (resolvedFound && (m.ext === "ts" || /video/i.test(m.type))) continue;
     items.push({
       label: `${m.type}${m.size ? " · " + fmtSize(m.size) : ""}`,
       sub: m.url,
@@ -427,7 +436,7 @@ chrome.webRequest.onHeadersReceived.addListener(
 
     addMedia(d.tabId, {
       url,
-      type: isHls ? "HLS stream" : type.split(";")[0],
+      type: isHls ? T("hlsStream") : type.split(";")[0],
       size,
       ext: isHls ? "ts" : (type.split("/")[1] || "mp4").split(";")[0].replace("x-matroska", "mkv").replace("mpeg", "mp3"),
     });
@@ -503,16 +512,21 @@ const resolving = new Map(); // tabId -> page being resolved
 
 async function askApp(page) {
   const { port } = await getOpts();
-  const r = await fetchWithTimeout(
-    apiUrl(port, "/resolve"),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-EdsDown": "1" },
-      body: JSON.stringify({ url: page, cookieList: await cookieList(page) }),
-    },
-    90000
-  );
-  const data = await r.json();
+  const ask = async (body) => {
+    const r = await fetchWithTimeout(
+      apiUrl(port, "/resolve"),
+      { method: "POST", headers: { "Content-Type": "application/json", "X-EdsDown": "1" }, body: JSON.stringify(body) },
+      90000
+    );
+    return r.json();
+  };
+  // without cookies first; the site's cookies go to the app only when it
+  // says the site wants a login (Instagram, age-limited videos, ...)
+  let data = await ask({ url: page });
+  if (!data.ok && data.needLogin) {
+    const cookies = await cookieList(page);
+    if (cookies.length) data = await ask({ url: page, cookieList: cookies, login: true });
+  }
   return data.ok
     ? { resolved: { title: data.title, site: data.site, options: data.options } }
     : { resolveError: data.error || "unknown error" };
@@ -540,7 +554,7 @@ async function resolveYoutube(tabId, pageUrl) {
   try {
     change = await askApp(`https://www.youtube.com/watch?v=${videoId}`);
   } catch (e) {
-    change = { resolveError: (await appAlive()) ? String((e && e.message) || e) : "EdsDown is not running" };
+    change = { resolveError: (await appAlive()) ? String((e && e.message) || e) : T("appNotRunning") };
   } finally {
     if (resolving.get(tabId) === videoId) resolving.delete(tabId);
   }
@@ -567,7 +581,7 @@ async function resolvePage(tabId, page) {
   try {
     change = await askApp(page);
   } catch (e) {
-    change = { resolveError: (await appAlive()) ? String((e && e.message) || e) : "EdsDown is not running" };
+    change = { resolveError: (await appAlive()) ? String((e && e.message) || e) : T("appNotRunning") };
   } finally {
     if (resolving.get(tabId) === page) resolving.delete(tabId);
   }
@@ -582,19 +596,19 @@ async function resolvePage(tabId, page) {
 async function resolveOneVideo(msg, tab) {
   const items = [];
   if (msg.src && /^https?:/i.test(msg.src)) {
-    items.push({ label: "Video file", sub: msg.src, url: msg.src, ext: (/\.(\w{2,4})(\?|$)/.exec(msg.src) || [])[1] || "mp4" });
+    items.push({ label: T("videoFile"), sub: msg.src, url: msg.src, ext: (/\.(\w{2,4})(\?|$)/.exec(msg.src) || [])[1] || "mp4" });
   }
   const page = msg.page || (msg.src ? "" : tab && tab.url);
   if (page && /^https?:/i.test(page)) {
     try {
       const r = await askApp(page);
       if (r.resolved && r.resolved.options.length) items.unshift(...optionItems(r.resolved, page));
-      else if (!items.length) return { error: r.resolveError || "Can't get this video" };
+      else if (!items.length) return { error: r.resolveError || T("cantGetVideo") };
     } catch (e) {
-      if (!items.length) return { error: (await appAlive()) ? String((e && e.message) || e) : "EdsDown is not running" };
+      if (!items.length) return { error: (await appAlive()) ? String((e && e.message) || e) : T("appNotRunning") };
     }
   }
-  return items.length ? { items } : { error: "Can't get this video" };
+  return items.length ? { items } : { error: T("cantGetVideo") };
 }
 
 // ---------------------------------------------------------------- tab lifecycle
@@ -620,25 +634,25 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 
 function makeMenus() {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: "edsdown-link", title: "Download with EdsDown", contexts: ["link"] });
+    chrome.contextMenus.create({ id: "edsdown-link", title: T("menuLink"), contexts: ["link"] });
     chrome.contextMenus.create({
       id: "edsdown-media",
-      title: "Download this media with EdsDown",
+      title: T("menuMedia"),
       contexts: ["video", "audio", "image"],
     });
     chrome.contextMenus.create({
       id: "edsdown-video",
-      title: "Download video with EdsDown",
+      title: T("menuVideo"),
       contexts: ["page", "video", "frame"],
     });
     chrome.contextMenus.create({
       id: "edsdown-all",
-      title: "Download all links with EdsDown",
+      title: T("menuAll"),
       contexts: ["page", "frame", "link", "image"],
     });
     chrome.contextMenus.create({
       id: "edsdown-selected",
-      title: "Download selected links with EdsDown",
+      title: T("menuSelected"),
       contexts: ["selection"],
     });
   });
@@ -667,18 +681,22 @@ async function sendAllLinks(tab, selection) {
   );
 }
 
+/** Find the qualities of the tab's video and open the panel on the page. */
+function grabVideo(tab) {
+  if (!tab || !/^https?:/i.test(tab.url || "")) return;
+  if (isYoutube(tab.url)) resolveYoutube(tab.id, tab.url);
+  else resolvePage(tab.id, tab.url);
+  chrome.tabs.sendMessage(tab.id, { type: "edsdown-open-panel" }).catch(() => {});
+  pushToTab(tab.id);
+}
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId === "edsdown-all" || info.menuItemId === "edsdown-selected") {
     if (tab) sendAllLinks(tab, info.menuItemId === "edsdown-selected").catch((e) => console.warn("EdsDown:", e));
     return;
   }
   if (info.menuItemId === "edsdown-video") {
-    if (!tab) return;
-    // find the qualities and open the panel on the page
-    if (isYoutube(tab.url)) resolveYoutube(tab.id, tab.url);
-    else resolvePage(tab.id, info.frameUrl && info.frameUrl !== tab.url ? tab.url : tab.url);
-    chrome.tabs.sendMessage(tab.id, { type: "edsdown-open-panel" }).catch(() => {});
-    pushToTab(tab.id);
+    if (tab) grabVideo(tab);
     return;
   }
   const url = info.linkUrl || info.srcUrl;
@@ -704,8 +722,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       return reply(sendToApp({ url: item.url, referrer, fileName: msg.fileName }), sendResponse);
     }
     case "edsdown-get-media":
-      itemsForTab(msg.tabId).then(sendResponse);
+      // a page only sees its own tab; the popup asks for the active one
+      itemsForTab(sender.tab ? sender.tab.id : msg.tabId).then(sendResponse);
       return true;
+    case "edsdown-add-url": {
+      // popup: a link pasted by the user
+      if (sender.tab || !/^https?:\/\/[^\s]+$/i.test(msg.url || "")) return false;
+      return reply(sendToApp({ url: msg.url, referrer: msg.referrer }), sendResponse);
+    }
+    case "edsdown-grab-video":
+      if (sender.tab) return false;
+      chrome.tabs.get(msg.tabId).then(grabVideo).catch(() => {});
+      return false;
     case "edsdown-media-request":
       if (!sender.tab) return false;
       if (sender.tab.url && videoIdOf(sender.tab.url)) resolveYoutube(sender.tab.id, sender.tab.url);

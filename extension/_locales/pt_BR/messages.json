@@ -1,0 +1,163 @@
+{
+  "extDescription": {
+    "message": "Envia downloads e vídeos do navegador para o gerenciador EdsDown."
+  },
+  "menuLink": {
+    "message": "Baixar com o EdsDown"
+  },
+  "menuMedia": {
+    "message": "Baixar esta mídia com o EdsDown"
+  },
+  "menuVideo": {
+    "message": "Baixar vídeo com o EdsDown"
+  },
+  "menuAll": {
+    "message": "Baixar todos os links com o EdsDown"
+  },
+  "menuSelected": {
+    "message": "Baixar links selecionados com o EdsDown"
+  },
+  "gettingQualities": {
+    "message": "Buscando qualidades do vídeo…"
+  },
+  "takesSeconds": {
+    "message": "Isso leva alguns segundos"
+  },
+  "cantGetVideo": {
+    "message": "Não foi possível obter este vídeo"
+  },
+  "needsApp": {
+    "message": "Este vídeo precisa do EdsDown"
+  },
+  "needsAppSub": {
+    "message": "Abra o EdsDown e recarregue a página"
+  },
+  "appNotRunning": {
+    "message": "O EdsDown não está aberto"
+  },
+  "appNotRunningRetry": {
+    "message": "O EdsDown não está aberto — abra o programa e tente de novo."
+  },
+  "appHttpError": {
+    "message": "O EdsDown respondeu HTTP $CODE$",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "videoFile": {
+    "message": "Arquivo de vídeo"
+  },
+  "hlsStream": {
+    "message": "Stream HLS"
+  },
+  "downloadThisVideo": {
+    "message": "Baixar este vídeo"
+  },
+  "downloadThisVideoN": {
+    "message": "Baixar este vídeo ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "hide": {
+    "message": "Ocultar"
+  },
+  "lookingForVideo": {
+    "message": "Procurando o vídeo…"
+  },
+  "sentToApp": {
+    "message": "Enviado ao EdsDown ✔"
+  },
+  "checking": {
+    "message": "verificando…"
+  },
+  "connected": {
+    "message": "conectado"
+  },
+  "notRunningShort": {
+    "message": "app fechado"
+  },
+  "settings": {
+    "message": "Configurações"
+  },
+  "buttonSize": {
+    "message": "Tamanho do botão"
+  },
+  "sizeSmall": {
+    "message": "Pequeno"
+  },
+  "sizeNormal": {
+    "message": "Normal"
+  },
+  "sizeLarge": {
+    "message": "Grande"
+  },
+  "mediaOnPage": {
+    "message": "Mídia nesta página"
+  },
+  "nothingYet": {
+    "message": "Nada detectado ainda. Dê play no vídeo."
+  },
+  "download": {
+    "message": "Baixar"
+  },
+  "sent": {
+    "message": "Enviado ✔"
+  },
+  "pasteLink": {
+    "message": "Cole um link de download"
+  },
+  "send": {
+    "message": "Enviar"
+  },
+  "invalidLink": {
+    "message": "Não é um endereço web (http/https)"
+  },
+  "grabVideo": {
+    "message": "Baixar o vídeo desta página"
+  },
+  "captureDownloads": {
+    "message": "Enviar downloads do navegador ao EdsDown"
+  },
+  "settingsTitle": {
+    "message": "EdsDown — Configurações"
+  },
+  "ignoreSmaller": {
+    "message": "Ignorar arquivos menores que"
+  },
+  "appPort": {
+    "message": "Porta do app"
+  },
+  "bubbleSizeLabel": {
+    "message": "Tamanho do botão \"Baixar este vídeo\""
+  },
+  "saved": {
+    "message": "Salvo ✔"
+  },
+  "testConnection": {
+    "message": "Testar conexão"
+  },
+  "testing": {
+    "message": "Testando…"
+  },
+  "testOk": {
+    "message": "Conectado ao EdsDown $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "testFail": {
+    "message": "Sem resposta na porta $PORT$. O EdsDown está aberto, com a mesma porta nas opções?",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      }
+    }
+  }
+}

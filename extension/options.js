@@ -1,9 +1,32 @@
+// T() comes from i18n.js
+
 const DEFAULTS = { port: 9614, intercept: true, minSizeKB: 0, bubbleSize: "normal" };
 
 function saved() {
   const el = document.getElementById("saved");
-  el.textContent = "Saved ✔";
+  el.textContent = T("saved");
   setTimeout(() => (el.textContent = ""), 1500);
+}
+
+/** Ask the app on `port` who it is. */
+async function testPort(port) {
+  const out = document.getElementById("testResult");
+  out.className = "test";
+  out.textContent = T("testing");
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 1500);
+  try {
+    const r = await fetch(`http://127.0.0.1:${port}/ping`, { headers: { "X-EdsDown": "1" }, signal: ctrl.signal });
+    const j = await r.json();
+    if (!r.ok || j.app !== "EdsDown") throw new Error("not EdsDown");
+    out.className = "test ok";
+    out.textContent = T("testOk", j.version || "");
+  } catch {
+    out.className = "test err";
+    out.textContent = T("testFail", port);
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function init() {
@@ -11,11 +34,12 @@ async function init() {
   const intercept = document.getElementById("intercept");
   const minSize = document.getElementById("minSize");
   const port = document.getElementById("port");
+  const size = document.getElementById("bubbleSize");
   intercept.checked = opts.intercept;
   minSize.value = opts.minSizeKB;
   port.value = opts.port;
-  const size = document.getElementById("bubbleSize");
   size.value = ["small", "normal", "large"].includes(opts.bubbleSize) ? opts.bubbleSize : "normal";
+
   size.addEventListener("change", () => chrome.storage.local.set({ bubbleSize: size.value }).then(saved));
   intercept.addEventListener("change", () => chrome.storage.local.set({ intercept: intercept.checked }).then(saved));
   minSize.addEventListener("change", () =>
@@ -23,8 +47,12 @@ async function init() {
   );
   port.addEventListener("change", () => {
     const p = Number(port.value);
-    if (p >= 1024 && p <= 65535) chrome.storage.local.set({ port: p }).then(saved);
+    if (p >= 1024 && p <= 65535) {
+      chrome.storage.local.set({ port: p }).then(saved);
+      testPort(p);
+    }
   });
+  document.getElementById("test").addEventListener("click", () => testPort(Number(port.value) || DEFAULTS.port));
 }
 
 init();

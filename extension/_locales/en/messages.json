@@ -1,0 +1,163 @@
+{
+  "extDescription": {
+    "message": "Sends browser downloads and videos to the EdsDown download manager."
+  },
+  "menuLink": {
+    "message": "Download with EdsDown"
+  },
+  "menuMedia": {
+    "message": "Download this media with EdsDown"
+  },
+  "menuVideo": {
+    "message": "Download video with EdsDown"
+  },
+  "menuAll": {
+    "message": "Download all links with EdsDown"
+  },
+  "menuSelected": {
+    "message": "Download selected links with EdsDown"
+  },
+  "gettingQualities": {
+    "message": "Getting video qualities…"
+  },
+  "takesSeconds": {
+    "message": "This takes a few seconds"
+  },
+  "cantGetVideo": {
+    "message": "Can't get this video"
+  },
+  "needsApp": {
+    "message": "This video needs EdsDown"
+  },
+  "needsAppSub": {
+    "message": "Open EdsDown and reload the page"
+  },
+  "appNotRunning": {
+    "message": "EdsDown is not running"
+  },
+  "appNotRunningRetry": {
+    "message": "EdsDown is not running — open the app and try again."
+  },
+  "appHttpError": {
+    "message": "EdsDown answered HTTP $CODE$",
+    "placeholders": {
+      "code": {
+        "content": "$1"
+      }
+    }
+  },
+  "videoFile": {
+    "message": "Video file"
+  },
+  "hlsStream": {
+    "message": "HLS stream"
+  },
+  "downloadThisVideo": {
+    "message": "Download this video"
+  },
+  "downloadThisVideoN": {
+    "message": "Download this video ($COUNT$)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "hide": {
+    "message": "Hide"
+  },
+  "lookingForVideo": {
+    "message": "Looking for the video…"
+  },
+  "sentToApp": {
+    "message": "Sent to EdsDown ✔"
+  },
+  "checking": {
+    "message": "checking…"
+  },
+  "connected": {
+    "message": "connected"
+  },
+  "notRunningShort": {
+    "message": "app not running"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "buttonSize": {
+    "message": "Button size"
+  },
+  "sizeSmall": {
+    "message": "Small"
+  },
+  "sizeNormal": {
+    "message": "Normal"
+  },
+  "sizeLarge": {
+    "message": "Large"
+  },
+  "mediaOnPage": {
+    "message": "Media on this page"
+  },
+  "nothingYet": {
+    "message": "Nothing detected yet. Start playing the video."
+  },
+  "download": {
+    "message": "Download"
+  },
+  "sent": {
+    "message": "Sent ✔"
+  },
+  "pasteLink": {
+    "message": "Paste a download link"
+  },
+  "send": {
+    "message": "Send"
+  },
+  "invalidLink": {
+    "message": "Not a web address (http/https)"
+  },
+  "grabVideo": {
+    "message": "Download the video of this page"
+  },
+  "captureDownloads": {
+    "message": "Send browser downloads to EdsDown"
+  },
+  "settingsTitle": {
+    "message": "EdsDown — Settings"
+  },
+  "ignoreSmaller": {
+    "message": "Ignore files smaller than"
+  },
+  "appPort": {
+    "message": "App port"
+  },
+  "bubbleSizeLabel": {
+    "message": "Size of the \"Download this video\" button"
+  },
+  "saved": {
+    "message": "Saved ✔"
+  },
+  "testConnection": {
+    "message": "Test connection"
+  },
+  "testing": {
+    "message": "Testing…"
+  },
+  "testOk": {
+    "message": "Connected to EdsDown $VERSION$",
+    "placeholders": {
+      "version": {
+        "content": "$1"
+      }
+    }
+  },
+  "testFail": {
+    "message": "No answer on port $PORT$. Is EdsDown open, with the same port in its options?",
+    "placeholders": {
+      "port": {
+        "content": "$1"
+      }
+    }
+  }
+}

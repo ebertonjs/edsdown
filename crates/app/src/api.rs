@@ -77,6 +77,9 @@ struct ResolveRequest {
     /// the site's cookies, used only if it asks for a login
     #[serde(default)]
     cookie_list: Vec<edsdown_engine::ytdlp::BrowserCookie>,
+    /// an earlier look-up answered `needLogin`: use the cookies at once
+    #[serde(default)]
+    login: bool,
 }
 
 /// "Download all links with EdsDown" from the browser's right click menu.
@@ -300,12 +303,18 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
                     }
                 }
                 let _done = Done;
+                // the extension sends the site's cookies only after the app
+                // said the site wants a login ("needLogin")
                 let cookies = (!r.cookie_list.is_empty()).then_some(r.cookie_list.as_slice());
-                let body = match edsdown_engine::ytdlp::resolve(&r.url, cookies) {
+                let body = match edsdown_engine::ytdlp::resolve_with(&r.url, cookies, r.login) {
                     Ok(info) => serde_json::json!({
                         "ok": true, "title": info.title, "site": info.site, "options": info.options
                     }),
-                    Err(e) => serde_json::json!({ "ok": false, "error": format!("{e:#}") }),
+                    Err(e) => {
+                        let error = format!("{e:#}");
+                        let need = cookies.is_none() && edsdown_engine::ytdlp::needs_login(&error);
+                        serde_json::json!({ "ok": false, "error": error, "needLogin": need })
+                    }
                 };
                 reply(req, 200, &body.to_string());
             });

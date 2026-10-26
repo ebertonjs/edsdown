@@ -3,13 +3,27 @@
 (() => {
   if (window.top !== window) return;
 
+  const T = (key, ...subs) => {
+    try {
+      return chrome.i18n.getMessage(key, subs.map(String)) || key;
+    } catch {
+      return key;
+    }
+  };
+  // live list: its length costs nothing, so pages without videos do no work
+  const videos = document.getElementsByTagName("video");
+
   let items = [];
   // Options > File Types > "Download panel for web players"
   let panel = { enabled: true, skipSites: [] };
   const hostMatches = (host, p) => {
     p = String(p).replace(/^https?:\/\//i, "").split("/")[0].toLowerCase();
     if (!p) return false;
-    if (p.includes("*")) return new RegExp("^" + p.replace(/[.]/g, "\\.").replace(/\*/g, ".*") + "$").test(host);
+    if (p.includes("*")) {
+      // every regex character is literal except "*" and "?"
+      const re = p.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*").replace(/\?/g, ".");
+      return new RegExp("^" + re + "$").test(host);
+    }
     return host === p || host.endsWith("." + p);
   };
   const panelAllowed = () =>
@@ -34,7 +48,7 @@
   function biggestVideo() {
     let best = null;
     let score = 0;
-    for (const v of document.querySelectorAll("video")) {
+    for (const v of videos) {
       const r = v.getBoundingClientRect();
       if (r.width < 200 || r.height < 100) continue;
       const visible = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
@@ -88,6 +102,7 @@
 
   let lastPage = "";
   function watchVideos() {
+    if (!videos.length) return;
     const v = biggestVideo();
     if (!v) return;
     // ignore tiny muted background loops that never play for long
@@ -129,11 +144,11 @@
   const STYLE = `
     :host { all: initial; }
     .wrap { font: 11px/1.25 "Segoe UI", system-ui, sans-serif; color: #1f2733; display: inline-block; zoom: var(--z, 1); }
-    .btn { display: inline-flex; align-items: center; gap: 5px; color: #fff; border: 1px solid #0f4fb5;
-           background: linear-gradient(#3f8cf5, #1d63d6); border-radius: 3px; padding: 3px 7px;
+    .btn { display: inline-flex; align-items: center; gap: 5px; color: #fff; border: 1px solid #0a2a66;
+           background: linear-gradient(135deg, #0e5fb8, #0a2a66); border-radius: 4px; padding: 3px 7px;
            cursor: grab; box-shadow: 0 1px 6px rgba(0,0,0,.35); font: inherit; font-weight: 600;
            opacity: .88; transition: opacity .15s; user-select: none; white-space: nowrap; }
-    .btn:hover { opacity: 1; background: linear-gradient(#4b96fa, #1a5bc7); }
+    .btn:hover { opacity: 1; background: linear-gradient(135deg, #1679d6, #0e3a85); }
     .btn.drag { cursor: grabbing; opacity: 1; }
     .ico { width: 13px; height: 13px; flex: none; }
     .caret { font-size: 9px; opacity: .9; }
@@ -149,7 +164,17 @@
     .msg { padding: 8px 10px; color: #1a9e5a; }
     .off { cursor: default; opacity: .7; }
     .off:hover { background: #fff; }
-    .err { color: #d1342f; }`;
+    .err { color: #d1342f; }
+    @media (prefers-color-scheme: dark) {
+      .list { background: #1b2230; box-shadow: 0 6px 20px rgba(0,0,0,.6); }
+      .wrap { color: #e6ebf2; }
+      .item { border-bottom-color: #2a3344; }
+      .item:hover { background: #24324a; }
+      .off:hover { background: #1b2230; }
+      .s { color: #93a0b4; }
+      .msg { color: #4cd38a; }
+      .err { color: #ff6b66; }
+    }`;
 
   function isMain(video) {
     return video === biggestVideo();
@@ -185,7 +210,7 @@
     for (const [k, v] of [["cx", "8"], ["cy", "8"], ["r", "7.5"], ["fill", "#fff"]]) circle.setAttribute(k, v);
     const arrow = document.createElementNS(svgNs, "path");
     arrow.setAttribute("d", "M6.6 3.5h2.8v4.6h2.3L8 12 4.3 8.1h2.3z");
-    arrow.setAttribute("fill", "#1d63d6");
+    arrow.setAttribute("fill", "#0e5fb8");
     svg.append(circle, arrow);
     const list = el("div", { class: "list", id: "list" });
     list.hidden = true;
@@ -198,9 +223,9 @@
           "div",
           { class: "btn", id: "main" },
           svg,
-          el("span", { id: "label", text: "Download this video" }),
+          el("span", { id: "label", text: T("downloadThisVideo") }),
           el("span", { class: "caret", text: "▼" }),
-          el("span", { class: "x", id: "close", title: "Hide", text: "✕" })
+          el("span", { class: "x", id: "close", title: T("hide"), text: "✕" })
         ),
         list
       )
@@ -208,29 +233,11 @@
     const b = { host, root, video, open: false, own: null, loading: false, dx: null, dy: null };
     const btn = root.getElementById("main");
     // drag: move it anywhere on the video; a short press is a click
-    let down = null;
     btn.addEventListener("mousedown", (e) => {
       if (e.button !== 0 || e.target.id === "close") return;
       const hr = host.getBoundingClientRect();
-      down = { x: e.clientX, y: e.clientY, ox: e.clientX - hr.left, oy: e.clientY - hr.top, moved: false };
+      drag = { b, btn, x: e.clientX, y: e.clientY, ox: e.clientX - hr.left, oy: e.clientY - hr.top, moved: false };
       e.preventDefault();
-    });
-    addEventListener("mousemove", (e) => {
-      if (!down) return;
-      if (!down.moved && Math.abs(e.clientX - down.x) + Math.abs(e.clientY - down.y) < 5) return;
-      down.moved = true;
-      btn.classList.add("drag");
-      const r = video.getBoundingClientRect();
-      b.dx = e.clientX - down.ox - r.left;
-      b.dy = e.clientY - down.oy - r.top;
-      placeOne(b);
-    });
-    addEventListener("mouseup", (e) => {
-      if (!down) return;
-      const wasDrag = down.moved;
-      down = null;
-      btn.classList.remove("drag");
-      if (!wasDrag) clicked(b, e);
     });
     root.getElementById("close").addEventListener("click", () => {
       b.dismissed = true;
@@ -242,6 +249,26 @@
     placeOne(b);
     return b;
   }
+
+  // the bubble being pressed / dragged (one pair of listeners for all of them)
+  let drag = null;
+  addEventListener("mousemove", (e) => {
+    if (!drag) return;
+    if (!drag.moved && Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) < 5) return;
+    drag.moved = true;
+    drag.btn.classList.add("drag");
+    const r = drag.b.video.getBoundingClientRect();
+    drag.b.dx = e.clientX - drag.ox - r.left;
+    drag.b.dy = e.clientY - drag.oy - r.top;
+    placeOne(drag.b);
+  });
+  addEventListener("mouseup", () => {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    d.btn.classList.remove("drag");
+    if (!d.moved) clicked(d.b);
+  });
 
   function itemsOf(b) {
     if (b.own) return b.own;
@@ -258,7 +285,7 @@
       // another video on the page: look it up now
       b.loading = true;
       b.open = true;
-      renderOne(b, "Looking for the video…");
+      renderOne(b, T("lookingForVideo"));
       chrome.runtime.sendMessage(
         // its own post / video link, or its own file; the page only when
         // neither is there
@@ -269,7 +296,7 @@
         },
         (res) => {
           b.loading = false;
-          if (chrome.runtime.lastError || !res) return renderOne(b, "EdsDown is not running — open the app and try again.", true);
+          if (chrome.runtime.lastError || !res) return renderOne(b, T("appNotRunningRetry"), true);
           if (res.error) return renderOne(b, res.error, true);
           b.own = res.items || [];
           renderOne(b);
@@ -284,7 +311,7 @@
   function renderOne(b, note, isError) {
     const list = itemsOf(b);
     const usable = list.filter((i) => !i.disabled).length;
-    b.root.getElementById("label").textContent = usable > 1 ? `Download this video (${usable})` : "Download this video";
+    b.root.getElementById("label").textContent = usable > 1 ? T("downloadThisVideoN", usable) : T("downloadThisVideo");
     const box = b.root.getElementById("list");
     box.hidden = !b.open;
     box.replaceChildren();
@@ -327,8 +354,9 @@
   }
 
   function place() {
+    if (!bubbles.size && !videos.length) return;
     if (!panelAllowed()) return;
-    const vids = [...document.querySelectorAll("video")].filter((v) => {
+    const vids = [...videos].filter((v) => {
       const r = v.getBoundingClientRect();
       return r.width >= 200 && r.height >= 100;
     });
@@ -364,9 +392,9 @@
     const fileName = `${cleanTitle()}.${m.ext || "mp4"}`;
     chrome.runtime.sendMessage({ type: "edsdown-download", item: m, title: document.title, fileName }, (res) => {
       if (chrome.runtime.lastError || !res || !res.ok) {
-        flashOne(b, "EdsDown is not running — open the app and try again.", true);
+        flashOne(b, T("appNotRunningRetry"), true);
       } else {
-        flashOne(b, "Sent to EdsDown ✔", false);
+        flashOne(b, T("sentToApp"), false);
       }
     });
   }
@@ -434,10 +462,20 @@
     }
   });
   // keys held while clicking a link: Alt = let the browser download it, etc.
+  // Only clicks with a key held wake the add-in (plus the next plain click,
+  // which clears the keys again).
+  let keysSent = false;
   addEventListener(
     "mousedown",
     (e) => {
-      chrome.runtime.sendMessage({ type: "edsdown-keys", alt: e.altKey, ctrl: e.ctrlKey, shift: e.shiftKey }).catch?.(() => {});
+      const held = e.altKey || e.ctrlKey || e.shiftKey;
+      if (!held && !keysSent) return;
+      keysSent = held;
+      try {
+        chrome.runtime.sendMessage({ type: "edsdown-keys", alt: e.altKey, ctrl: e.ctrlKey, shift: e.shiftKey }).catch?.(() => {});
+      } catch {
+        /* add-in reloaded: this page keeps an old script */
+      }
     },
     true
   );
