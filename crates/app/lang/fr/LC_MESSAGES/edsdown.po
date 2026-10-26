@@ -1305,3 +1305,63 @@ msgstr "NetLAB sombre"
 
 msgid "NetLAB light"
 msgstr "NetLAB clair"
+
+msgid "Shut down"
+msgstr "Éteindre"
+
+msgid "Export / Import"
+msgstr "Exporter / Importer"
+
+msgid "Back"
+msgstr "Retour"
+
+msgid "New category…"
+msgstr "Nouvelle catégorie…"
+
+msgid "DOWNLOADING NOW"
+msgstr "EN COURS"
+
+msgid "Nothing downloading right now ✓"
+msgstr "Aucun téléchargement en cours ✓"
+
+msgid "TODAY"
+msgstr "AUJOURD’HUI"
+
+msgid "finished"
+msgstr "terminés"
+
+msgid "downloaded"
+msgstr "téléchargés"
+
+msgid "QUEUES"
+msgstr "FILES"
+
+msgid "{} downloading"
+msgstr "{} en cours"
+
+msgid "Idle"
+msgstr "Inactif"
+
+msgid "Limiter on"
+msgstr "Limiteur activé"
+
+msgid "No speed limit"
+msgstr "Sans limite"
+
+msgid "Browser connected"
+msgstr "Navigateur connecté"
+
+msgid "Browser not connected"
+msgstr "Navigateur non connecté"
+
+msgid "All"
+msgstr "Tout"
+
+msgid "In progress"
+msgstr "En cours"
+
+msgid "FINISHED"
+msgstr "TERMINÉS"
+
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "Gestionnaire de téléchargements pour Windows, au style NetLAB."

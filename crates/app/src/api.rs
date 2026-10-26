@@ -16,6 +16,20 @@ use tiny_http::{Header, Method, Request, Response, Server};
 /// refused EdsDown): the extension leaves them to the browser once.
 static FOR_BROWSER: std::sync::Mutex<Vec<(String, std::time::Instant)>> = std::sync::Mutex::new(Vec::new());
 
+/// When the browser add-in last talked to us (seconds since 1970; 0 = never).
+static LAST_SEEN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
+
+/// The add-in asked something in the last few minutes (it pings every
+/// minute while the browser is open).
+pub fn browser_connected() -> bool {
+    let last = LAST_SEEN.load(Ordering::Relaxed);
+    last > 0 && now_secs().saturating_sub(last) < 150
+}
+
 /// Version of the browser add-in that ships with this program.
 pub fn bundled_extension_version() -> String {
     serde_json::from_str::<serde_json::Value>(include_str!("../../../extension/manifest.json"))
@@ -221,6 +235,10 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
     }
     if header(&req, "X-EdsDown").is_none() {
         return reply(req, 403, r#"{"error":"missing header"}"#);
+    }
+    // a request of the add-in (not the second copy of the program asking us to show)
+    if header(&req, "Origin").is_some() {
+        LAST_SEEN.store(now_secs(), Ordering::Relaxed);
     }
 
     let path = req.url().split('?').next().unwrap_or("").to_string();

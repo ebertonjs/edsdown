@@ -25,7 +25,7 @@ use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use edsdown_engine::config::MAIN_QUEUE;
 use i18n::{t, tf};
 use edsdown_engine::filename;
@@ -147,6 +147,13 @@ pub(crate) struct Ui {
     browser_list: Rc<RefCell<Vec<browser::Browser>>>,
     /// what the list was last drawn from: an identical one is not drawn again
     last_refresh: Rc<RefCell<Option<RefreshKey>>>,
+    /// the list split for the NetLAB layout: cards (not finished), rows
+    /// (finished) and the few running ones of the side column
+    active_rows: Rc<VecModel<DownloadRow>>,
+    done_rows: Rc<VecModel<DownloadRow>>,
+    side_rows: Rc<VecModel<DownloadRow>>,
+    /// total speed of the last minute (one sample a second) for the side graph
+    speed_hist: Rc<RefCell<(Option<Instant>, std::collections::VecDeque<f64>)>>,
 }
 
 /// Everything the main list depends on.
@@ -160,6 +167,10 @@ pub(crate) struct RefreshKey {
     focus: i32,
     early: Option<u64>,
     all_done: AfterDone,
+    // side column: the speed graph, the date, the browser add-in
+    spark: String,
+    date: String,
+    browser: bool,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -263,8 +274,15 @@ fn main() -> anyhow::Result<()> {
         columns_model: Rc::new(VecModel::default()),
         browser_list: Rc::new(RefCell::new(Vec::new())),
         last_refresh: Rc::new(RefCell::new(None)),
+        active_rows: Rc::new(VecModel::default()),
+        done_rows: Rc::new(VecModel::default()),
+        side_rows: Rc::new(VecModel::default()),
+        speed_hist: Rc::new(RefCell::new((None, std::collections::VecDeque::new()))),
     };
     main.set_rows(ModelRc::from(ui.rows.clone()));
+    main.set_active_rows(ModelRc::from(ui.active_rows.clone()));
+    main.set_done_rows(ModelRc::from(ui.done_rows.clone()));
+    main.set_side_rows(ModelRc::from(ui.side_rows.clone()));
     main.set_columns(ModelRc::from(ui.columns_model.clone()));
     main.set_queues(ModelRc::from(ui.queues.clone()));
     main.set_categories(ModelRc::from(ui.cats.clone()));
@@ -284,12 +302,12 @@ fn main() -> anyhow::Result<()> {
     }
     let tray = tray::Tray::new();
     let has_tray = tray.is_some();
-    // 0.1.3: the NetLAB look became the default. A copy still on the old
-    // default (Light) gets it once; a theme the user picked stays.
+    // 0.2: only the NetLAB themes are left. The old light themes become
+    // NetLAB light, the dark ones (and the old default) NetLAB dark.
     {
         let mut s = mgr.settings();
-        if s.theme == 0 && !s.last_version.is_empty() && is_older(&s.last_version, "0.1.3") {
-            s.theme = NETLAB_DARK;
+        if s.theme != NETLAB_DARK && s.theme != NETLAB_LIGHT {
+            s.theme = if matches!(s.theme, 2 | 4 | 6 | 8) { NETLAB_LIGHT } else { NETLAB_DARK };
             let _ = mgr.set_settings(s);
         }
     }
@@ -616,7 +634,7 @@ fn wire_main(ui: &Ui) {
         let ui = ui.clone();
         main.on_set_theme(move |m| {
             let mut s = ui.ctx.mgr.settings();
-            s.theme = m.clamp(0, LAST_THEME) as u32;
+            s.theme = if m == NETLAB_LIGHT as i32 { NETLAB_LIGHT } else { NETLAB_DARK };
             let _ = ui.ctx.mgr.set_settings(s);
             apply_theme(&ui, m);
         });
@@ -1555,8 +1573,17 @@ fn kind_of_category(name: &str) -> &'static str {
     }
 }
 
+/// A queue's name as shown: the main queue's built-in name is translated.
+pub(crate) fn queue_label(name: &str) -> String {
+    if name == "Main download queue" {
+        t(name)
+    } else {
+        name.to_string()
+    }
+}
+
 pub(crate) fn queue_names(s: &Settings) -> ModelRc<SharedString> {
-    let names: Vec<SharedString> = s.queues.iter().map(|q| q.name.clone().into()).collect();
+    let names: Vec<SharedString> = s.queues.iter().map(|q| queue_label(&q.name).into()).collect();
     ModelRc::new(VecModel::from(names))
 }
 
@@ -1614,15 +1641,9 @@ pub(crate) fn set_language(ui: &Ui, lang: &str) {
 }
 
 /// Fonts of Options > Appearance > Font ("" = Windows' own).
-/// Themes 0..=10; 9 and 10 are NetLAB dark / light (the look of NetNOC).
-pub(crate) const LAST_THEME: i32 = 10;
+/// The two themes (the look of NetNOC): 9 NetLAB dark, 10 NetLAB light.
 pub(crate) const NETLAB_DARK: u32 = 9;
-
-/// `a` is an older version than `b` ("0.1.2" < "0.1.3").
-fn is_older(a: &str, b: &str) -> bool {
-    let n = |v: &str| v.trim_start_matches('v').split('.').map(|p| p.parse::<u64>().unwrap_or(0)).collect::<Vec<_>>();
-    n(a) < n(b)
-}
+pub(crate) const NETLAB_LIGHT: u32 = 10;
 
 pub(crate) const FONTS: [&str; 7] = ["", "Tahoma", "Arial", "Calibri", "Verdana", "Times New Roman", "Courier New"];
 
@@ -1642,7 +1663,7 @@ pub(crate) struct Look {
 impl Look {
     pub(crate) fn of(s: &Settings) -> Look {
         Look {
-            mode: s.theme.min(LAST_THEME as u32) as i32,
+            mode: if s.theme == NETLAB_LIGHT { NETLAB_LIGHT as i32 } else { NETLAB_DARK as i32 },
             scale: s.font_scale.clamp(80, 150) as f32 / 100.0,
             family: if FONTS.contains(&s.font_family.as_str()) { s.font_family.clone() } else { String::new() },
             background: s.background_image.clone(),
@@ -1726,14 +1747,11 @@ pub(crate) fn apply_look(ui: &Ui, look: &Look) {
             Some(img) => {
                 m.set_bg_image(img);
                 m.set_has_bg_image(true);
-                m.global::<Theme>().set_glass(look.strength);
+                m.global::<Theme>().set_glass_strength(look.strength);
             }
             None => {
                 m.set_has_bg_image(false);
-                // NetLAB: the panels let the built-in wave background show
-                // through, like NetNOC's glass cards
-                let netlab = look.mode == 9 || look.mode == 10;
-                m.global::<Theme>().set_glass(if netlab { 0.35 } else { 0.0 });
+                m.global::<Theme>().set_glass_strength(0.0);
             }
         }
     }
@@ -2409,7 +2427,15 @@ fn menu_done_from(i: i32) -> AfterDone {
 }
 
 pub(crate) fn fmt_time(t: chrono::DateTime<chrono::Utc>) -> String {
-    t.with_timezone(&chrono::Local).format("%b %d %H:%M").to_string()
+    // numbers only (no month names in English): 26/10 09:39, with the year
+    // when it is not this one
+    use chrono::Datelike;
+    let local = t.with_timezone(&chrono::Local);
+    if local.year() == chrono::Local::now().year() {
+        local.format("%d/%m %H:%M").to_string()
+    } else {
+        local.format("%d/%m/%Y %H:%M").to_string()
+    }
 }
 
 fn row_of(v: &DownloadView, sel: bool) -> DownloadRow {
@@ -2484,6 +2510,90 @@ fn in_view(v: &DownloadView, view: &str) -> bool {
     }
 }
 
+/// "13.4" + "MB/s": the big number of the side column.
+fn speed_parts(bytes_per_sec: f64) -> (String, String) {
+    let v = bytes_per_sec.max(0.0);
+    if v >= 1024.0 * 1024.0 * 1024.0 {
+        (format!("{:.1}", v / 1024.0 / 1024.0 / 1024.0), "GB/s".into())
+    } else if v >= 1024.0 * 1024.0 {
+        (format!("{:.1}", v / 1024.0 / 1024.0), "MB/s".into())
+    } else {
+        (format!("{:.0}", v / 1024.0), "KB/s".into())
+    }
+}
+
+/// The speed of the last minute as path commands on a 100×40 grid: the line,
+/// and the same line closed at the bottom (the filled area under it).
+fn speed_graph(ui: &Ui, now_speed: f64) -> (String, String) {
+    const N: usize = 60;
+    let mut h = ui.speed_hist.borrow_mut();
+    let due = h.0.map(|t| t.elapsed() >= Duration::from_millis(950)).unwrap_or(true);
+    if due {
+        h.0 = Some(Instant::now());
+        h.1.push_back(now_speed.max(0.0));
+        while h.1.len() > N {
+            h.1.pop_front();
+        }
+    }
+    let pts: Vec<f64> = std::iter::repeat_n(0.0, N.saturating_sub(h.1.len())).chain(h.1.iter().copied()).collect();
+    let top = pts.iter().cloned().fold(0.0_f64, f64::max).max(1.0);
+    let mut line = String::new();
+    for (i, v) in pts.iter().enumerate() {
+        let x = i as f64 * 100.0 / (N - 1) as f64;
+        let y = 38.0 - v / top * 33.0;
+        line.push_str(&format!("{} {:.1} {:.1} ", if i == 0 { "M" } else { "L" }, x, y));
+    }
+    let area = format!("{line}L 100 40 L 0 40 Z");
+    (line.trim_end().to_string(), area)
+}
+
+/// "Segunda-feira, 26 de outubro" in the language of the program.
+fn date_text() -> String {
+    use chrono::Datelike;
+    let d = chrono::Local::now();
+    let wd = d.weekday().num_days_from_monday() as usize;
+    let (day, m) = (d.day(), d.month0() as usize);
+    let pick = |w: [&'static str; 7], mo: [&'static str; 12]| (w[wd], mo[m]);
+    match i18n::current() {
+        "pt" => {
+            let (w, mo) = pick(
+                ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"],
+                ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"],
+            );
+            format!("{w}, {day} de {mo}")
+        }
+        "es" => {
+            let (w, mo) = pick(
+                ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+                ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+            );
+            format!("{w}, {day} de {mo}")
+        }
+        "fr" => {
+            let (w, mo) = pick(
+                ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+                ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
+            );
+            format!("{w} {day} {mo}")
+        }
+        "de" => {
+            let (w, mo) = pick(
+                ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+                ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+            );
+            format!("{w}, {day}. {mo}")
+        }
+        "en" => {
+            let (w, mo) = pick(
+                ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            );
+            format!("{w}, {mo} {day}")
+        }
+        _ => d.format("%d/%m/%Y").to_string(),
+    }
+}
+
 fn update_model<T: Clone + PartialEq + 'static>(model: &VecModel<T>, rows: Vec<T>) {
     if model.row_count() == rows.len() {
         for (i, r) in rows.into_iter().enumerate() {
@@ -2507,6 +2617,12 @@ pub(crate) fn refresh(ui: &Ui) {
     let view = w.get_view().to_string();
     let search = w.get_search().to_lowercase();
 
+    // the side column: speed of the last minute, today's date, the add-in
+    let total_speed: f64 = views.iter().map(|v| v.speed).sum();
+    let (spark_line, spark_area) = speed_graph(ui, total_speed);
+    let date = date_text();
+    let browser = api::browser_connected();
+
     // nothing changed since the last time (no download running, nothing
     // clicked): the list stays as it is, at almost no cost
     views.sort_unstable_by_key(|v| v.id);
@@ -2519,6 +2635,9 @@ pub(crate) fn refresh(ui: &Ui) {
         focus: w.get_selected_id(),
         early,
         all_done: ui.ctx.mgr.when_all_done(),
+        spark: spark_line.clone(),
+        date: date.clone(),
+        browser,
     };
     if ui.last_refresh.borrow().as_ref() == Some(&key) {
         return;
@@ -2584,6 +2703,14 @@ pub(crate) fn refresh(ui: &Ui) {
         w.set_can_resume(chosen.iter().any(|v| matches!(v.status, Status::Paused | Status::Failed)));
         w.set_can_stop(chosen.iter().any(|v| v.status == Status::Queued || v.status.is_running()));
     }
+    {
+        let active: Vec<DownloadRow> = new_rows.iter().filter(|r| r.state != 3).cloned().collect();
+        let done: Vec<DownloadRow> = new_rows.iter().filter(|r| r.state == 3).cloned().collect();
+        let side: Vec<DownloadRow> = active.iter().filter(|r| r.state == 1).take(4).cloned().collect();
+        update_model(&ui.active_rows, active);
+        update_model(&ui.done_rows, done);
+        update_model(&ui.side_rows, side);
+    }
     update_model(&ui.rows, new_rows);
 
     // sidebar: categories (General last) with their counts, all counted in
@@ -2631,7 +2758,8 @@ pub(crate) fn refresh(ui: &Ui) {
         .iter()
         .map(|q| QueueRow {
             id: q.id as i32,
-            name: q.name.clone().into(),
+            // the main queue's built-in name, in the program's language
+            name: queue_label(&q.name).into(),
             count: views
                 .iter()
                 .filter(|v| v.queue == Some(q.id) && v.status != Status::Completed)
@@ -2661,6 +2789,27 @@ pub(crate) fn refresh(ui: &Ui) {
         tf("Ready  ·  {} files in the list", &[&views.len()])
     };
     w.set_status_text(text.into());
+    // side column and pills
+    let (value, unit) = speed_parts(speed);
+    w.set_speed_value(value.into());
+    w.set_speed_unit(unit.into());
+    let conns: u32 = views.iter().filter(|v| v.status.is_running()).map(|v| v.active_connections).sum();
+    w.set_speed_caption(if running > 0 { tf("total speed  ·  {} connections", &[&conns]) } else { t("total speed") }.into());
+    w.set_running_count(running as i32);
+    w.set_spark_line(spark_line.into());
+    w.set_spark_area(spark_area.into());
+    w.set_date_text(date.into());
+    w.set_browser_on(browser);
+    {
+        let today = chrono::Local::now().date_naive();
+        let done_today: Vec<&DownloadView> = views
+            .iter()
+            .filter(|v| v.status == Status::Completed && v.finished_at.map(|f| f.with_timezone(&chrono::Local).date_naive() == today).unwrap_or(false))
+            .collect();
+        let bytes: u64 = done_today.iter().map(|v| v.total_size.unwrap_or(v.downloaded)).sum();
+        w.set_today_count(done_today.len().to_string().into());
+        w.set_today_bytes(fmt_size(bytes).into());
+    }
     w.set_limiter_on(settings.speed_limit_on);
     let limiter_text = if settings.speed_limit_on {
         tf("Speed limiter: on ({} KB/s)", &[&settings.speed_limit_kb])

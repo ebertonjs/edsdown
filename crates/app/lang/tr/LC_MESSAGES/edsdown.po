@@ -1305,3 +1305,63 @@ msgstr "NetLAB koyu"
 
 msgid "NetLAB light"
 msgstr "NetLAB açık"
+
+msgid "Shut down"
+msgstr "Kapat"
+
+msgid "Export / Import"
+msgstr "Dışa / İçe aktar"
+
+msgid "Back"
+msgstr "Geri"
+
+msgid "New category…"
+msgstr "Yeni kategori…"
+
+msgid "DOWNLOADING NOW"
+msgstr "ŞU AN İNDİRİLİYOR"
+
+msgid "Nothing downloading right now ✓"
+msgstr "Şu an indirilen yok ✓"
+
+msgid "TODAY"
+msgstr "BUGÜN"
+
+msgid "finished"
+msgstr "tamamlandı"
+
+msgid "downloaded"
+msgstr "indirildi"
+
+msgid "QUEUES"
+msgstr "KUYRUKLAR"
+
+msgid "{} downloading"
+msgstr "{} indiriliyor"
+
+msgid "Idle"
+msgstr "Boşta"
+
+msgid "Limiter on"
+msgstr "Sınırlayıcı açık"
+
+msgid "No speed limit"
+msgstr "Sınır yok"
+
+msgid "Browser connected"
+msgstr "Tarayıcı bağlı"
+
+msgid "Browser not connected"
+msgstr "Tarayıcı bağlı değil"
+
+msgid "All"
+msgstr "Tümü"
+
+msgid "In progress"
+msgstr "Devam eden"
+
+msgid "FINISHED"
+msgstr "TAMAMLANANLAR"
+
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "NetLAB görünümünde Windows indirme yöneticisi."

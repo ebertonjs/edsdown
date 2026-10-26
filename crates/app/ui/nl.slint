@@ -1,0 +1,346 @@
+// EdsDown – NetLAB look: line icons and the glass widgets (round buttons,
+// pills, chips, cards) shared by every window.
+//
+// Icons are drawn on a 24×24 grid with round strokes, like NetNOC's.
+
+import { Theme } from "theme.slint";
+
+component Stroke inherits Path {
+    in property <color> tint;
+    in property <length> weight;
+    viewbox-width: 24;
+    viewbox-height: 24;
+    fill: transparent;
+    stroke: root.tint;
+    stroke-width: root.weight;
+    stroke-line-cap: round;
+    stroke-line-join: round;
+}
+
+// One line icon. `kind` names (old names kept so every window keeps working):
+// actions  add plus minus batch play resume pause stop stopall delete deletedone
+//          scheduler clock limiter grabber globe playlist options gear search
+//          sun moon more folder download export import check close
+//          chevron-right chevron-down chevron-up caret-down caret-up up down
+//          refresh redo copy hash info edit openwith progress warn bulb queue
+//          startqueue stopqueue power browser sort exit language
+// files    video audio archive pdf doc sheet slides text exe apk disc image general
+export component Ico inherits Rectangle {
+    in property <string> kind;
+    in property <color> tint: Theme.text;
+    // stroke width for a 24 px icon; scales with the size
+    in property <float> weight: 1.9;
+    width: 20px;
+    height: 20px;
+    property <length> w: self.width / 24 * root.weight;
+    property <string> d:
+        root.kind == "add" || root.kind == "plus" ? "M12 5 L12 19 M5 12 L19 12"
+        : root.kind == "minus" ? "M5 12 L19 12"
+        : root.kind == "batch" ? "M12 3 L21 7.5 L12 12 L3 7.5 Z M3 12 L12 16.5 L21 12 M3 16.5 L12 21 L21 16.5"
+        : root.kind == "play" || root.kind == "resume" ? "M7.5 4.8 L18.5 12 L7.5 19.2 Z"
+        : root.kind == "pause" ? "M8.5 5 L8.5 19 M15.5 5 L15.5 19"
+        : root.kind == "stop" ? "M6.5 6.5 L17.5 6.5 L17.5 17.5 L6.5 17.5 Z"
+        : root.kind == "stopall" ? "M4 9 L14 9 L14 20 L4 20 Z M9 5 L20 5 L20 15 L18 15"
+        : root.kind == "delete" ? "M4 7 L20 7 M9.5 7 L9.5 4 L14.5 4 L14.5 7 M6.5 7 L7.5 20 L16.5 20 L17.5 7 M10 11 L10 16 M14 11 L14 16"
+        : root.kind == "deletedone" ? "M4 7 L20 7 M9.5 7 L9.5 4 L14.5 4 L14.5 7 M6.5 7 L7.5 20 L16.5 20 L17.5 7 M9.3 13.6 L11.3 15.6 L14.9 11.6"
+        : root.kind == "scheduler" ? "M4 6 L20 6 L20 20 L4 20 Z M4 10.5 L20 10.5 M8 3.5 L8 7.5 M16 3.5 L16 7.5 M8 14.5 L9 14.5 M12 14.5 L13 14.5 M16 14.5 L17 14.5 M8 17.5 L9 17.5 M12 17.5 L13 17.5"
+        : root.kind == "clock" ? "M12 3 A9 9 0 1 1 11.99 3 Z M12 7.5 L12 12 L15 14"
+        : root.kind == "limiter" ? "M4.6 17.5 A8.6 8.6 0 1 1 19.4 17.5 M12 13 L16.2 8.6 M12 12.55 L12 13.45"
+        : root.kind == "grabber" || root.kind == "globe" || root.kind == "language" ? "M12 3 A9 9 0 1 1 11.99 3 Z M3 12 L21 12 M12 3 C 8.5 6.5 8.5 17.5 12 21 M12 3 C 15.5 6.5 15.5 17.5 12 21"
+        : root.kind == "playlist" ? "M4 6 L16 6 M4 11 L16 11 M4 16 L10 16 M14.5 13.5 L20 16.8 L14.5 20 Z"
+        : root.kind == "options" ? "M4 7 L12 7 M16 7 L20 7 M14 5 L14 9 M4 17 L7 17 M11 17 L20 17 M9 15 L9 19"
+        : root.kind == "gear" ? "M12 9 A3 3 0 1 1 11.99 9 Z M12 2.8 L13.4 5.2 L16.1 4.4 L16.6 7.2 L19.4 7.9 L18.6 10.6 L21 12 L18.6 13.4 L19.4 16.1 L16.6 16.8 L16.1 19.6 L13.4 18.8 L12 21.2 L10.6 18.8 L7.9 19.6 L7.4 16.8 L4.6 16.1 L5.4 13.4 L3 12 L5.4 10.6 L4.6 7.9 L7.4 7.2 L7.9 4.4 L10.6 5.2 Z"
+        : root.kind == "search" || root.kind == "find" ? "M10.5 4 A6.5 6.5 0 1 1 10.49 4 Z M15.3 15.3 L20 20"
+        : root.kind == "sun" ? "M12 8 A4 4 0 1 1 11.99 8 Z M12 2.5 L12 4.5 M12 19.5 L12 21.5 M2.5 12 L4.5 12 M19.5 12 L21.5 12 M5.3 5.3 L6.7 6.7 M17.3 17.3 L18.7 18.7 M5.3 18.7 L6.7 17.3 M17.3 6.7 L18.7 5.3"
+        : root.kind == "moon" ? "M19.5 14.6 A8 8 0 1 1 9.4 4.5 A6.4 6.4 0 0 0 19.5 14.6 Z"
+        : root.kind == "more" ? "M5.5 11.55 L5.5 12.45 M12 11.55 L12 12.45 M18.5 11.55 L18.5 12.45"
+        : root.kind == "folder" ? "M3.5 7.5 A2 2 0 0 1 5.5 5.5 L9.5 5.5 L11.5 7.5 L18.5 7.5 A2 2 0 0 1 20.5 9.5 L20.5 16.5 A2 2 0 0 1 18.5 18.5 L5.5 18.5 A2 2 0 0 1 3.5 16.5 Z"
+        : root.kind == "download" || root.kind == "import" || root.kind == "down" ? "M12 4 L12 15 M7 10 L12 15 L17 10 M5 20 L19 20"
+        : root.kind == "export" || root.kind == "up" ? "M12 15 L12 4 M7 9 L12 4 L17 9 M5 20 L19 20"
+        : root.kind == "check" ? "M5 12.5 L10 17 L19 7.5"
+        : root.kind == "close" ? "M6.5 6.5 L17.5 17.5 M17.5 6.5 L6.5 17.5"
+        : root.kind == "chevron-right" ? "M9.5 6 L15.5 12 L9.5 18"
+        : root.kind == "chevron-down" || root.kind == "caret-down" ? "M6 9.5 L12 15.5 L18 9.5"
+        : root.kind == "chevron-up" || root.kind == "caret-up" ? "M6 14.5 L12 8.5 L18 14.5"
+        : root.kind == "refresh" ? "M19.5 12 A7.5 7.5 0 1 1 17.3 6.7 M19.5 4.5 L19.5 9 L15 9"
+        : root.kind == "redo" ? "M4.5 12 A7.5 7.5 0 1 0 6.7 6.7 M4.5 4.5 L4.5 9 L9 9"
+        : root.kind == "copy" ? "M9 9 L20 9 L20 20 L9 20 Z M5.5 15 L4 15 L4 4 L15 4 L15 5.5"
+        : root.kind == "hash" ? "M5 9 L19 9 M5 15 L19 15 M10.5 4 L8.5 20 M15.5 4 L13.5 20"
+        : root.kind == "info" ? "M12 3 A9 9 0 1 1 11.99 3 Z M12 11 L12 16.5 M12 7.35 L12 8.25"
+        : root.kind == "edit" ? "M4 20 L8.2 19 L19 8.2 L15.8 5 L5 15.8 Z M13.8 7 L17 10.2"
+        : root.kind == "openwith" ? "M14 4 L20 4 L20 10 M20 4 L11 13 M18 14 L18 19 A1 1 0 0 1 17 20 L5 20 A1 1 0 0 1 4 19 L4 7 A1 1 0 0 1 5 6 L10 6"
+        : root.kind == "progress" ? "M3 12 L7 12 L10 5 L14 19 L17 12 L21 12"
+        : root.kind == "warn" ? "M12 4 L21 19.5 L3 19.5 Z M12 10 L12 14 M12 16.35 L12 17.25"
+        : root.kind == "bulb" ? "M9.5 18 L14.5 18 M10.5 21 L13.5 21 M12 3 A6 6 0 0 1 15.6 13.8 L15.4 15 L8.6 15 L8.4 13.8 A6 6 0 0 1 12 3 Z"
+        : root.kind == "queue" ? "M9 6 L20 6 M9 12 L20 12 M9 18 L20 18 M4.5 6 L5 6 M4.5 12 L5 12 M4.5 18 L5 18"
+        : root.kind == "startqueue" ? "M4 6 L15 6 M4 11 L15 11 M4 16 L9.5 16 M14 13.5 L20 17 L14 20.5 Z"
+        : root.kind == "stopqueue" ? "M4 6 L15 6 M4 11 L15 11 M4 16 L9.5 16 M14 14 L20 14 L20 20 L14 20 Z"
+        : root.kind == "power" ? "M12 3.5 L12 11.5 M7 6.2 A7.6 7.6 0 1 0 17 6.2"
+        : root.kind == "browser" ? "M3.5 5 L20.5 5 L20.5 19 L3.5 19 Z M3.5 9 L20.5 9 M6.5 6.55 L6.5 7.45 M9 6.55 L9 7.45 M10 14 L12 16 L16 12"
+        : root.kind == "sort" ? "M7 4 L7 20 M3.5 16.5 L7 20 L10.5 16.5 M17 20 L17 4 M13.5 7.5 L17 4 L20.5 7.5"
+        : root.kind == "exit" ? "M14.5 4 L19 4 A1 1 0 0 1 20 5 L20 19 A1 1 0 0 1 19 20 L14.5 20 M10 16.5 L14.5 12 L10 7.5 M14.5 12 L4 12"
+        : root.kind == "link" ? "M10 14 A4 4 0 0 0 15.7 14 L18.5 11.2 A4 4 0 0 0 12.8 5.5 L11.5 6.8 M14 10 A4 4 0 0 0 8.3 10 L5.5 12.8 A4 4 0 0 0 11.2 18.5 L12.5 17.2"
+        // file types
+        : root.kind == "video" ? "M4 6 L20 6 L20 18 L4 18 Z M10.2 9.3 L14.8 12 L10.2 14.7 Z"
+        : root.kind == "audio" ? "M9 17.5 L9 5.5 L19 3.8 L19 15.5 M9 17.5 A2.6 2.6 0 1 1 8.99 17.5 M19 15.5 A2.6 2.6 0 1 1 18.99 15.5"
+        : root.kind == "archive" ? "M4 7.5 L12 3.5 L20 7.5 L20 16.5 L12 20.5 L4 16.5 Z M4 7.5 L12 11.5 L20 7.5 M12 11.5 L12 20.5"
+        : root.kind == "pdf" || root.kind == "doc" || root.kind == "text" ? "M6 3 L14 3 L19 8 L19 21 L6 21 Z M14 3 L14 8 L19 8 M9 13 L16 13 M9 17 L16 17"
+        : root.kind == "sheet" ? "M4 5 L20 5 L20 19 L4 19 Z M4 10 L20 10 M4 14.5 L20 14.5 M10 5 L10 19"
+        : root.kind == "slides" ? "M3 4.5 L21 4.5 M5 4.5 L5 15 L19 15 L19 4.5 M12 15 L12 20 M8.5 20 L15.5 20"
+        : root.kind == "exe" ? "M4 5 L20 5 L20 19 L4 19 Z M4 9 L20 9 M8 13 L10 15 L8 17 M12 17 L16 17"
+        : root.kind == "apk" ? "M7 3 L17 3 L17 21 L7 21 Z M11 18 L13 18"
+        : root.kind == "disc" ? "M12 3 A9 9 0 1 1 11.99 3 Z M12 9.5 A2.5 2.5 0 1 1 11.99 9.5 Z"
+        : root.kind == "image" ? "M4 5 L20 5 L20 19 L4 19 Z M4 16 L9 11 L14 16 L16 14 L20 18 M15 8.55 L15 9.45"
+        : root.kind == "unfinished" ? "M12 4 L12 15 M7 10 L12 15 L17 10 M5 20 L19 20"
+        : root.kind == "finished" ? "M5 12.5 L10 17 L19 7.5"
+        : "M6 3 L14 3 L19 8 L19 21 L6 21 Z M14 3 L14 8 L19 8";
+    Stroke {
+        width: parent.width;
+        height: parent.height;
+        tint: root.tint;
+        weight: root.w;
+        commands: root.d;
+    }
+}
+
+// The color of a file type (NetNOC's chart palette).
+export global Kinds {
+    pure public function tint(kind: string) -> color {
+        if (kind == "video" || kind == "pdf") { return #ef5350; }
+        if (kind == "audio") { return #9b7bff; }
+        if (kind == "archive" || kind == "slides") { return #f59e2e; }
+        if (kind == "doc") { return #4f8dff; }
+        if (kind == "sheet" || kind == "apk") { return #36c06f; }
+        if (kind == "exe") { return #22b8cf; }
+        if (kind == "image") { return #ec6fb3; }
+        return #8c93ab;
+    }
+}
+
+// File type badge: a tinted round tile with the line icon.
+export component KindBadge inherits Rectangle {
+    in property <string> kind: "general";
+    width: 36px;
+    height: 36px;
+    property <color> c: Kinds.tint(root.kind);
+    border-radius: self.width * 0.32;
+    background: root.c.with-alpha(Theme.dark ? 0.18 : 0.16);
+    border-width: 1px;
+    border-color: root.c.with-alpha(0.28);
+    Ico {
+        kind: root.kind;
+        tint: root.c;
+        width: parent.width * 0.56;
+        height: parent.height * 0.56;
+        weight: 2.0;
+    }
+}
+
+// Round glass button (NetNOC's dock / header buttons). `active` glows blue.
+export component RoundBtn inherits Rectangle {
+    in property <string> icon;
+    in property <string> label;
+    in property <bool> enabled: true;
+    in property <bool> active;
+    // orange (the main action)
+    in property <bool> accent;
+    in property <length> size: 46px;
+    // show the label above the button while the mouse is on it
+    in property <bool> label-above: true;
+    callback clicked();
+    width: root.size;
+    height: root.size;
+    border-radius: self.width / 2;
+    background: root.accent ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%)
+        : ta.pressed && root.enabled ? Theme.btn-press
+        : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
+    border-width: 1px;
+    border-color: root.active ? #4f8dffaa : Theme.stroke;
+    drop-shadow-blur: root.active ? 18px : root.accent ? 14px : 10px;
+    drop-shadow-color: root.active ? #4f8dff66 : root.accent ? #f59e2e55 : Theme.shadow;
+    drop-shadow-offset-y: root.active ? 0px : 4px;
+    animate background { duration: 120ms; }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
+        clicked => {
+            root.clicked();
+        }
+    }
+    Ico {
+        kind: root.icon;
+        width: root.size * 0.46;
+        height: root.size * 0.46;
+        tint: !root.enabled ? Theme.muted.with-alpha(0.5) : root.accent ? #2a1600 : root.active ? #4f8dff : Theme.btn-ico;
+        weight: 2.0;
+    }
+    if ta.has-hover && root.label != "": Rectangle {
+        y: root.label-above ? -30px : root.height + 6px;
+        x: (root.width - self.width) / 2;
+        width: tip.preferred-width + 18px;
+        height: 22px;
+        border-radius: 11px;
+        background: Theme.tooltip;
+        drop-shadow-blur: 8px;
+        drop-shadow-color: #00000040;
+        tip := Text {
+            text: root.label;
+            font-size: 11px;
+            font-weight: 600;
+            color: Theme.tooltip-text;
+        }
+    }
+}
+
+// Pill: a small rounded glass label, like NetNOC's header indicators.
+export component Pill inherits Rectangle {
+    in property <string> icon;
+    in property <string> text;
+    in property <string> sub;
+    // "", "ok", "warn", "bad", "blue": a colored dot / text
+    in property <string> state;
+    in property <bool> clickable;
+    callback clicked();
+    height: 32px;
+    border-radius: 16px;
+    background: ta.has-hover && root.clickable ? Theme.btn-hover : Theme.btn;
+    border-width: 1px;
+    border-color: Theme.stroke;
+    property <color> dot: root.state == "ok" ? #36c06f : root.state == "warn" ? #f59e2e : root.state == "bad" ? #ef5350 : root.state == "blue" ? #4f8dff : Theme.muted;
+    ta := TouchArea {
+        enabled: root.clickable;
+        mouse-cursor: root.clickable ? pointer : default;
+        clicked => {
+            root.clicked();
+        }
+    }
+    HorizontalLayout {
+        padding-left: 12px;
+        padding-right: 13px;
+        spacing: 7px;
+        alignment: center;
+        if root.icon == "" && root.state != "": Rectangle {
+            width: 8px;
+            Rectangle {
+                y: (parent.height - 8px) / 2;
+                width: 8px;
+                height: 8px;
+                border-radius: 4px;
+                background: root.dot;
+                drop-shadow-blur: 6px;
+                drop-shadow-color: root.dot;
+            }
+        }
+        if root.icon != "": Ico {
+            y: (parent.height - 15px) / 2;
+            kind: root.icon;
+            width: 15px;
+            height: 15px;
+            tint: root.state == "" ? Theme.muted : root.dot;
+        }
+        Text {
+            text: root.text;
+            vertical-alignment: center;
+            font-size: 12px * Theme.font-scale;
+            font-weight: 600;
+            color: root.state == "warn" || root.state == "bad" ? root.dot : Theme.text;
+        }
+        if root.sub != "": Text {
+            text: root.sub;
+            vertical-alignment: center;
+            font-size: 11px * Theme.font-scale;
+            color: Theme.muted;
+        }
+    }
+}
+
+// Filter chip (categories, queues): rounded, the chosen one is filled.
+export component Chip inherits Rectangle {
+    in property <string> text;
+    in property <string> count;
+    in property <string> icon;
+    in property <bool> selected;
+    callback clicked();
+    // right click at (x, y) inside the chip
+    callback context(length, length);
+    height: 30px;
+    border-radius: 15px;
+    background: root.selected ? Theme.chip-on : ta.has-hover ? Theme.btn-hover : Theme.btn;
+    border-width: 1px;
+    border-color: root.selected ? Theme.chip-on-line : Theme.stroke;
+    animate background { duration: 120ms; }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => {
+            root.clicked();
+        }
+        pointer-event(ev) => {
+            if (ev.button == PointerEventButton.right && ev.kind == PointerEventKind.up) {
+                root.context(self.mouse-x, self.mouse-y);
+            }
+        }
+    }
+    HorizontalLayout {
+        padding-left: root.icon != "" ? 10px : 13px;
+        padding-right: 12px;
+        spacing: 6px;
+        if root.icon != "": Ico {
+            y: (parent.height - 15px) / 2;
+            kind: root.icon;
+            width: 15px;
+            height: 15px;
+            tint: root.selected ? Theme.chip-on-text : Kinds.tint(root.icon);
+        }
+        Text {
+            text: root.text;
+            vertical-alignment: center;
+            font-size: 12px * Theme.font-scale;
+            font-weight: 600;
+            color: root.selected ? Theme.chip-on-text : Theme.text-2;
+        }
+        if root.count != "": Text {
+            text: root.count;
+            vertical-alignment: center;
+            font-size: 11px * Theme.font-scale;
+            font-weight: 600;
+            color: root.selected ? Theme.chip-on-text.with-alpha(0.75) : Theme.muted;
+        }
+    }
+}
+
+// Frosted glass card.
+export component Glass inherits Rectangle {
+    in property <length> radius: Theme.r-card;
+    border-radius: root.radius;
+    background: Theme.glass;
+    border-width: 1px;
+    border-color: Theme.stroke;
+    drop-shadow-blur: 24px;
+    drop-shadow-color: Theme.shadow;
+    drop-shadow-offset-y: 8px;
+}
+
+// Small uppercase section title ("ATIVOS", "HOJE"...).
+export component SectionTitle inherits Text {
+    font-size: 11px * Theme.font-scale;
+    font-weight: 700;
+    color: Theme.muted;
+    letter-spacing: 0.8px;
+}
+
+// Thin rounded progress bar.
+export component Bar inherits Rectangle {
+    in property <float> value;
+    in property <color> tint: Theme.accent;
+    height: 6px;
+    border-radius: self.height / 2;
+    background: Theme.track;
+    Rectangle {
+        x: 0;
+        width: parent.width * clamp(root.value, 0, 1);
+        height: parent.height;
+        border-radius: parent.border-radius;
+        background: @linear-gradient(90deg, root.tint.darker(0.05) 0%, root.tint.brighter(0.25) 100%);
+        animate width { duration: 300ms; easing: ease-out; }
+    }
+}

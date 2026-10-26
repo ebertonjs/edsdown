@@ -1,16 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#0A2A66"/>
-      <stop offset="0.55" stop-color="#0E5FB8"/>
-      <stop offset="1" stop-color="#18C6E6"/>
+      <stop offset="0" stop-color="#2a2452"/>
+      <stop offset="0.55" stop-color="#5a5bd8"/>
+      <stop offset="1" stop-color="#4f8dff"/>
+    </linearGradient>
+    <linearGradient id="ac" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f59e2e"/>
+      <stop offset="1" stop-color="#ffc56b"/>
+    </linearGradient>
+    <linearGradient id="hi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
-  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
-  <!-- E -->
-  <path d="M54 48 H122 V72 H80 V96 H114 V120 H80 V144 H122 V168 H54 Z" fill="#FFFFFF"/>
-  <!-- download arrow -->
-  <path d="M158 48 H186 V118 H212 L172 164 L132 118 H158 Z" fill="#7FE7FF"/>
-  <!-- tray -->
-  <path d="M50 182 V198 Q50 210 62 210 H194 Q206 210 206 198 V182" fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="8" y="8" width="240" height="240" rx="64" fill="url(#bg)"/>
+  <rect x="8" y="8" width="240" height="240" rx="64" fill="url(#hi)"/>
+  <path d="M56 50 H120 V74 H82 V96 H114 V120 H82 V142 H120 V166 H56 Z" fill="#ffffff"/>
+  <path d="M158 50 H186 V114 H212 L172 160 L132 114 H158 Z" fill="url(#ac)"/>
+  <path d="M52 186 V198 Q52 210 64 210 H192 Q204 210 204 198 V186" fill="none" stroke="#ffffff" stroke-opacity="0.9" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

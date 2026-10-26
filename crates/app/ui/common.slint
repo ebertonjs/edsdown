@@ -1,6 +1,9 @@
-// EdsDown – shared look: data types, themes, icons and small widgets.
+// EdsDown – shared look: data types, the NetLAB widgets, icons.
 
-import { Button, LineEdit, SpinBox, CheckBox, ComboBox, ListView, TabWidget, TextEdit, Palette } from "std-widgets.slint";
+import { LineEdit, SpinBox, ComboBox, ListView, TabWidget, TextEdit, Palette } from "std-widgets.slint";
+import { Theme } from "theme.slint";
+import { Ico, Kinds, KindBadge, RoundBtn, Pill, Chip, Glass, SectionTitle, Bar } from "nl.slint";
+export { Theme, Ico, Kinds, KindBadge, RoundBtn, Pill, Chip, Glass, SectionTitle, Bar }
 // Inter, the font of NetNOC (SIL Open Font License, fonts/LICENSE-Inter-OFL.txt)
 import "fonts/Inter-400.ttf";
 import "fonts/Inter-500.ttf";
@@ -100,56 +103,6 @@ export struct SegView {
     info: string,
 }
 
-// ------------------------------------------------------------------ themes
-// 0 Light, 1 Dark, 2 Ocean, 3 Midnight
-
-export global Theme {
-    in-out property <int> mode: 0;
-    // themes: Light, Dark, Ocean blue, Midnight purple, Forest green, Black,
-    // Sunset, Teal night, Rose, NetLAB dark, NetLAB light
-    out property <bool> dark: mode == 1 || mode == 3 || mode == 5 || mode == 7 || mode == 9;
-    // NetLAB dark / light: the look of NetNOC (glass panels on a wave background)
-    out property <bool> netlab: mode == 9 || mode == 10;
-    // round corners of the big panels and of small controls
-    out property <length> r-panel: netlab ? 18px : 0px;
-    out property <length> r-ctl: netlab ? 10px : 4px;
-    // Options > General > Text size / Font
-    in-out property <float> font-scale: 1.0;
-    in-out property <string> font-family: "";
-    // the program's language is written in Latin letters (Inter has no
-    // Cyrillic / Arabic here)
-    in-out property <bool> latin: true;
-    // a picture behind the main window: how much of it shows through (0..0.8)
-    in-out property <float> glass: 0;
-    out property <color> window: window-base;
-    out property <color> panel: panel-base.transparentize(glass);
-    out property <color> toolbar-top: toolbar-top-base.transparentize(glass);
-    out property <color> toolbar-bottom: toolbar-bottom-base.transparentize(glass);
-    out property <color> header-top: header-top-base.transparentize(glass);
-    out property <color> header-bottom: header-bottom-base.transparentize(glass);
-    out property <color> grid: grid-base.transparentize(glass);
-    property <color> window-base: [#f0f0f0, #1e1f22, #e8f1fb, #15131d, #eef5ef, #000000, #fbf1ea, #0f1c1e, #fbf0f4, #15142b, #c9d6e8][mode];
-    property <color> panel-base: [#ffffff, #26282c, #ffffff, #1d1a29, #ffffff, #0b0b0b, #ffffff, #142527, #ffffff, #2c2e4a, #f0f4fa][mode];
-    property <color> toolbar-top-base: [#fdfdfd, #2e3136, #2f80ed, #2b2545, #2f9e5b, #121212, #f07b3f, #1b3a3d, #e05a8a, #242640, #566886][mode];
-    property <color> toolbar-bottom-base: [#e7ebf0, #24262a, #1b5fc4, #1e1a33, #1f7a43, #050505, #d4513a, #132b2e, #c23d6e, #242640, #566886][mode];
-    out property <color> toolbar-text: [#1b1f24, #e8eaed, #ffffff, #ece9f6, #ffffff, #f2f2f2, #ffffff, #e3f4f3, #ffffff, #eef0f8, #ffffff][mode];
-    out property <color> toolbar-hover: [#e5f1fb, #3a3e45, #4a92f0, #3a3260, #45b06f, #262626, #f5955f, #26504f, #e97aa1, #3a3d5e, #6b7d9b][mode];
-    out property <color> line: [#d9dde3, #3a3d42, #c6d8ef, #352f4d, #c9dfcf, #262626, #efd2c2, #24403f, #efcdda, #ffffff17, #ffffffbf][mode];
-    property <color> grid-base: [#eef0f3, #2f3237, #eaf2fc, #26223a, #eaf4ec, #141414, #fbeee6, #1a2e30, #fbedf2, #33355a, #e8eef6][mode];
-    property <color> header-top-base: [#ffffff, #2e3136, #f7fbff, #26223a, #f8fcf9, #161616, #fffaf6, #1b3133, #fffafc, #2c2e4a, #f0f4fa][mode];
-    property <color> header-bottom-base: [#eef1f5, #282a2e, #e3eefb, #201c31, #e2f0e6, #0e0e0e, #f8e5d9, #16292b, #f8e3eb, #2c2e4a, #f0f4fa][mode];
-    out property <color> text: [#1b1f24, #e8eaed, #13243a, #ece9f6, #15281b, #f2f2f2, #2e1a12, #e3f4f3, #2e1420, #eef0f8, #1c2333][mode];
-    out property <color> muted: [#5f6b78, #9aa0a6, #557090, #a59fc0, #557a61, #9a9a9a, #8a6352, #8fb3b0, #8a5a6c, #8c93ab, #6b778d][mode];
-    out property <color> accent: [#1f6feb, #5b9dff, #1565c0, #a78bfa, #1f8a4c, #4ea1ff, #d4513a, #2ec4b6, #c23d6e, #f59e2e, #c26a08][mode];
-    out property <color> select: [#cce8ff, #264f78, #cfe4ff, #3d3366, #cdebd7, #1f3550, #fbd9c8, #1d4b4b, #f8d3e1, #4f8dff3d, #4f8dff33][mode];
-    out property <color> select-line: [#99d1ff, #3a6ea5, #8dbcf5, #5b4a99, #8ccaa2, #2f5a8a, #eea98a, #2b7470, #eaa0bb, #4f8dff, #4f8dff][mode];
-    out property <color> hover: [#e5f3ff, #2c3440, #e3efff, #2a2541, #e2f3e7, #1a1a1a, #fdeadf, #1b3436, #fde6ee, #ffffff12, #ffffff8c][mode];
-    out property <color> ok: netlab ? (dark ? #36c06f : #168a4a) : dark ? #3fcf7a : #1f9d55;
-    out property <color> warn: netlab ? (dark ? #f5c451 : #b7791f) : #e08a00;
-    out property <color> err: netlab ? #ef5350 : dark ? #ff6b62 : #d23b32;
-    out property <color> bar-bg: netlab ? (dark ? #ffffff29 : #ffffff99) : dark ? #34373c : #e6e6e6;
-    out property <color> input-bg: netlab ? (dark ? #1e2038 : #ffffff) : dark ? #2b2d31 : #ffffff;
-}
 
 // Applies the light/dark look to the standard widgets of every window.
 export component ThemedWindow inherits Window {
@@ -160,197 +113,107 @@ export component ThemedWindow inherits Window {
     init => {
         Palette.color-scheme = self.dark ? ColorScheme.dark : ColorScheme.light;
     }
-    // NetLAB: NetNOC's indigo (or blue-grey) gradient behind every window
-    background: Theme.netlab ? (Theme.dark ? @linear-gradient(160deg, #15142b 0%, #2a2452 100%) : @linear-gradient(160deg, #c9d6e8 0%, #a9bdd8 100%)) : Theme.window;
-    // 12px is the size Windows gives Slint by default (the message font)
+    // NetNOC's indigo (or blue-grey) gradient behind every window
+    background: @linear-gradient(160deg, Theme.bg-a 0%, Theme.bg-b 100%);
     default-font-size: 12px * Theme.font-scale;
-    default-font-family: Theme.font-family != "" ? Theme.font-family : Theme.netlab && Theme.latin ? "Inter" : "";
+    default-font-family: Theme.font-family != "" ? Theme.font-family : Theme.latin ? "Inter" : "";
     icon: @image-url("icon-window.png");
 }
 
-// Small vector icons for menus, lists and buttons (fonts on Windows don't
-// have every symbol, so nothing here depends on a font).
+// ---- buttons and check boxes in the NetLAB look (same use as the standard ones)
+export component Button inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled: true;
+    // the main button of a window: orange
+    in property <bool> primary;
+    callback clicked();
+    min-width: max(80px, label.preferred-width + 30px);
+    height: 32px;
+    horizontal-stretch: 0;
+    border-radius: 16px;
+    background: root.primary ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%)
+        : ta.pressed ? Theme.btn-press : ta.has-hover ? Theme.btn-hover : Theme.btn;
+    border-width: root.primary ? 0px : 1px;
+    border-color: Theme.stroke;
+    opacity: root.enabled ? 1.0 : 0.45;
+    drop-shadow-blur: root.primary && root.enabled ? 12px : 0px;
+    drop-shadow-color: root.primary && root.enabled ? #f59e2e4d : transparent;
+    drop-shadow-offset-y: root.primary && root.enabled ? 3px : 0px;
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
+        clicked => {
+            root.clicked();
+        }
+    }
+    label := Text {
+        text: root.text;
+        font-size: 12px * Theme.font-scale;
+        font-weight: 600;
+        color: root.primary ? #2a1600 : Theme.text;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+export component CheckBox inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled: true;
+    in-out property <bool> checked;
+    callback toggled();
+    min-height: 26px;
+    min-width: box.width + (root.text != "" ? txt.preferred-width + 10px : 0px);
+    preferred-width: self.min-width;
+    opacity: root.enabled ? 1.0 : 0.45;
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
+        clicked => {
+            root.checked = !root.checked;
+            root.toggled();
+        }
+    }
+    box := Rectangle {
+        x: 0;
+        y: (parent.height - 18px) / 2;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        background: root.checked ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
+        border-width: root.checked ? 0px : 1.5px;
+        border-color: Theme.dark ? #ffffff40 : #1c233340;
+        if root.checked: Ico {
+            kind: "check";
+            width: 14px;
+            height: 14px;
+            tint: #2a1600;
+            weight: 3;
+        }
+    }
+    txt := Text {
+        x: 28px;
+        width: parent.width - 28px;
+        height: parent.height;
+        text: root.text;
+        vertical-alignment: center;
+        color: Theme.text;
+        font-size: 12px * Theme.font-scale;
+        wrap: word-wrap;
+    }
+}
+
+// Small icons for menus, lists and buttons (old name; drawn by Ico now).
 export component Glyph inherits Rectangle {
-    // play, progress, openwith, folder, pause, stop, redo, refresh, edit, check,
-    // copy, hash, info, close, clock, plus, warn, down, up, caret-down, caret-up,
-    // bulb, queue
     in property <string> kind;
-    in property <color> tint: Theme.accent;
+    in property <color> tint: Theme.text;
     width: 16px;
     height: 16px;
-    if root.kind == "play": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 4 2.5 L 13 8 L 4 13.5 Z";
-    }
-    if root.kind == "progress": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.6px;
-        fill: transparent;
-        commands: "M 8 1.8 A 6.2 6.2 0 1 1 7.99 1.8 Z M 8 4.5 L 8 8 L 10.8 9.6";
-    }
-    if root.kind == "openwith": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.5px;
-        fill: transparent;
-        commands: "M 2 4 L 2 14 L 12 14 L 12 9 M 7 9 L 14 2 M 9 2 L 14 2 L 14 7";
-    }
-    if root.kind == "folder": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: #f2b531;
-        stroke: #c98a10;
-        stroke-width: 1px;
-        commands: "M 1.5 3.5 L 6 3.5 L 7.5 5 L 14.5 5 L 14.5 13 L 1.5 13 Z";
-    }
-    if root.kind == "pause": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 4 3 L 7 3 L 7 13 L 4 13 Z M 9 3 L 12 3 L 12 13 L 9 13 Z";
-    }
-    if root.kind == "stop": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 3.5 3.5 L 12.5 3.5 L 12.5 12.5 L 3.5 12.5 Z";
-    }
-    if root.kind == "redo": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.7px;
-        fill: transparent;
-        commands: "M 13 8 A 5 5 0 1 1 10.5 3.7 M 9.5 1.5 L 11.5 4 L 8.8 5.6";
-    }
-    if root.kind == "refresh": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.5px;
-        fill: transparent;
-        commands: "M 2.5 7 A 5.5 5.5 0 0 1 12.8 5 M 13.5 9 A 5.5 5.5 0 0 1 3.2 11 M 13 2 L 13 5.2 L 9.8 5.2 M 3 14 L 3 10.8 L 6.2 10.8";
-    }
-    if root.kind == "edit": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.4px;
-        fill: transparent;
-        commands: "M 2.5 13.5 L 3.2 10.4 L 10.8 2.8 L 13.2 5.2 L 5.6 12.8 Z M 9.4 4.2 L 11.8 6.6";
-    }
-    if root.kind == "check": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 2px;
-        fill: transparent;
-        commands: "M 2.5 8.5 L 6.3 12 L 13.5 4";
-    }
-    if root.kind == "copy": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.4px;
-        fill: transparent;
-        commands: "M 5.5 5.5 L 13.5 5.5 L 13.5 14 L 5.5 14 Z M 3 11 L 2.5 11 L 2.5 2 L 10.5 2 L 10.5 3";
-    }
-    if root.kind == "hash": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.4px;
-        fill: transparent;
-        commands: "M 6 2 L 4.5 14 M 11.5 2 L 10 14 M 2.5 5.5 L 14 5.5 M 2 10.5 L 13.5 10.5";
-    }
-    if root.kind == "info": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.4px;
-        fill: transparent;
-        commands: "M 8 1.8 A 6.2 6.2 0 1 1 7.99 1.8 Z M 8 7 L 8 12 M 8 4.2 L 8 5.4";
-    }
-    if root.kind == "close": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 2px;
-        fill: transparent;
-        commands: "M 3.5 3.5 L 12.5 12.5 M 12.5 3.5 L 3.5 12.5";
-    }
-    if root.kind == "clock": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 1.5px;
-        fill: transparent;
-        commands: "M 8 1.8 A 6.2 6.2 0 1 1 7.99 1.8 Z M 8 4 L 8 8 L 11 9.5";
-    }
-    if root.kind == "plus": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 2px;
-        fill: transparent;
-        commands: "M 8 2.5 L 8 13.5 M 2.5 8 L 13.5 8";
-    }
-    if root.kind == "minus": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        stroke: root.tint;
-        stroke-width: 2px;
-        fill: transparent;
-        commands: "M 2.5 8 L 13.5 8";
-    }
-    if root.kind == "warn": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: #e08a00;
-        commands: "M 8 1.5 L 15 14 L 1 14 Z M 7.2 5.5 L 8.8 5.5 L 8.5 10 L 7.5 10 Z M 7.3 11.2 L 8.7 11.2 L 8.7 12.6 L 7.3 12.6 Z";
-    }
-    if root.kind == "down": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 6.5 2 L 9.5 2 L 9.5 8 L 13 8 L 8 14 L 3 8 L 6.5 8 Z";
-    }
-    if root.kind == "up": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 6.5 14 L 9.5 14 L 9.5 8 L 13 8 L 8 2 L 3 8 L 6.5 8 Z";
-    }
-    if root.kind == "caret-down": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 4 6 L 12 6 L 8 11 Z";
-    }
-    if root.kind == "caret-up": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 4 10 L 12 10 L 8 5 Z";
-    }
-    if root.kind == "bulb": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: #ffd54a;
-        stroke: #b8860b;
-        stroke-width: 1px;
-        commands: "M 8 1.5 A 4.8 4.8 0 0 1 11 10 L 10.5 12 L 5.5 12 L 5 10 A 4.8 4.8 0 0 1 8 1.5 Z M 6 13.5 L 10 13.5";
-    }
-    if root.kind == "queue": Path {
-        viewbox-width: 16;
-        viewbox-height: 16;
-        fill: root.tint;
-        commands: "M 2 3 L 10 3 L 10 4.6 L 2 4.6 Z M 2 6.5 L 10 6.5 L 10 8.1 L 2 8.1 Z M 2 10 L 7 10 L 7 11.6 L 2 11.6 Z M 9.5 9 L 14.5 12 L 9.5 15 Z";
+    Ico {
+        kind: root.kind;
+        tint: root.tint;
+        width: parent.width;
+        height: parent.height;
+        weight: 2.1;
     }
 }
 
@@ -361,196 +224,16 @@ export component P inherits Path {
     viewbox-height: 32;
 }
 
-// Toolbar icons, drawn on a 32x32 grid.
+// Toolbar icons (old name; line icons now).
 export component Icon inherits Rectangle {
     in property <string> kind;
     width: 32px;
     height: 32px;
-    if root.kind == "add": Rectangle {
-        P {
-            fill: @linear-gradient(180deg, #45c06a 0%, #23934a 100%);
-            commands: "M 16 2 A 14 14 0 1 1 15.99 2 Z";
-        }
-        P {
-            fill: white;
-            commands: "M 14 8 L 18 8 L 18 14 L 24 14 L 24 18 L 18 18 L 18 24 L 14 24 L 14 18 L 8 18 L 8 14 L 14 14 Z";
-        }
-    }
-    if root.kind == "batch": Rectangle {
-        P {
-            fill: #dde6f1;
-            stroke: #6b7c90;
-            stroke-width: 1.5px;
-            commands: "M 11 3 L 26 3 L 26 22 L 11 22 Z";
-        }
-        P {
-            fill: white;
-            stroke: #6b7c90;
-            stroke-width: 1.5px;
-            commands: "M 5 8 L 20 8 L 20 28 L 5 28 Z M 8 13 L 17 13 M 8 17 L 17 17 M 8 21 L 14 21";
-        }
-        P {
-            fill: #2e9e4f;
-            commands: "M 24 17 A 7 7 0 1 1 23.99 17 Z";
-        }
-        P {
-            fill: white;
-            commands: "M 23 20 L 25 20 L 25 23 L 28 23 L 28 25 L 25 25 L 25 28 L 23 28 L 23 25 L 20 25 L 20 23 L 23 23 Z";
-        }
-    }
-    if root.kind == "playlist": Rectangle {
-        // a green player with a list in front of it
-        P {
-            fill: @linear-gradient(180deg, #4cd47a 0%, #1e9e4c 100%);
-            commands: "M 6 4 L 28 4 Q 31 4 31 7 L 31 19 Q 31 22 28 22 L 6 22 Q 3 22 3 19 L 3 7 Q 3 4 6 4 Z";
-        }
-        P {
-            fill: white;
-            commands: "M 14 8 L 21 13 L 14 18 Z";
-        }
-        P {
-            fill: #33475b;
-            commands: "M 3 24 L 20 24 L 20 26 L 3 26 Z M 3 28 L 20 28 L 20 30 L 3 30 Z";
-        }
-        P {
-            fill: #1f6feb;
-            commands: "M 25 21 A 6 6 0 1 1 24.99 21 Z";
-        }
-        P {
-            fill: white;
-            commands: "M 24 23 L 26 23 L 26 27 L 28 27 L 25 30 L 22 27 L 24 27 Z";
-        }
-    }
-    if root.kind == "grabber": Rectangle {
-        // a globe with a download arrow
-        P {
-            fill: @linear-gradient(180deg, #5aa8ff 0%, #1f6feb 100%);
-            commands: "M 14 3 A 11 11 0 1 1 13.99 3 Z";
-        }
-        P {
-            stroke: white;
-            stroke-width: 1.2px;
-            fill: transparent;
-            commands: "M 3 14 L 25 14 M 14 3 C 8 8 8 20 14 25 M 14 3 C 20 8 20 20 14 25 M 5 8 L 23 8 M 5 20 L 23 20";
-        }
-        P {
-            fill: #2e9e4f;
-            commands: "M 24 17 A 7 7 0 1 1 23.99 17 Z";
-        }
-        P {
-            fill: white;
-            commands: "M 23 19 L 25 19 L 25 24 L 27.5 24 L 24 28 L 20.5 24 L 23 24 Z";
-        }
-    }
-    if root.kind == "find": Rectangle {
-        P {
-            stroke: #4b5b70;
-            stroke-width: 3px;
-            fill: #e8f2ff;
-            commands: "M 13 4 A 9 9 0 1 1 12.99 4 Z";
-        }
-        P {
-            stroke: #4b5b70;
-            stroke-width: 4px;
-            commands: "M 19.5 19.5 L 28 28";
-        }
-    }
-    if root.kind == "resume": P {
-        fill: @linear-gradient(180deg, #45c06a 0%, #23934a 100%);
-        commands: "M 9 5 L 27 16 L 9 27 Z";
-    }
-    if root.kind == "stop": P {
-        fill: @linear-gradient(180deg, #f5a623 0%, #d97d00 100%);
-        commands: "M 8 6 L 14 6 L 14 26 L 8 26 Z M 18 6 L 24 6 L 24 26 L 18 26 Z";
-    }
-    if root.kind == "stopall": Rectangle {
-        P {
-            fill: #f2a7a2;
-            commands: "M 11 3 L 29 3 L 29 21 L 11 21 Z";
-        }
-        P {
-            fill: @linear-gradient(180deg, #ef5a50 0%, #c62f27 100%);
-            commands: "M 4 9 L 22 9 L 22 27 L 4 27 Z";
-        }
-    }
-    if root.kind == "delete": P {
-        stroke: #e0443b;
-        stroke-width: 4.5px;
-        commands: "M 8 8 L 24 24 M 24 8 L 8 24";
-    }
-    if root.kind == "deletedone": Rectangle {
-        P {
-            fill: #8a96a3;
-            commands: "M 7 7 L 25 7 L 25 10 L 7 10 Z M 13 4 L 19 4 L 19 7 L 13 7 Z M 9 11 L 23 11 L 21.5 29 L 10.5 29 Z";
-        }
-        P {
-            stroke: #3fcf7a;
-            stroke-width: 3.5px;
-            commands: "M 12 19 L 15.5 23 L 22 15";
-        }
-    }
-    if root.kind == "options": Rectangle {
-        P {
-            stroke: #7d8b9a;
-            stroke-width: 2.5px;
-            commands: "M 4 9 L 28 9 M 4 16 L 28 16 M 4 23 L 28 23";
-        }
-        P {
-            fill: #3b82f6;
-            stroke: white;
-            stroke-width: 1px;
-            commands: "M 11 5 A 4 4 0 1 1 10.99 5 Z M 21 12 A 4 4 0 1 1 20.99 12 Z M 14 19 A 4 4 0 1 1 13.99 19 Z";
-        }
-    }
-    if root.kind == "scheduler": Rectangle {
-        P {
-            fill: white;
-            stroke: #3b82f6;
-            stroke-width: 3px;
-            commands: "M 16 3.5 A 12.5 12.5 0 1 1 15.99 3.5 Z";
-        }
-        P {
-            stroke: #2d3a48;
-            stroke-width: 2.5px;
-            commands: "M 16 9 L 16 16 L 21.5 19.5";
-        }
-    }
-    if root.kind == "limiter": Rectangle {
-        P {
-            stroke: #7d8b9a;
-            stroke-width: 3px;
-            commands: "M 5 22 A 11 11 0 1 1 27 22";
-        }
-        P {
-            stroke: #e0443b;
-            stroke-width: 3px;
-            commands: "M 16 22 L 22 12";
-        }
-        P {
-            fill: #2d3a48;
-            commands: "M 16 19.5 A 2.5 2.5 0 1 1 15.99 19.5 Z";
-        }
-    }
-    if root.kind == "startqueue" || root.kind == "stopqueue": Rectangle {
-        P {
-            stroke: #7d8b9a;
-            stroke-width: 3px;
-            commands: "M 3 7 L 19 7 M 3 13 L 19 13 M 3 19 L 12 19";
-        }
-        if root.kind == "startqueue": P {
-            fill: #2e9e4f;
-            commands: "M 16 15 L 29 22.5 L 16 30 Z";
-        }
-        if root.kind == "stopqueue": P {
-            fill: #e0443b;
-            commands: "M 16 17 L 28 17 L 28 29 L 16 29 Z";
-        }
-    }
-    if root.kind == "folder": P {
-        fill: @linear-gradient(180deg, #ffd86b 0%, #f2b632 100%);
-        stroke: #c99a1e;
-        stroke-width: 1.2px;
-        commands: "M 3 8 L 12 8 L 15 11 L 29 11 L 29 27 L 3 27 Z";
+    Ico {
+        kind: root.kind;
+        tint: root.kind == "add" ? Theme.orange : root.kind == "delete" || root.kind == "stopall" ? Theme.red : Theme.btn-ico;
+        width: parent.width;
+        height: parent.height;
     }
 }
 
@@ -559,94 +242,15 @@ export component G inherits Path {
     viewbox-height: 16;
 }
 
-// Colorful file-type icon: rounded tile with a white symbol.
+// File type icon (old name): the tinted NetLAB badge.
 export component TypeIcon inherits Rectangle {
     in property <string> kind: "general";
     width: 18px;
     height: 18px;
-    property <color> base: root.kind == "video" ? #e5484d
-        : root.kind == "audio" ? #8e4ec6
-        : root.kind == "archive" ? #c27c0e
-        : root.kind == "pdf" ? #d93025
-        : root.kind == "doc" ? #2b6cde
-        : root.kind == "sheet" ? #1e8e3e
-        : root.kind == "slides" ? #e8710a
-        : root.kind == "text" ? #6b7785
-        : root.kind == "exe" ? #4a5568
-        : root.kind == "apk" ? #2e9e5b
-        : root.kind == "disc" ? #5b7083
-        : root.kind == "image" ? #12a594
-        : #8a94a0;
-    border-radius: self.width * 0.22;
-    background: @linear-gradient(180deg, root.base.brighter(25%) 0%, root.base 100%);
-    if root.kind == "video": G {
-        fill: white;
-        commands: "M 6 4.5 L 12 8 L 6 11.5 Z";
-    }
-    if root.kind == "audio": G {
-        fill: white;
-        commands: "M 9.6 3 L 12.2 3.9 L 12.2 5.4 L 10.6 4.9 L 10.6 10.6 A 2.2 1.8 0 1 1 9.6 9.2 Z";
-    }
-    if root.kind == "archive": G {
-        fill: white;
-        commands: "M 7 2 L 9 2 L 9 3 L 7 3 Z M 7 4 L 9 4 L 9 5 L 7 5 Z M 7 6 L 9 6 L 9 7 L 7 7 Z M 6.3 8 L 9.7 8 L 9.7 12.5 L 6.3 12.5 Z";
-    }
-    if root.kind == "pdf" || root.kind == "doc" || root.kind == "text": G {
-        stroke: white;
-        stroke-width: 1.3px;
-        commands: "M 4.5 4.5 L 11.5 4.5 M 4.5 7 L 11.5 7 M 4.5 9.5 L 11.5 9.5 M 4.5 12 L 9 12";
-    }
-    if root.kind == "sheet": G {
-        stroke: white;
-        stroke-width: 1px;
-        commands: "M 4 4 L 12 4 L 12 12 L 4 12 Z M 4 6.7 L 12 6.7 M 4 9.3 L 12 9.3 M 7 4 L 7 12";
-    }
-    if root.kind == "slides": G {
-        stroke: white;
-        stroke-width: 1.2px;
-        commands: "M 3.5 4 L 12.5 4 L 12.5 10 L 3.5 10 Z M 8 10 L 8 12.5 M 6 12.5 L 10 12.5";
-    }
-    if root.kind == "exe": Rectangle {
-        G {
-            stroke: white;
-            stroke-width: 1.2px;
-            commands: "M 3.5 4 L 12.5 4 L 12.5 12 L 3.5 12 Z";
-        }
-        G {
-            fill: white;
-            commands: "M 3.5 4 L 12.5 4 L 12.5 6.2 L 3.5 6.2 Z";
-        }
-    }
-    if root.kind == "apk": G {
-        stroke: white;
-        stroke-width: 1.2px;
-        commands: "M 5.5 2.8 L 10.5 2.8 L 10.5 13.2 L 5.5 13.2 Z M 7.3 11.5 L 8.7 11.5";
-    }
-    if root.kind == "disc": Rectangle {
-        G {
-            stroke: white;
-            stroke-width: 1.3px;
-            commands: "M 8 3 A 5 5 0 1 1 7.99 3 Z";
-        }
-        G {
-            fill: white;
-            commands: "M 8 6.7 A 1.3 1.3 0 1 1 7.99 6.7 Z";
-        }
-    }
-    if root.kind == "image": Rectangle {
-        G {
-            fill: white;
-            commands: "M 3.5 11.8 L 6.5 7.5 L 8.6 10.2 L 10 8.6 L 12.5 11.8 Z";
-        }
-        G {
-            fill: white;
-            commands: "M 10.5 3.6 A 1.3 1.3 0 1 1 10.49 3.6 Z";
-        }
-    }
-    if root.kind == "general": G {
-        stroke: white;
-        stroke-width: 1.2px;
-        commands: "M 5 3 L 9.5 3 L 11.5 5 L 11.5 13 L 5 13 Z";
+    KindBadge {
+        kind: root.kind;
+        width: parent.width;
+        height: parent.height;
     }
 }
 
@@ -960,30 +564,33 @@ export component Cell inherits Text {
     overflow: elide;
 }
 
-// ---- right-click menu pieces
+// ---- menu pieces (popups)
 export component MenuEntry inherits Rectangle {
     in property <string> text;
     in property <string> glyph;
-    in property <color> glyph-color: Theme.accent;
+    in property <color> glyph-color: Theme.btn-ico;
     in property <bool> enabled: true;
     in property <bool> bold;
     in property <bool> indent;
+    // a check mark on the right (chosen option)
+    in property <bool> checked;
     callback clicked();
-    height: 26px;
-    border-radius: Theme.netlab ? 10px : 3px;
-    background: ta.has-hover && root.enabled ? Theme.select : transparent;
+    height: 32px;
+    border-radius: 10px;
+    background: ta.has-hover && root.enabled ? Theme.btn-hover : transparent;
     ta := TouchArea {
         width: parent.width;
         height: parent.height;
         enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
         clicked => {
             root.clicked();
         }
     }
     HorizontalLayout {
-        padding-left: root.indent ? 26px : 8px;
+        padding-left: root.indent ? 28px : 10px;
         padding-right: 10px;
-        spacing: 8px;
+        spacing: 10px;
         opacity: root.enabled ? 1.0 : 0.4;
         Rectangle {
             width: 16px;
@@ -998,34 +605,51 @@ export component MenuEntry inherits Rectangle {
             color: Theme.text;
             vertical-alignment: center;
             font-size: 12px * Theme.font-scale;
-            font-weight: root.bold ? 700 : 400;
+            font-weight: root.bold ? 600 : 400;
             overflow: elide;
             horizontal-stretch: 1;
+        }
+        if root.checked: Glyph {
+            y: (parent.height - 16px) / 2;
+            kind: "check";
+            tint: Theme.blue;
         }
     }
 }
 
 export component MenuSep inherits Rectangle {
-    height: 7px;
+    height: 9px;
     Rectangle {
-        x: 6px;
-        y: 3px;
-        width: parent.width - 12px;
+        x: 8px;
+        y: 4px;
+        width: parent.width - 16px;
         height: 1px;
-        background: Theme.line;
+        background: Theme.rule;
     }
 }
 
 export component MenuLabel inherits Rectangle {
     in property <string> text;
-    height: 22px;
+    height: 26px;
     Text {
-        x: 34px;
+        x: 12px;
         text: root.text;
-        font-size: 11px * Theme.font-scale;
+        font-size: 10.5px * Theme.font-scale;
+        font-weight: 700;
+        letter-spacing: 0.6px;
         color: Theme.muted;
         vertical-alignment: center;
         height: parent.height;
     }
 }
 
+// The frame of every popup menu.
+export component MenuFrame inherits Rectangle {
+    border-radius: 16px;
+    background: Theme.dark ? #23253ef7 : #f4f7fbf7;
+    border-width: 1px;
+    border-color: Theme.stroke;
+    drop-shadow-blur: 26px;
+    drop-shadow-color: #05061480;
+    drop-shadow-offset-y: 10px;
+}

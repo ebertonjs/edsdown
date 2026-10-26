@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "Die Download-Schaltfläche auf Videos im Browser ist kleiner, ihre Größe lässt sich in den Einstellungen der Erweiterung ändern.",
  "The main window can be maximized to the full screen.": "Das Hauptfenster lässt sich auf den ganzen Bildschirm maximieren.",
  "Columns of the list can be resized and moved by dragging their titles.": "Die Spalten der Liste lassen sich durch Ziehen ihrer Titel in Größe und Reihenfolge ändern.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Die Namen der Symbolleiste sind fett, und die Größe der Video-Schaltfläche wählt man im Fenster der Erweiterung."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Die Namen der Symbolleiste sind fett, und die Größe der Video-Schaltfläche wählt man im Fenster der Erweiterung.",
+ "total speed": "Gesamtgeschwindigkeit",
+ "total speed  ·  {} connections": "Gesamtgeschwindigkeit  ·  {} Verbindungen",
+ "Main download queue": "Hauptwarteschlange",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Neues Aussehen: das Layout von NetLAB mit Glaskarten, Seitenspalte und einem Dock aus runden Knöpfen.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Laufende Downloads sind Karten, fertige stehen als kompakte Zeilen darunter.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "Die Seitenspalte zeigt die Gesamtgeschwindigkeit, ein Diagramm der letzten Minute, die heutigen Downloads und die Warteschlangen.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "Die Menüleiste ist weg: alles Weitere steckt im ⋯-Knopf (oben rechts) und im Rechtsklickmenü.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "Zwei Designs, NetLAB dunkel und hell: der orange Knopf neben ⋯ wechselt sie.",
+ "New line icons and a new program icon.": "Neue Linien-Symbole und ein neues Programmsymbol."
 }

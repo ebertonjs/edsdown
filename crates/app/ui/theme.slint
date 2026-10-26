@@ -1,0 +1,72 @@
+// EdsDown – the NetLAB look (NetNOC's "glass" skin): colors and sizes.
+// Two themes: 9 = NetLAB dark (default), 10 = NetLAB light.
+
+export global Theme {
+    in-out property <int> mode: 9;
+    out property <bool> dark: mode != 10;
+    // kept for the windows written before the NetLAB look (always on now)
+    out property <bool> netlab: true;
+    // Options > Appearance > Text size / Font
+    in-out property <float> font-scale: 1.0;
+    in-out property <string> font-family: "";
+    // the program's language is written in Latin letters (Inter has no
+    // Cyrillic / Arabic here)
+    in-out property <bool> latin: true;
+    // a picture behind the main window: how much of it shows through (0..0.8)
+    in-out property <float> glass-strength: 0;
+
+    // ---- NetNOC tokens
+    out property <color> bg-a: dark ? #15142b : #c9d6e8;
+    out property <color> bg-b: dark ? #2a2452 : #a9bdd8;
+    out property <color> text: dark ? #eef0f8 : #1c2333;
+    out property <color> text-2: dark ? #b9bfd3 : #3d475c;
+    out property <color> muted: dark ? #8c93ab : #66728a;
+    out property <color> glass: dark ? #2c2e4a9e : #f0f4fa9e;
+    out property <color> glass-2: dark ? #3a3d5e8c : #ffffff8c;
+    out property <color> glass-hi: dark ? #ffffff12 : #ffffff8c;
+    out property <color> side: dark ? #242640b8 : #5668869e;
+    out property <color> side-text: dark ? #eef0f8 : #ffffff;
+    out property <color> stroke: dark ? #ffffff17 : #ffffffbf;
+    out property <color> rule: dark ? #ffffff14 : #1c23331a;
+    out property <color> shadow: dark ? #05061473 : #30466e33;
+    out property <color> btn: dark ? #ffffff17 : #ffffff9e;
+    out property <color> btn-hover: dark ? #ffffff26 : #ffffffd9;
+    out property <color> btn-press: dark ? #ffffff33 : #ffffff;
+    out property <color> btn-ico: dark ? #d9dcea : #58637a;
+    out property <color> track: dark ? #ffffff29 : #1c233321;
+    out property <color> tile: dark ? #ffffff0f : #ffffffb3;
+    out property <color> tooltip: dark ? #0d0c1ef2 : #1c2333f2;
+    out property <color> tooltip-text: #ffffff;
+    out property <color> chip-on: #4f8dff;
+    out property <color> chip-on-line: #4f8dff;
+    out property <color> chip-on-text: #ffffff;
+    out property <color> blue: #4f8dff;
+    out property <color> orange: #f59e2e;
+    out property <color> green: #36c06f;
+    out property <color> red: #ef5350;
+    out property <color> purple: #9b7bff;
+    out property <length> r-card: 22px;
+    out property <length> r-panel: 22px;
+    out property <length> r-ctl: 12px;
+
+    // ---- names the dialogs use
+    out property <color> window: bg-a;
+    out property <color> panel: glass;
+    out property <color> toolbar-top: side;
+    out property <color> toolbar-bottom: side;
+    out property <color> toolbar-text: side-text;
+    out property <color> toolbar-hover: btn-hover;
+    out property <color> line: dark ? #ffffff1a : #1c23331f;
+    out property <color> grid: tile;
+    out property <color> header-top: transparent;
+    out property <color> header-bottom: transparent;
+    out property <color> accent: dark ? #f59e2e : #c26a08;
+    out property <color> select: dark ? #4f8dff38 : #4f8dff2e;
+    out property <color> select-line: #4f8dffaa;
+    out property <color> hover: dark ? #ffffff12 : #ffffff8c;
+    out property <color> ok: dark ? #36c06f : #168a4a;
+    out property <color> warn: dark ? #f5c451 : #b7791f;
+    out property <color> err: dark ? #ef5350 : #d23b32;
+    out property <color> bar-bg: track;
+    out property <color> input-bg: dark ? #1e2038 : #ffffff;
+}

@@ -51,7 +51,8 @@ fn show_lists(ui: &Ui, d: &SettingsDialog) {
 fn fill(ui: &Ui, d: &SettingsDialog, s: &Settings) {
     // General
     d.set_language(crate::i18n::index_of(crate::i18n::effective(&s.language)) as i32);
-    d.set_theme(s.theme as i32);
+    // the list has two entries: NetLAB dark, NetLAB light
+    d.set_theme(if s.theme == crate::NETLAB_LIGHT { 1 } else { 0 });
     d.set_window_opacity(s.opacity.clamp(50, 100) as f32);
     d.set_text_size(s.font_scale.clamp(80, 150) as f32);
     d.set_font_index(crate::FONTS.iter().position(|f| *f == s.font_family).unwrap_or(0) as i32);
@@ -142,7 +143,7 @@ fn read(ui: &Ui, d: &SettingsDialog, mut s: Settings) -> Result<Settings, String
     }
     // General
     s.language = crate::i18n::LANGS[(d.get_language().max(0) as usize).min(crate::i18n::LANGS.len() - 1)].0.into();
-    s.theme = d.get_theme().clamp(0, crate::LAST_THEME) as u32;
+    s.theme = if d.get_theme() == 1 { crate::NETLAB_LIGHT } else { crate::NETLAB_DARK };
     s.opacity = (d.get_window_opacity().round() as u32).clamp(50, 100);
     s.font_scale = (d.get_text_size().round() as u32).clamp(80, 150);
     s.font_family = crate::FONTS.get(d.get_font_index().max(0) as usize).copied().unwrap_or("").to_string();
@@ -229,7 +230,7 @@ fn read(ui: &Ui, d: &SettingsDialog, mut s: Settings) -> Result<Settings, String
 /// The look the Options window shows now (not saved yet).
 fn look_of(d: &SettingsDialog) -> crate::Look {
     crate::Look {
-        mode: d.get_theme().clamp(0, crate::LAST_THEME),
+        mode: if d.get_theme() == 1 { crate::NETLAB_LIGHT as i32 } else { crate::NETLAB_DARK as i32 },
         scale: (d.get_text_size().round() as u32).clamp(80, 150) as f32 / 100.0,
         family: crate::FONTS.get(d.get_font_index().max(0) as usize).copied().unwrap_or("").to_string(),
         background: d.get_bg_image().to_string(),

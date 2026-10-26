@@ -1305,3 +1305,63 @@ msgstr "NetLAB داكن"
 
 msgid "NetLAB light"
 msgstr "NetLAB فاتح"
+
+msgid "Shut down"
+msgstr "إيقاف التشغيل"
+
+msgid "Export / Import"
+msgstr "تصدير / استيراد"
+
+msgid "Back"
+msgstr "رجوع"
+
+msgid "New category…"
+msgstr "فئة جديدة…"
+
+msgid "DOWNLOADING NOW"
+msgstr "قيد التنزيل الآن"
+
+msgid "Nothing downloading right now ✓"
+msgstr "لا شيء قيد التنزيل الآن ✓"
+
+msgid "TODAY"
+msgstr "اليوم"
+
+msgid "finished"
+msgstr "مكتملة"
+
+msgid "downloaded"
+msgstr "تم تنزيلها"
+
+msgid "QUEUES"
+msgstr "قوائم الانتظار"
+
+msgid "{} downloading"
+msgstr "{} قيد التنزيل"
+
+msgid "Idle"
+msgstr "خامل"
+
+msgid "Limiter on"
+msgstr "المحدد يعمل"
+
+msgid "No speed limit"
+msgstr "بلا حد للسرعة"
+
+msgid "Browser connected"
+msgstr "المتصفح متصل"
+
+msgid "Browser not connected"
+msgstr "المتصفح غير متصل"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "In progress"
+msgstr "قيد التنفيذ"
+
+msgid "FINISHED"
+msgstr "المكتملة"
+
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "مدير تنزيلات لويندوز بمظهر NetLAB."

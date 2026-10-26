@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "Le bouton de téléchargement sur les vidéos du navigateur est plus petit, et sa taille se règle dans les paramètres de l'extension.",
  "The main window can be maximized to the full screen.": "La fenêtre principale peut être agrandie en plein écran.",
  "Columns of the list can be resized and moved by dragging their titles.": "Les colonnes de la liste se redimensionnent et se déplacent en faisant glisser leur titre.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Les noms de la barre d'outils sont en gras, et la taille du bouton vidéo se choisit dans la fenêtre de l'extension."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Les noms de la barre d'outils sont en gras, et la taille du bouton vidéo se choisit dans la fenêtre de l'extension.",
+ "total speed": "vitesse totale",
+ "total speed  ·  {} connections": "vitesse totale  ·  {} connexions",
+ "Main download queue": "File principale",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Nouveau look : la disposition de NetLAB, avec des cartes en verre, une colonne latérale et un dock de boutons ronds.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Les téléchargements en cours sont des cartes ; les terminés, des lignes compactes en dessous.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "La colonne latérale montre la vitesse totale, un graphique de la dernière minute, les téléchargements du jour et les files.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "La barre de menus disparaît : le reste est dans le bouton ⋯ (en haut à droite) et le clic droit.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "Deux thèmes, NetLAB sombre et clair : le bouton orange à côté de ⋯ les alterne.",
+ "New line icons and a new program icon.": "Nouvelles icônes au trait et nouvelle icône du programme."
 }

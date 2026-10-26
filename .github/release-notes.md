@@ -1,24 +1,23 @@
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-escuro.png" alt="EdsDown 0.1.3 — tema NetLAB escuro" width="800"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-escuro.png" alt="EdsDown 0.2.0" width="820"></p>
 
-## Visual NetLAB
+## Interface nova, no layout do NetLAB
 
-O EdsDown agora tem o mesmo visual do NetNOC: vidro fosco sobre o fundo de ondas, fonte Inter e destaque laranja.
-
-- **NetLAB escuro** (novo padrão) e **NetLAB claro**, em **Exibir → Tema**. Os temas antigos continuam lá.
-- Quem usava o tema padrão antigo passa para o NetLAB escuro automaticamente; quem escolheu outro tema continua nele.
-- Janelas de opções e diálogos com o mesmo gradiente, menus e botões arredondados.
+- **Coluna lateral:** velocidade total, gráfico do último minuto, o que está baixando, resumo do dia e as filas.
+- **Cards de vidro** para os downloads em andamento e **linhas compactas** para os concluídos.
+- **Dock flutuante** com botões redondos e **menu ⋯** no lugar da barra de menus.
+- **Pílulas de status** no topo: baixando, limitador, navegador conectado.
+- **Ícones novos** em todo o app e ícone novo do programa.
+- Temas **NetLAB escuro** e **NetLAB claro** (botão laranja no topo). Os temas antigos migram sozinhos.
 
 <p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-claro.png" alt="Tema NetLAB claro" width="640"></p>
-
-## Extensão
-
-Popup, configurações e o botão "Baixar este vídeo" no mesmo visual, claro e escuro conforme o sistema.
-
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/popup.png" alt="Popup da extensão" width="640"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/botao-video.png" alt="Botão Baixar este vídeo" width="560"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/menu-contexto.png" alt="Clique direito" width="640"></p>
 
 ## Instalação
 
-Baixe o **EdsDown-Setup.exe** abaixo. Quem já tem o EdsDown instalado recebe esta versão sozinho (ou em **Help → Check for updates**).
+Baixe o **EdsDown-Setup.exe** abaixo. Quem já tem o EdsDown instalado recebe esta versão sozinho (ou pelo menu **⋯ → Verificar atualizações**).
 
 Lista completa de mudanças: [CHANGELOG.md](https://github.com/ebertonjs/edsdown/blob/main/CHANGELOG.md)
+
+---
+
+[![Made with Slint](https://raw.githubusercontent.com/slint-ui/slint/master/logo/MadeWithSlint-logo-whitebg.png)](https://slint.dev)

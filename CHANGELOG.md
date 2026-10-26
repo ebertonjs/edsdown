@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0
+
+Interface reformulada no layout do NetLAB:
+- Coluna lateral: velocidade total em destaque, gráfico do último minuto, downloads ativos, resumo do dia e filas (iniciar/parar).
+- Topo: data, pílulas de status (baixando, limitador, navegador conectado, ação ao terminar), busca, alternância de tema e menu ⋯.
+- Downloads em andamento como cards de vidro (progresso, velocidade, tempo restante, pausar/retomar); concluídos em linhas compactas.
+- Filtros por estado e categoria em chips; clique direito na categoria para propriedades/excluir.
+- Dock flutuante com botões redondos: adicionar, lote, retomar, pausar, parar todos, excluir, agendador, limitador, grabber, playlist, opções.
+- Barra de menus removida: o restante foi para o menu ⋯ e para o clique direito.
+- Ícones novos em linha em todo o app e ícone novo do programa.
+- Diálogos (Opções, Adicionar, Progresso, Agendador, Lote, Sobre…) com botões, caixas de seleção e abas novos.
+- Só os temas NetLAB escuro e claro; os temas antigos migram automaticamente.
+- O quadro "About Slint" saiu do app; a atribuição do Slint fica no README e na página de download.
+
 ## 0.1.3 — 2026-10-26
 
 Visual NetLAB (o mesmo do NetNOC):

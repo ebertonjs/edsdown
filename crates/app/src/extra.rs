@@ -349,8 +349,13 @@ pub(crate) fn is_web_address(s: &str) -> bool {
 }
 
 /// What the newest version brings (shown once after an automatic update).
-const WHATS_NEW: [&str; 1] = [
-    "First version of EdsDown.",
+const WHATS_NEW: [&str; 6] = [
+    "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.",
+    "Downloads in progress are cards; finished ones are compact rows below them.",
+    "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.",
+    "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.",
+    "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.",
+    "New line icons and a new program icon.",
 ];
 
 pub(crate) fn whats_new() {

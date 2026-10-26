@@ -20,19 +20,24 @@ Gerenciador de downloads para Windows, escrito em Rust.
 
 ## Telas
 
-Visual padrão **NetLAB**: vidro fosco sobre o fundo de ondas do NetNOC, fonte Inter e destaque laranja. Escuro ou claro em **Exibir → Tema** (os temas antigos continuam disponíveis).
+Interface no layout do **NetLAB**: coluna lateral com a velocidade total e o gráfico do último minuto, pílulas de status no topo, downloads em andamento como cards de vidro, concluídos em linhas compactas e um dock flutuante de botões redondos. Temas **NetLAB escuro** e **NetLAB claro** (botão laranja ao lado do menu ⋯).
 
 <table>
 <tr>
 <td align="center"><b>NetLAB claro</b><br><img src="docs/images/main-netlab-claro.png" alt="EdsDown no tema NetLAB claro" width="420"></td>
-<td align="center"><b>Opções</b><br><img src="docs/images/opcoes.png" alt="Janela de opções" width="360"></td>
+<td align="center"><b>Menu ⋯</b><br><img src="docs/images/menu.png" alt="Menu de opções" width="420"></td>
 </tr>
 <tr>
-<td align="center"><b>Popup da extensão</b> (escuro e claro)<br><img src="docs/images/popup.png" alt="Popup da extensão" width="420"></td>
-<td align="center"><b>Botão "Baixar este vídeo"</b> sobre o player<br><img src="docs/images/botao-video.png" alt="Botão de download sobre o vídeo" width="420"></td>
+<td align="center"><b>Clique direito</b><br><img src="docs/images/menu-contexto.png" alt="Menu do clique direito" width="420"></td>
+<td align="center"><b>Opções</b><br><img src="docs/images/opcoes.png" alt="Janela de opções" width="420"></td>
 </tr>
 <tr>
-<td align="center" colspan="2"><b>Configurações da extensão</b><br><img src="docs/images/configuracoes-extensao.png" alt="Configurações da extensão" width="640"></td>
+<td align="center"><b>Progresso do download</b><br><img src="docs/images/progresso.png" alt="Janela de progresso com as conexões" width="360"></td>
+<td align="center"><b>Sobre</b><br><img src="docs/images/sobre.png" alt="Janela Sobre" width="220"></td>
+</tr>
+<tr>
+<td align="center"><b>Popup da extensão</b><br><img src="docs/images/popup.png" alt="Popup da extensão" width="420"></td>
+<td align="center"><b>Botão "Baixar este vídeo"</b><br><img src="docs/images/botao-video.png" alt="Botão de download sobre o vídeo" width="420"></td>
 </tr>
 </table>
 
@@ -48,6 +53,7 @@ Visual padrão **NetLAB**: vidro fosco sobre o fundo de ondas do NetNOC, fonte I
 | Filas e agendamento | Filas, horário de início e desligar o PC ao terminar |
 | Limite de velocidade | Global ou por download |
 | Grabber | Coleta todos os arquivos de uma página |
+| Interface | Layout do NetLAB, cards de vidro, dock, temas escuro e claro |
 | Idiomas | Português, English, Español, Français, Deutsch, Türkçe, Русский, العربية |
 
 ## Instalação
@@ -111,3 +117,7 @@ O secret `UPDATE_SIGNING_KEY` do repositório assina o `version.json`.
 ## Licença
 
 MIT. Ver `LICENSE`.
+
+A interface usa o [Slint](https://slint.dev), sob a licença Slint Royalty-free 2.0:
+
+[![Made with Slint](https://raw.githubusercontent.com/slint-ui/slint/master/logo/MadeWithSlint-logo-whitebg.png)](https://slint.dev)

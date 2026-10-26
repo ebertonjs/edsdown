@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "Tarayıcıdaki videoların indirme düğmesi daha küçük ve boyutu eklenti ayarlarından değiştirilebilir.",
  "The main window can be maximized to the full screen.": "Ana pencere tam ekran büyütülebilir.",
  "Columns of the list can be resized and moved by dragging their titles.": "Listenin sütunları başlıkları sürüklenerek boyutlandırılabilir ve taşınabilir.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Araç çubuğu adları kalın; video düğmesinin boyutu eklenti penceresinden seçilebilir."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Araç çubuğu adları kalın; video düğmesinin boyutu eklenti penceresinden seçilebilir.",
+ "total speed": "toplam hız",
+ "total speed  ·  {} connections": "toplam hız  ·  {} bağlantı",
+ "Main download queue": "Ana kuyruk",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Yeni görünüm: NetLAB düzeni; cam kartlar, yan sütun ve yuvarlak düğmeli bir dock.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Devam eden indirmeler kart, bitenler altında sıkı satırlar olarak görünür.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "Yan sütun toplam hızı, son dakikanın grafiğini, bugünkü indirmeleri ve kuyrukları gösterir.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "Menü çubuğu kalktı: geri kalan her şey ⋯ düğmesinde (sağ üst) ve sağ tık menüsünde.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "İki tema, NetLAB koyu ve açık: ⋯ yanındaki turuncu düğme değiştirir.",
+ "New line icons and a new program icon.": "Yeni çizgi simgeler ve yeni program simgesi."
 }

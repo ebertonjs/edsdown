@@ -1305,3 +1305,63 @@ msgstr "NetLAB тёмная"
 
 msgid "NetLAB light"
 msgstr "NetLAB светлая"
+
+msgid "Shut down"
+msgstr "Выключить"
+
+msgid "Export / Import"
+msgstr "Экспорт / Импорт"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "New category…"
+msgstr "Новая категория…"
+
+msgid "DOWNLOADING NOW"
+msgstr "СЕЙЧАС ЗАГРУЖАЕТСЯ"
+
+msgid "Nothing downloading right now ✓"
+msgstr "Сейчас ничего не загружается ✓"
+
+msgid "TODAY"
+msgstr "СЕГОДНЯ"
+
+msgid "finished"
+msgstr "завершено"
+
+msgid "downloaded"
+msgstr "загружено"
+
+msgid "QUEUES"
+msgstr "ОЧЕРЕДИ"
+
+msgid "{} downloading"
+msgstr "Загружается: {}"
+
+msgid "Idle"
+msgstr "Ожидание"
+
+msgid "Limiter on"
+msgstr "Ограничитель включён"
+
+msgid "No speed limit"
+msgstr "Без ограничения"
+
+msgid "Browser connected"
+msgstr "Браузер подключён"
+
+msgid "Browser not connected"
+msgstr "Браузер не подключён"
+
+msgid "All"
+msgstr "Все"
+
+msgid "In progress"
+msgstr "В процессе"
+
+msgid "FINISHED"
+msgstr "ЗАВЕРШЕНО"
+
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "Менеджер загрузок для Windows в стиле NetLAB."

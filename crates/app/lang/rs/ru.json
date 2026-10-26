@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "Кнопка загрузки на видео в браузере стала меньше, её размер меняется в настройках расширения.",
  "The main window can be maximized to the full screen.": "Главное окно можно развернуть на весь экран.",
  "Columns of the list can be resized and moved by dragging their titles.": "Столбцы списка меняют ширину и порядок перетаскиванием заголовков.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Названия кнопок панели выделены жирным, а размер кнопки видео выбирается в окне расширения."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Названия кнопок панели выделены жирным, а размер кнопки видео выбирается в окне расширения.",
+ "total speed": "общая скорость",
+ "total speed  ·  {} connections": "общая скорость  ·  соединений: {}",
+ "Main download queue": "Основная очередь",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Новый вид: макет NetLAB со стеклянными карточками, боковой колонкой и панелью круглых кнопок.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Текущие загрузки — карточки, завершённые — компактные строки под ними.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "Боковая колонка показывает общую скорость, график за минуту, сегодняшние загрузки и очереди.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "Строки меню больше нет: всё остальное — в кнопке ⋯ (справа вверху) и в контекстном меню.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "Две темы, NetLAB тёмная и светлая: оранжевая кнопка рядом с ⋯ переключает их.",
+ "New line icons and a new program icon.": "Новые линейные значки и новый значок программы."
 }

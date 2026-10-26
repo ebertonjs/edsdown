@@ -22,7 +22,7 @@ fn queue_rows(ui: &Ui) -> Vec<QueueRow> {
         .iter()
         .map(|q| QueueRow {
             id: q.id as i32,
-            name: q.name.clone().into(),
+            name: crate::queue_label(&q.name).into(),
             count: views.iter().filter(|v| v.queue == Some(q.id) && v.status != Status::Completed).count() as i32,
             running: ui.ctx.mgr.queue_running(q.id),
         })

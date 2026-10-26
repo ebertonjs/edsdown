@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "El botón de descarga de los vídeos del navegador es más pequeño y su tamaño se cambia en los ajustes de la extensión.",
  "The main window can be maximized to the full screen.": "La ventana principal se puede maximizar a pantalla completa.",
  "Columns of the list can be resized and moved by dragging their titles.": "Las columnas de la lista se cambian de tamaño y de lugar arrastrando su título.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Los nombres de la barra de herramientas están en negrita y el tamaño del botón de vídeo se elige en la ventana de la extensión."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Los nombres de la barra de herramientas están en negrita y el tamaño del botón de vídeo se elige en la ventana de la extensión.",
+ "total speed": "velocidad total",
+ "total speed  ·  {} connections": "velocidad total  ·  {} conexiones",
+ "Main download queue": "Cola principal",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Nuevo aspecto: el diseño de NetLAB, con tarjetas de cristal, columna lateral y un dock de botones redondos.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Las descargas en curso son tarjetas; las terminadas, filas compactas debajo.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "La columna lateral muestra la velocidad total, un gráfico del último minuto, las descargas de hoy y las colas.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "La barra de menús ya no está: lo demás está en el botón ⋯ (arriba a la derecha) y en el clic derecho.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "Dos temas, NetLAB oscuro y claro: el botón naranja junto a ⋯ los alterna.",
+ "New line icons and a new program icon.": "Iconos nuevos de línea y un icono nuevo del programa."
 }

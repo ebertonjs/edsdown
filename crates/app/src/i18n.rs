@@ -499,6 +499,16 @@ const AR: &[(&str, &str)] = &[
         "More protection against harmful web pages and links.",
         "حماية أكبر من صفحات الويب والروابط الضارة.",
     ),
+    // 0.2 (NetLAB layout)
+    ("total speed", "السرعة الإجمالية"),
+    ("Main download queue", "قائمة التنزيل الرئيسية"),
+    ("A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.", "مظهر جديد: تخطيط NetLAB مع بطاقات زجاجية وعمود جانبي وشريط أزرار دائرية."),
+    ("Downloads in progress are cards; finished ones are compact rows below them.", "التنزيلات الجارية بطاقات، والمكتملة صفوف مضغوطة أسفلها."),
+    ("The side column shows the total speed, a graph of the last minute, today's downloads and the queues.", "يعرض العمود الجانبي السرعة الإجمالية ورسمًا للدقيقة الأخيرة وتنزيلات اليوم وقوائم الانتظار."),
+    ("The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.", "اختفى شريط القوائم: كل شيء آخر في الزر ⋯ (أعلى اليمين) وفي قائمة النقر الأيمن."),
+    ("Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.", "سمتان، NetLAB داكن وفاتح: الزر البرتقالي بجانب ⋯ يبدل بينهما."),
+    ("New line icons and a new program icon.", "أيقونات خطية جديدة وأيقونة جديدة للبرنامج."),
+    ("total speed  ·  {} connections", "السرعة الإجمالية  ·  {} اتصالات"),
 ];
 
 #[cfg(test)]

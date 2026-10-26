@@ -3,8 +3,8 @@
 // Find, Duplicate link, Shutdown countdown, Site Grabber / Download all
 // links, Tip of the day and Refresh download address.
 
-import { Button, LineEdit, SpinBox, CheckBox, ComboBox, ListView, TextEdit, ScrollView, AboutSlint, Slider } from "std-widgets.slint";
-import { Cols, PairRow, LinkRow, QueueRow, DownloadRow, Theme, ThemedWindow, TypeIcon, BigTypeIcon, HeaderCell, Cell, Glyph } from "common.slint";
+import { LineEdit, SpinBox, ComboBox, ListView, TextEdit, ScrollView, Slider } from "std-widgets.slint";
+import { Cols, PairRow, LinkRow, QueueRow, DownloadRow, Theme, ThemedWindow, TypeIcon, BigTypeIcon, HeaderCell, Cell, Glyph, Button, CheckBox, MenuFrame, Glass, Pill, Ico, KindBadge, RoundBtn, Chip, SectionTitle, Bar } from "common.slint";
 
 // ------------------------------------------------------------------ small parts
 
@@ -21,9 +21,10 @@ component Hint inherits Text {
 }
 
 component Section inherits Text {
-    color: Theme.accent;
-    font-size: 12px * Theme.font-scale;
+    color: Theme.muted;
+    font-size: 11px * Theme.font-scale;
     font-weight: 700;
+    letter-spacing: 0.6px;
 }
 
 // a round option button (one of several)
@@ -46,16 +47,16 @@ component Radio inherits Rectangle {
         width: 14px;
         height: 14px;
         border-radius: 7px;
-        border-width: 1px;
-        border-color: root.checked ? Theme.accent : Theme.muted;
-        background: Theme.input-bg;
+        border-width: root.checked ? 0px : 1.5px;
+        border-color: Theme.dark ? #ffffff40 : #1c233340;
+        background: root.checked ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : Theme.btn;
         if root.checked: Rectangle {
-            x: 3.5px;
-            y: 3.5px;
-            width: 7px;
-            height: 7px;
-            border-radius: 3.5px;
-            background: Theme.accent;
+            x: 4.5px;
+            y: 4.5px;
+            width: 5px;
+            height: 5px;
+            border-radius: 2.5px;
+            background: #2a1600;
         }
     }
     lbl := Text {
@@ -73,23 +74,25 @@ component SideTab inherits Rectangle {
     in property <string> text;
     in property <bool> active;
     callback clicked();
-    height: 28px;
-    background: root.active ? Theme.select : ta.has-hover ? Theme.hover : transparent;
-    border-width: root.active ? 1px : 0px;
-    border-color: Theme.select-line;
+    height: 34px;
+    border-radius: 17px;
+    background: root.active ? Theme.chip-on : ta.has-hover ? Theme.btn-hover : transparent;
     ta := TouchArea {
+        mouse-cursor: pointer;
         clicked => {
             root.clicked();
         }
     }
     Text {
-        x: 10px;
+        x: 14px;
+        width: parent.width - 20px;
         height: parent.height;
         text: root.text;
         vertical-alignment: center;
+        overflow: elide;
         font-size: 12px * Theme.font-scale;
-        font-weight: root.active ? 600 : 400;
-        color: Theme.text;
+        font-weight: root.active ? 600 : 500;
+        color: root.active ? Theme.chip-on-text : Theme.text;
     }
 }
 
@@ -98,12 +101,14 @@ component TabBtn inherits Rectangle {
     in property <string> text;
     in property <bool> active;
     callback clicked();
-    height: 26px;
-    width: tl.preferred-width + 24px;
-    background: root.active ? Theme.panel : ta.has-hover ? Theme.hover : Theme.window;
+    height: 30px;
+    width: tl.preferred-width + 28px;
+    border-radius: 15px;
+    background: root.active ? Theme.chip-on : ta.has-hover ? Theme.btn-hover : Theme.btn;
     border-width: 1px;
-    border-color: Theme.line;
+    border-color: root.active ? Theme.chip-on-line : Theme.stroke;
     ta := TouchArea {
+        mouse-cursor: pointer;
         clicked => {
             root.clicked();
         }
@@ -115,8 +120,8 @@ component TabBtn inherits Rectangle {
         horizontal-alignment: center;
         vertical-alignment: center;
         font-size: 12px * Theme.font-scale;
-        font-weight: root.active ? 600 : 400;
-        color: Theme.text;
+        font-weight: 600;
+        color: root.active ? Theme.chip-on-text : Theme.text;
     }
 }
 
@@ -159,6 +164,7 @@ component PairList inherits Rectangle {
             for r[i] in root.rows: Rectangle {
                 height: 21px;
                 background: i == root.current ? Theme.select : rt.has-hover ? Theme.hover : transparent;
+                border-radius: 10px;
                 rt := TouchArea {
                     clicked => {
                         root.current = i;
@@ -907,6 +913,7 @@ export component SchedulerDialog inherits ThemedWindow {
                     for q[i] in root.queues: Rectangle {
                         height: 24px;
                         background: i == root.current ? Theme.select : qa.has-hover ? Theme.hover : transparent;
+                        border-radius: 10px;
                         qa := TouchArea {
                             clicked => {
                                 root.pick-queue(i);
@@ -1625,13 +1632,14 @@ export component TipDialog inherits ThemedWindow {
                 width: 44px;
                 height: 44px;
                 border-radius: 22px;
-                background: @linear-gradient(135deg, #8b5cf6 0%, #2563eb 100%);
+                background: @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%);
                 Glyph {
                     x: 10px;
                     y: 10px;
                     width: 24px;
                     height: 24px;
                     kind: "bulb";
+                    tint: #2a1600;
                 }
             }
             VerticalLayout {
@@ -1796,7 +1804,7 @@ export component SettingsDialog inherits ThemedWindow {
     in property <bool> front;
     always-on-top: root.front;
     title: @tr("EdsDown – Options");
-    preferred-width: 820px;
+    preferred-width: 860px;
     preferred-height: 600px;
 
     in-out property <int> tab: 0;
@@ -1907,13 +1915,14 @@ export component SettingsDialog inherits ThemedWindow {
             vertical-stretch: 1;
             spacing: 8px;
             Rectangle {
-                width: 150px;
+                width: 186px;
                 background: Theme.panel;
                 border-radius: Theme.r-panel;
                 border-width: 1px;
                 border-color: Theme.line;
                 VerticalLayout {
-                    padding: 3px;
+                    padding: 8px;
+                    spacing: 2px;
                     alignment: start;
                     for t[i] in [@tr("General"), @tr("File Types"), @tr("Save To"), @tr("Downloads"), @tr("Connection"), @tr("Proxy / Server"), @tr("Site Logins"), @tr("Sounds"), @tr("Speed Limiter"), @tr("Appearance")]: SideTab {
                         text: t;
@@ -1943,7 +1952,7 @@ export component SettingsDialog inherits ThemedWindow {
                         }
                         ComboBox {
                             width: 200px;
-                            model: [@tr("Light"), @tr("Dark"), @tr("Ocean blue"), @tr("Midnight purple"), @tr("Forest green"), @tr("Black"), @tr("Sunset"), @tr("Teal night"), @tr("Rose"), @tr("NetLAB dark"), @tr("NetLAB light")];
+                            model: [@tr("NetLAB dark"), @tr("NetLAB light")];
                             current-index <=> root.theme;
                         }
                         Rectangle {
@@ -3123,7 +3132,7 @@ component BrowserCard inherits Rectangle {
                     width: 20px;
                     height: 20px;
                     border-radius: 10px;
-                    background: #2e9e4f;
+                    background: Theme.green;
                     border-width: 2px;
                     border-color: Theme.panel;
                     Glyph {
@@ -3243,62 +3252,67 @@ export component AboutDialog inherits ThemedWindow {
     in property <bool> front;
     always-on-top: root.front;
     title: @tr("About EdsDown");
-    preferred-width: 420px;
+    preferred-width: 400px;
     in property <string> version;
     callback open-link(string);
     callback close-window();
     VerticalLayout {
-        padding: 22px;
-        spacing: 10px;
-        HorizontalLayout {
-            alignment: center;
-            Image {
-                source: @image-url("icon.png");
-                width: 72px;
-                height: 72px;
-            }
-        }
-        Text {
-            text: "EdsDown";
-            horizontal-alignment: center;
-            font-size: 20px * Theme.font-scale;
-            font-weight: 700;
-            color: Theme.text;
-        }
-        Text {
-            text: @tr("Version {}", root.version);
-            horizontal-alignment: center;
-            color: Theme.muted;
-        }
-        Text {
-            text: "by ebertonjs";
-            horizontal-alignment: center;
-            font-size: 13px * Theme.font-scale;
-            color: Theme.text;
-        }
-        HorizontalLayout {
-            alignment: center;
-            Button {
-                text: "GitHub";
-                primary: true;
-                clicked => {
-                    root.open-link("https://github.com/ebertonjs/edsdown");
+        padding: 20px;
+        Glass {
+            VerticalLayout {
+                padding: 26px;
+                spacing: 12px;
+                HorizontalLayout {
+                    alignment: center;
+                    Image {
+                        source: @image-url("icon.png");
+                        width: 84px;
+                        height: 84px;
+                    }
                 }
-            }
-        }
-        Rectangle {
-            height: 6px;
-        }
-        AboutSlint {
-            preferred-height: 90px;
-        }
-        HorizontalLayout {
-            alignment: end;
-            Button {
-                text: @tr("Close");
-                primary: true;
-                clicked => {
-                    root.close-window();
+                Text {
+                    text: "EdsDown";
+                    horizontal-alignment: center;
+                    font-size: 24px * Theme.font-scale;
+                    font-weight: 700;
+                    color: Theme.text;
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 8px;
+                    Pill {
+                        state: "ok";
+                        text: @tr("Version {}", root.version);
+                    }
+                    Pill {
+                        icon: "edit";
+                        text: "ebertonjs";
+                    }
+                }
+                Text {
+                    text: @tr("Download manager for Windows, in the look of NetLAB.");
+                    horizontal-alignment: center;
+                    wrap: word-wrap;
+                    font-size: 12px * Theme.font-scale;
+                    color: Theme.text-2;
+                }
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 10px;
+                    padding-top: 6px;
+                    Button {
+                        text: "GitHub";
+                        clicked => {
+                            root.open-link("https://github.com/ebertonjs/edsdown");
+                        }
+                    }
+                    Button {
+                        text: @tr("Close");
+                        primary: true;
+                        clicked => {
+                            root.close-window();
+                        }
+                    }
                 }
             }
         }

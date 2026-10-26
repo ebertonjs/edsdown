@@ -181,5 +181,14 @@
  "The download button on videos in the browser is smaller, and its size can be changed in the add-in's settings.": "O botão de download nos vídeos do navegador está menor, e o tamanho pode ser mudado nas configurações da extensão.",
  "The main window can be maximized to the full screen.": "A janela principal pode ser maximizada para a tela inteira.",
  "Columns of the list can be resized and moved by dragging their titles.": "As colunas da lista podem ser redimensionadas e movidas arrastando seus títulos.",
- "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Os nomes da barra de ferramentas estão em negrito, e o tamanho do botão de vídeo é escolhido na janela da extensão."
+ "Toolbar names are bold, and the size of the video button can be chosen in the add-in's window.": "Os nomes da barra de ferramentas estão em negrito, e o tamanho do botão de vídeo é escolhido na janela da extensão.",
+ "total speed": "velocidade total",
+ "total speed  ·  {} connections": "velocidade total  ·  {} conexões",
+ "Main download queue": "Fila principal",
+ "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.": "Visual novo: o layout do NetLAB, com cards de vidro, coluna lateral e um dock de botões redondos.",
+ "Downloads in progress are cards; finished ones are compact rows below them.": "Downloads em andamento aparecem como cards; os concluídos, em linhas compactas logo abaixo.",
+ "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.": "A coluna lateral mostra a velocidade total, um gráfico do último minuto, os downloads de hoje e as filas.",
+ "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.": "A barra de menus saiu: o resto está no botão ⋯ (canto superior direito) e no clique direito.",
+ "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.": "Dois temas, NetLAB escuro e claro: o botão laranja ao lado do ⋯ alterna entre eles.",
+ "New line icons and a new program icon.": "Ícones novos em linha e um ícone novo para o programa."
 }
