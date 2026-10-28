@@ -1311,6 +1311,7 @@ impl Manager {
                 .map(|e| (e.rec.save_dir.clone(), e.rec.file_name.clone()))
                 .unwrap_or_else(|| (rec.save_dir.clone(), rec.file_name.clone()))
         };
+        check_program(&rec.part_path(), &file_name)?;
         let mut target = save_dir.join(&file_name);
         if target.exists() {
             let name = filename::unique_name(&save_dir, &file_name);
@@ -1826,4 +1827,30 @@ mod name_tests {
         assert_eq!(playlist_stem("2024 plans", "Plans"), "Plans");
         assert_eq!(playlist_stem("07 - Old", "  "), "07 - Old");
     }
+}
+
+/// A program (.exe / .dll / .msi) that does not start like one is almost
+/// always a web page the server sent instead (login, "download will start",
+/// error page). Saving it under the program's name only gives "this app
+/// can't run on your PC" later, so the download fails with a clear reason.
+fn check_program(part: &std::path::Path, file_name: &str) -> anyhow::Result<()> {
+    use std::io::Read;
+    let ext = std::path::Path::new(file_name)
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let magic: &[u8] = match ext.as_str() {
+        "exe" | "dll" | "scr" | "sys" => b"MZ",
+        "msi" => &[0xD0, 0xCF, 0x11, 0xE0],
+        _ => return Ok(()),
+    };
+    let mut head = [0u8; 4];
+    let n = std::fs::File::open(part)
+        .and_then(|mut f| f.read(&mut head))
+        .unwrap_or(0);
+    if n >= magic.len() && head[..magic.len()] != *magic {
+        anyhow::bail!("the server sent a web page instead of the program (sign in or open the link in the browser first)");
+    }
+    Ok(())
 }

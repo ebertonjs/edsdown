@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 — 2026-10-27
+
+Correção: programas (.exe/.msi) baixados pelo EdsDown que o Windows recusava executar.
+- Ao terminar, o arquivo deixa de ser "sparse" e vira um arquivo normal, igual ao que o navegador salva.
+- O arquivo é fechado por completo antes de ser renomeado e marcado como vindo da internet.
+- Se o servidor mandar uma página da web no lugar do programa (login, erro), o download falha com o motivo em vez de salvar um .exe inválido.
+
 ## 0.2.0 — 2026-10-26
 
 Interface reformulada no layout do NetLAB:

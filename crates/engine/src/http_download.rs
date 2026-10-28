@@ -5,7 +5,7 @@
 //! offset of the `.sgpart` file. When a worker finishes it steals half of the
 //! biggest remaining segment, so all connections stay busy until the end.
 
-use crate::fileio::{make_sparse, write_at};
+use crate::fileio::{make_normal, make_sparse, write_at};
 use crate::http::{request, ConnGuard, Progress, Shared};
 use crate::model::RequestHeaders;
 use crate::segments::{self, Segment};
@@ -157,10 +157,18 @@ pub async fn run(
     if let Some(e) = first_error {
         return Err(e);
     }
-    let table = segs.lock().unwrap();
-    if segmented && !segments::all_finished(&table) {
-        bail!("download ended before all parts were received");
+    {
+        let table = segs.lock().unwrap();
+        if segmented && !segments::all_finished(&table) {
+            bail!("download ended before all parts were received");
+        }
     }
+    if segmented {
+        make_normal(&file);
+        file.sync_all().ok();
+    }
+    // the last handle must be gone before the file is renamed / opened
+    drop(file);
     Ok(())
 }
 

@@ -1,16 +1,8 @@
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-escuro-v020.png" alt="EdsDown 0.2.0" width="820"></p>
+## Correção: .exe baixados que não executavam
 
-## Interface nova, no layout do NetLAB
-
-- **Coluna lateral:** velocidade total, gráfico do último minuto, o que está baixando, resumo do dia e as filas.
-- **Cards de vidro** para os downloads em andamento e **linhas compactas** para os concluídos.
-- **Dock flutuante** com botões redondos e **menu ⋯** no lugar da barra de menus.
-- **Pílulas de status** no topo: baixando, limitador, navegador conectado.
-- **Ícones novos** em todo o app e ícone novo do programa.
-- Temas **NetLAB escuro** e **NetLAB claro** (botão laranja no topo). Os temas antigos migram sozinhos.
-
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/main-netlab-claro-v020.png" alt="Tema NetLAB claro" width="640"></p>
-<p align="center"><img src="https://raw.githubusercontent.com/ebertonjs/edsdown/main/docs/images/menu-contexto-v020.png" alt="Clique direito" width="640"></p>
+- Ao terminar, o arquivo deixa de ser **sparse** e vira um arquivo normal, igual ao que o navegador salva — o Windows volta a executar os programas baixados.
+- O arquivo é fechado por completo antes de ser renomeado e marcado como vindo da internet.
+- Se o servidor mandar uma **página da web no lugar do programa** (login, erro), o download falha mostrando o motivo, em vez de salvar um .exe inválido.
 
 ## Instalação
 

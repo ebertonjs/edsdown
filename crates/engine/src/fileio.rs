@@ -50,3 +50,30 @@ pub fn make_sparse(file: &File) {
     #[cfg(not(windows))]
     let _ = file;
 }
+
+/// Once every byte is on the disk the file is turned back into a normal one:
+/// a sparse .exe/.msi is treated differently by Windows (some programs and
+/// the loader / SmartScreen refuse it), while a browser never makes one.
+/// Best effort: failures are ignored.
+pub fn make_normal(file: &File) {
+    #[cfg(windows)]
+    unsafe {
+        use std::os::windows::io::AsRawHandle;
+        use windows_sys::Win32::System::Ioctl::{FILE_SET_SPARSE_BUFFER, FSCTL_SET_SPARSE};
+        use windows_sys::Win32::System::IO::DeviceIoControl;
+        let input = FILE_SET_SPARSE_BUFFER { SetSparse: 0 };
+        let mut returned: u32 = 0;
+        DeviceIoControl(
+            file.as_raw_handle() as _,
+            FSCTL_SET_SPARSE,
+            &input as *const _ as *const _,
+            std::mem::size_of::<FILE_SET_SPARSE_BUFFER>() as u32,
+            std::ptr::null_mut(),
+            0,
+            &mut returned,
+            std::ptr::null_mut(),
+        );
+    }
+    #[cfg(not(windows))]
+    let _ = file;
+}
