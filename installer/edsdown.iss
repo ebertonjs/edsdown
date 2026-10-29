@@ -86,6 +86,12 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExe}"; Tasks: deskto
 Root: HKCU; Subkey: "Software\ebertonjs\EdsDown"; ValueType: string; ValueName: "Installed"; ValueData: "1"; Flags: uninsdeletekey
 ; start in the background (next to the clock) when the user signs in
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "EdsDown"; ValueData: """{app}\{#MyAppExe}"" --background"; Flags: uninsdeletevalue; Tasks: autostart
+; "Open EdsDown" in the browser add-in (edsdown://open). The
+; address given by the browser is never passed to the program.
+Root: HKCU; Subkey: "Software\Classes\edsdown"; ValueType: string; ValueName: ""; ValueData: "URL:EdsDown"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\edsdown"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKCU; Subkey: "Software\Classes\edsdown\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExe},0"
+Root: HKCU; Subkey: "Software\Classes\edsdown\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExe}"" --from-browser"
 
 [Run]
 Filename: "{app}\{#MyAppExe}"; Description: "Open EdsDown now"; Flags: nowait postinstall skipifsilent

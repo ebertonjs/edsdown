@@ -227,7 +227,7 @@ pub(crate) fn open_properties(ui: &Ui, id: u64) {
     d.set_last_try(v.finished_at.or(v.last_try).map(fmt_time).unwrap_or_default().into());
     d.set_result(
         match (&v.error, v.status) {
-            (Some(e), _) => e.clone(),
+            (Some(e), _) => crate::err_text(e),
             (None, Status::Completed) => t("The file was downloaded successfully"),
             _ => String::new(),
         }
@@ -263,7 +263,15 @@ fn save_properties(ui: &Ui) {
     let target = PathBuf::from(d.get_save_to().trim());
     if !target.as_os_str().is_empty() && target != v.save_path {
         let result = if v.status == Status::Completed {
-            ui.ctx.mgr.move_file(id, &target)
+            // on its own thread: a move to another disk is a copy
+            let mgr = ui.ctx.mgr.clone();
+            std::thread::spawn(move || {
+                if let Err(e) = mgr.move_file(id, &target) {
+                    let text = format!("{e:#}");
+                    let _ = slint::invoke_from_event_loop(move || crate::message(&text));
+                }
+            });
+            Ok(())
         } else {
             let dir = target.parent().map(Path::to_path_buf).unwrap_or_default();
             let name = target.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
@@ -349,24 +357,47 @@ pub(crate) fn is_web_address(s: &str) -> bool {
 }
 
 /// What the newest version brings (shown once after an automatic update).
-const WHATS_NEW: [&str; 6] = [
-    "A new look: the layout of NetLAB, with glass cards, a side column and a dock of round buttons.",
-    "Downloads in progress are cards; finished ones are compact rows below them.",
-    "The side column shows the total speed, a graph of the last minute, today's downloads and the queues.",
-    "The menu bar is gone: everything else is in the ⋯ button (top right) and in the right click menu.",
-    "Two themes, NetLAB dark and light: the orange button next to ⋯ switches them.",
-    "New line icons and a new program icon.",
+const WHATS_NEW: [&str; 10] = [
+    "Torrents and magnet links: add them from the ⋯ menu, the dock or the browser add-in.",
+    "Play while downloading: right click a video or audio download > Play while downloading.",
+    "The program has its own small FFmpeg inside: video and sound are joined, MP3 files are made and live streams are saved, with nothing extra to download.",
+    "When the internet drops, downloads wait and continue by themselves when it is back.",
+    "The browser add-in has an on / off switch, a button size from 50% to 200% and six looks to choose from.",
+    "The browser button finds more videos: inside frames, in players that hide them, and streams in several qualities.",
+    "YouTube playlists: \"Download all\" in the add-in's window opens the whole list in the program.",
+    "Arabic: every window now reads from right to left.",
+    "AV1 qualities are offered when a video has them.",
+    "Much less memory and processor work, also with many downloads at once.",
 ];
 
-pub(crate) fn whats_new() {
-    let mut text = tf("EdsDown was updated to version {} by itself.", &[&env!("CARGO_PKG_VERSION")]);
-    text.push_str("\n\n");
-    text.push_str(&t("What's new:"));
-    for line in WHATS_NEW {
-        text.push_str("\n•  ");
-        text.push_str(&t(line));
-    }
-    crate::message(&text);
+thread_local! {
+    static WHATS_NEW_WIN: std::cell::RefCell<Option<WhatsNewDialog>> = const { std::cell::RefCell::new(None) };
+}
+
+/// After an update: what is new, in its own window (right to left in
+/// Arabic).
+pub(crate) fn whats_new(ui: &Ui) {
+    let Ok(d) = WhatsNewDialog::new() else { return };
+    crate::set_theme_of(d.global::<Theme>(), &crate::Look::of(&ui.ctx.mgr.settings()));
+    d.set_rtl(crate::i18n::is_arabic());
+    d.set_heading(tf("EdsDown was updated to version {} by itself.", &[&env!("CARGO_PKG_VERSION")]).into());
+    let items: Vec<SharedString> = WHATS_NEW.iter().map(|l| t(l).into()).collect();
+    d.set_items(ModelRc::new(VecModel::from(items)));
+    d.on_open_link(|u| {
+        if u.starts_with("https://") {
+            let _ = open::that(u.as_str());
+        }
+    });
+    let w = d.as_weak();
+    d.on_close_window(move || {
+        if let Some(d) = w.upgrade() {
+            let _ = d.hide();
+        }
+        // let the window go after this click
+        slint::Timer::single_shot(std::time::Duration::from_millis(1), || WHATS_NEW_WIN.with(|x| *x.borrow_mut() = None));
+    });
+    open_window!(d);
+    WHATS_NEW_WIN.with(|x| *x.borrow_mut() = Some(d));
 }
 
 const TIPS: [&str; 14] = [
@@ -385,6 +416,15 @@ const TIPS: [&str; 14] = [
     "Tasks > Run site grabber collects every image, video or archive of a web site.",
     "Hold Alt while clicking a link in the browser to let the browser download it by itself.",
 ];
+
+/// The tip at start, once no message box is open (they must not mix).
+pub(crate) fn show_tip_when_free(ui: Ui) {
+    if modal_open() {
+        slint::Timer::single_shot(std::time::Duration::from_millis(700), move || show_tip_when_free(ui));
+        return;
+    }
+    show_tip(&ui, false);
+}
 
 pub(crate) fn show_tip(ui: &Ui, from_menu: bool) {
     let Some(d) = ui.tips.upgrade() else { return };
@@ -433,7 +473,7 @@ pub(crate) fn refresh_received(ui: &Ui, id: u64, url: &str, headers: RequestHead
 
 pub(crate) fn export_list(mgr: &Arc<Manager>, kind: &str) {
     let ef2 = kind == "ef2";
-    let Some(path) = rfd::FileDialog::new()
+    let Some(path) = crate::winfx::file_box()
         .set_file_name(if ef2 { "edsdown-list.ef2" } else { "edsdown-links.txt" })
         .add_filter(if ef2 { "Download list" } else { "Text file" }, &[if ef2 { "ef2" } else { "txt" }])
         .save_file()
@@ -464,7 +504,7 @@ pub(crate) fn export_list(mgr: &Arc<Manager>, kind: &str) {
 
 pub(crate) fn import_list(ui: &Ui, kind: &str) {
     let ef2 = kind == "ef2";
-    let Some(path) = rfd::FileDialog::new()
+    let Some(path) = crate::winfx::file_box()
         .add_filter(if ef2 { "Download list" } else { "Text file" }, &[if ef2 { "ef2" } else { "txt" }])
         .pick_file()
     else {
@@ -544,7 +584,7 @@ pub(crate) fn wire(ui: &Ui) {
             let w = d.as_weak();
             d.on_browse(move || {
                 let Some(d) = w.upgrade() else { return };
-                if let Some(dir) = rfd::FileDialog::new().pick_folder() {
+                if let Some(dir) = crate::winfx::file_box().pick_folder() {
                     d.set_folder(dir.display().to_string().into());
                 }
             });
@@ -582,7 +622,7 @@ pub(crate) fn wire(ui: &Ui) {
             d.on_browse(move || {
                 let Some(d) = w.upgrade() else { return };
                 let current = PathBuf::from(d.get_save_to().as_str());
-                let mut dlg = rfd::FileDialog::new();
+                let mut dlg = crate::winfx::file_box();
                 if let Some(dir) = current.parent().filter(|p| p.exists()) {
                     dlg = dlg.set_directory(dir);
                 }
@@ -598,7 +638,7 @@ pub(crate) fn wire(ui: &Ui) {
             let ui = ui.clone();
             d.on_open_file(move || {
                 if let Some(v) = ui.props_id.get().and_then(|id| ui.ctx.mgr.get(id)) {
-                    let _ = open::that(&v.save_path);
+                    crate::open_download(&v.save_path);
                 }
             });
         }

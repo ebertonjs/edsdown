@@ -48,7 +48,10 @@ Interface no layout do **NetLAB**: coluna lateral com a velocidade total e o gr�
 | Multi-conexão | Divide o arquivo em até 32 conexões simultâneas |
 | Retomada | Pausa e continua a qualquer momento, mesmo depois de fechar o programa |
 | Extensão de navegador | Chrome, Edge, Brave, Opera e Firefox |
-| Vídeo e áudio | Vídeos e playlists com escolha de qualidade (yt-dlp + FFmpeg) |
+| Vídeo e áudio | Vídeos e playlists com escolha de qualidade (yt-dlp + FFmpeg próprio) |
+| Torrents | Arquivos .torrent e links magnet (aria2) |
+| Assistir enquanto baixa | Vídeo ou áudio abre no player antes de terminar |
+| Queda de internet | Downloads esperam e continuam sozinhos quando a conexão volta |
 | Categorias | Cada arquivo vai para a pasta do seu tipo |
 | Filas e agendamento | Filas, horário de início e desligar o PC ao terminar |
 | Limite de velocidade | Global ou por download |
@@ -79,6 +82,7 @@ Pelo programa: **Help → Add EdsDown to my browser**. Ou manualmente:
 Requisitos: [Rust](https://rustup.rs) (MSVC) e [Inno Setup](https://jrsoftware.org/isinfo.php) (o script tenta instalar via winget).
 
 Rode `BUILD.bat`. O instalador sai em `dist\EdsDown-Setup.exe`.
+O `ffmpeg.exe` usado no build local fica em `tools\ffmpeg\win64` (gerado por `tools/ffmpeg/build.sh`; no GitHub o CI gera a cada release).
 O primeiro build em release leva vários minutos; evite pastas no Desktop/OneDrive e exclua a pasta do projeto do antivírus.
 
 ## Requisitos
@@ -90,7 +94,7 @@ O primeiro build em release leva vários minutos; evite pastas no Desktop/OneDri
 | Função | Detalhes |
 |---|---|
 | Atualização | Na inicialização e a cada 6 h lê `version.json` do último release deste repositório. A atualização só é instalada se a assinatura Ed25519 bater com a chave pública embutida no programa e o SHA-256 do instalador conferir. |
-| Ferramentas | yt-dlp e FFmpeg (pasta `tools`) são atualizados uma vez por dia a partir dos releases oficiais deles, conferindo o SHA-256 publicado. |
+| Ferramentas | O yt-dlp (pasta `tools`) é atualizado uma vez por dia a partir do release oficial, conferindo o SHA-256 publicado. O FFmpeg é um build próprio e enxuto (`tools/ffmpeg/build.sh`) e o aria2 é uma versão fixa conferida por SHA-256; os dois vêm com o instalador. |
 | API local | Porta `127.0.0.1:9614` usada só pela extensão do navegador. |
 | Cookies | A extensão envia ao programa apenas os cookies e o referer do arquivo baixado, para links que exigem login. Nada sai da máquina. |
 | Área de transferência | Detecta links copiados (desativável nas opções). |

@@ -159,5 +159,118 @@
         "content": "$1"
       }
     }
+  },
+  "help": {
+    "message": "Ajuda"
+  },
+  "lookingQualities": {
+    "message": "Procurando as qualidades do vídeo…"
+  },
+  "openApp": {
+    "message": "Abrir o EdsDown"
+  },
+  "openingApp": {
+    "message": "Abrindo o EdsDown…"
+  },
+  "appDidNotStart": {
+    "message": "O EdsDown não abriu. Abra pelo menu Iniciar e tente de novo."
+  },
+  "aboutSize": {
+    "message": "cerca de $SIZE$",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "mp3After": {
+    "message": "convertido em MP3 depois do download"
+  },
+  "kindAudio": {
+    "message": "Áudio $EXT$",
+    "placeholders": {
+      "ext": {
+        "content": "$1"
+      }
+    }
+  },
+  "kindFile": {
+    "message": "Arquivo $EXT$",
+    "placeholders": {
+      "ext": {
+        "content": "$1"
+      }
+    }
+  },
+  "allPlaylist": {
+    "message": "Baixar todos os vídeos desta playlist"
+  },
+  "allFiles": {
+    "message": "Baixar tudo ($COUNT$ arquivos)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "playlistOpened": {
+    "message": "A playlist abriu no EdsDown ✔"
+  },
+  "helpText": {
+    "message": "Clique no botão para escolher a qualidade. Arraste para mudar o lugar dele no vídeo. O ✕ esconde o botão neste vídeo. O tamanho e o estilo mudam no menu da extensão do EdsDown."
+  },
+  "dashChoose": {
+    "message": "Stream de vídeo (DASH) · escolha a qualidade"
+  },
+  "isOn": {
+    "message": "EdsDown ligado"
+  },
+  "isPaused": {
+    "message": "EdsDown pausado"
+  },
+  "isOnHint": {
+    "message": "Downloads e vídeos deste navegador vão para o EdsDown"
+  },
+  "isPausedHint": {
+    "message": "O navegador baixa sozinho, sem botões nos vídeos"
+  },
+  "onOffTitle": {
+    "message": "Ligar ou desligar a extensão"
+  },
+  "buttonStyle": {
+    "message": "Estilo do botão"
+  },
+  "reset": {
+    "message": "Padrão"
+  },
+  "resetTitle": {
+    "message": "Voltar ao tamanho normal"
+  },
+  "lookNetlab": {
+    "message": "Vidro NetLAB"
+  },
+  "lookBlue": {
+    "message": "Azul"
+  },
+  "lookDark": {
+    "message": "Escuro"
+  },
+  "lookLight": {
+    "message": "Claro"
+  },
+  "lookGreen": {
+    "message": "Verde"
+  },
+  "lookIcon": {
+    "message": "Só o ícone"
+  },
+  "allVideosPlaylist": {
+    "message": "Todos os vídeos desta playlist"
+  },
+  "downloadAll": {
+    "message": "Baixar todos"
+  },
+  "opened": {
+    "message": "Aberto ✔"
   }
 }

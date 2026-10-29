@@ -27,8 +27,9 @@ pub mod selfupdate;
 pub mod store;
 pub mod system;
 pub mod tools;
+pub mod torrent;
 pub mod ytdlp;
 
 pub use config::{AfterDone, Schedule, Settings};
-pub use manager::{default_data_dir, DetailsEdit, Event, Manager};
+pub use manager::{default_data_dir, DetailsEdit, Event, Manager, PreviewSource};
 pub use model::*;

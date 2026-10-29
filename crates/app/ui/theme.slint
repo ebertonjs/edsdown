@@ -14,6 +14,8 @@ export global Theme {
     in-out property <bool> latin: true;
     // a picture behind the main window: how much of it shows through (0..0.8)
     in-out property <float> glass-strength: 0;
+    // Arabic: every window reads from right to left
+    in-out property <bool> rtl: false;
 
     // ---- NetNOC tokens
     out property <color> bg-a: dark ? #15142b : #c9d6e8;

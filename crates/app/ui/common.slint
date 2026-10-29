@@ -104,6 +104,25 @@ export struct SegView {
 }
 
 
+// A row that runs from right to left for Arabic (Theme.rtl), otherwise
+// like HorizontalLayout.
+export component HRow inherits FlexboxLayout {
+    flex-direction: Theme.rtl ? FlexboxLayoutDirection.row-reverse : FlexboxLayoutDirection.row;
+    flex-wrap: no-wrap;
+    alignment: stretch;
+}
+
+// The note under the mouse on a button (filled by the program).
+export global ToolTip {
+    in-out property <string> title;
+    in-out property <string> text;
+    in-out property <length> x;
+    in-out property <length> y;
+    // the mouse is on a button (the note shows after a moment)
+    in-out property <bool> pending;
+    in-out property <bool> shown;
+}
+
 // Applies the light/dark look to the standard widgets of every window.
 export component ThemedWindow inherits Window {
     property <bool> dark: Theme.dark;
@@ -156,6 +175,28 @@ export component Button inherits Rectangle {
     }
 }
 
+// A button of a window's own title bar (windows drawn without the Windows
+// frame): "tray" (hide next to the clock), "min" or "close".
+export component CaptionButton inherits Rectangle {
+    in property <string> kind;
+    callback clicked();
+    out property <bool> hovered: ca.has-hover;
+    width: 44px;
+    background: ca.pressed ? (root.kind == "close" ? #c50f1f : Theme.btn-press) : ca.has-hover ? (root.kind == "close" ? #e81123 : Theme.btn-hover) : transparent;
+    ca := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+    Ico {
+        width: 16px;
+        height: 16px;
+        kind: root.kind == "close" ? "close" : root.kind == "min" ? "minus" : "download";
+        tint: root.kind == "close" && ca.has-hover ? white : Theme.text;
+        weight: 1.6;
+    }
+}
+
 export component CheckBox inherits Rectangle {
     in property <string> text;
     in property <bool> enabled: true;
@@ -174,7 +215,8 @@ export component CheckBox inherits Rectangle {
         }
     }
     box := Rectangle {
-        x: 0;
+        // Arabic: the box on the right
+        x: Theme.rtl ? parent.width - 18px : 0;
         y: (parent.height - 18px) / 2;
         width: 18px;
         height: 18px;
@@ -191,10 +233,11 @@ export component CheckBox inherits Rectangle {
         }
     }
     txt := Text {
-        x: 28px;
+        x: Theme.rtl ? 0 : 28px;
         width: parent.width - 28px;
         height: parent.height;
         text: root.text;
+        horizontal-alignment: Theme.rtl ? TextHorizontalAlignment.right : TextHorizontalAlignment.left;
         vertical-alignment: center;
         color: Theme.text;
         font-size: 12px * Theme.font-scale;
@@ -587,9 +630,9 @@ export component MenuEntry inherits Rectangle {
             root.clicked();
         }
     }
-    HorizontalLayout {
-        padding-left: root.indent ? 28px : 10px;
-        padding-right: 10px;
+    HRow {
+        padding-left: Theme.rtl ? 10px : (root.indent ? 28px : 10px);
+        padding-right: Theme.rtl ? (root.indent ? 28px : 10px) : 10px;
         spacing: 10px;
         opacity: root.enabled ? 1.0 : 0.4;
         Rectangle {
@@ -603,16 +646,20 @@ export component MenuEntry inherits Rectangle {
         Text {
             text: root.text;
             color: Theme.text;
+            horizontal-alignment: Theme.rtl ? TextHorizontalAlignment.right : TextHorizontalAlignment.left;
             vertical-alignment: center;
             font-size: 12px * Theme.font-scale;
             font-weight: root.bold ? 600 : 400;
             overflow: elide;
             horizontal-stretch: 1;
         }
-        if root.checked: Glyph {
-            y: (parent.height - 16px) / 2;
-            kind: "check";
-            tint: Theme.blue;
+        Rectangle {
+            width: root.checked ? 16px : 0px;
+            if root.checked: Glyph {
+                y: (parent.height - 16px) / 2;
+                kind: "check";
+                tint: Theme.blue;
+            }
         }
     }
 }

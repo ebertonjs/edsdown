@@ -6,11 +6,11 @@
 //! biggest remaining segment, so all connections stay busy until the end.
 
 use crate::fileio::{make_normal, make_sparse, write_at};
-use crate::http::{request, ConnGuard, Progress, Shared};
+use crate::http::{http_status_of, is_network_error, reconnect_delay, request, ConnGuard, HttpStatus, NetDrop, Progress, Shared};
 use crate::model::RequestHeaders;
 use crate::segments::{self, Segment};
 use anyhow::{anyhow, bail};
-use reqwest::header::RANGE;
+use reqwest::header::{CONTENT_RANGE, RANGE};
 use reqwest::StatusCode;
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
@@ -215,6 +215,7 @@ impl Worker {
     /// the previous attempt stopped.
     async fn download_segment(&self, idx: usize) -> anyhow::Result<()> {
         let mut attempt = 0u32;
+        let mut net_tries = 0u32;
         loop {
             if self.cancel.is_cancelled() {
                 return Err(Cancelled.into());
@@ -235,10 +236,28 @@ impl Worker {
                     let after = self.segs.lock().unwrap()[idx].pos;
                     if after > before {
                         attempt = 0; // it was making progress, don't give up yet
+                        net_tries = 0;
                     }
-                    attempt += 1;
-                    if attempt > self.job.retries {
-                        return Err(e);
+                    let network = is_network_error(&e);
+                    let status = http_status_of(&e);
+                    if network {
+                        // no internet / reset / stall: wait as long as it takes,
+                        // the part keeps what it already has
+                        net_tries += 1;
+                        self.progress.waiting.store(true, Ordering::Relaxed);
+                    } else {
+                        attempt += 1;
+                        // an expired or removed link won't come back by itself
+                        let gone = matches!(status, Some(401 | 403 | 404 | 410));
+                        let limit = if gone { self.job.retries.min(2) } else { self.job.retries };
+                        if attempt > limit {
+                            if gone {
+                                return Err(e.context(
+                                    "the link has expired or the file was removed - use \"Refresh download address\"",
+                                ));
+                            }
+                            return Err(e);
+                        }
                     }
                     if !self.segmented {
                         // can't resume without ranges: restart from zero
@@ -248,9 +267,15 @@ impl Worker {
                         s.pos = s.start;
                         let _ = self.file.set_len(0);
                     }
-                    let backoff = Duration::from_secs((1u64 << attempt.min(5)).min(30));
+                    let backoff = if network {
+                        reconnect_delay(net_tries)
+                    } else {
+                        Duration::from_secs((1u64 << attempt.min(5)).min(30))
+                    };
                     tokio::select! {
                         _ = tokio::time::sleep(backoff) => {},
+                        // another part got through: the internet is back
+                        _ = self.progress.back_online.notified() => {},
                         _ = self.cancel.cancelled() => return Err(Cancelled.into()),
                     }
                 }
@@ -289,6 +314,8 @@ impl Worker {
         }
         res?;
         self.progress.bytes.fetch_add(n, Ordering::Relaxed);
+        // data arrived: parts waiting for the internet try again now
+        self.progress.online();
         data.clear();
         *buf = data; // keep the allocation for the next round
         Ok(at + n)
@@ -315,10 +342,36 @@ impl Worker {
         let status = resp.status();
         if self.segmented {
             if status != StatusCode::PARTIAL_CONTENT {
+                if status.is_client_error() || status.is_server_error() {
+                    return Err(HttpStatus(status.as_u16()).into());
+                }
                 bail!("server did not accept the byte range (HTTP {})", status.as_u16());
             }
         } else if !status.is_success() {
-            bail!("server answered HTTP {}", status.as_u16());
+            return Err(HttpStatus(status.as_u16()).into());
+        }
+        // the part the server really sent: some servers / CDNs answer 206
+        // with another range than the one asked for (aligned blocks, or the
+        // file from 0). Written at our offset that silently corrupts the
+        // file (programs then "can't run on this PC"), so it is checked.
+        let mut skip: u64 = 0;
+        if self.segmented {
+            let range = resp.headers().get(CONTENT_RANGE).and_then(|v| v.to_str().ok()).and_then(parse_content_range);
+            match range {
+                Some((start, _, total)) => {
+                    if let (Some(t), Some(want)) = (total, self.job.total_size) {
+                        if t != want {
+                            bail!("the file on the server changed during the download ({want} -> {t} bytes): start it again");
+                        }
+                    }
+                    if start > pos {
+                        bail!("the server sent the wrong part of the file (asked from byte {pos}, got {start})");
+                    }
+                    // started earlier than asked: the extra bytes are skipped
+                    skip = pos - start;
+                }
+                None => bail!("the server did not say which part of the file it sent"),
+            }
         }
         let _guard = ConnGuard::new(&self.progress);
 
@@ -330,9 +383,17 @@ impl Worker {
             loop {
                 let chunk = match tokio::time::timeout(STALL_TIMEOUT, resp.chunk()).await {
                     Ok(r) => r?,
-                    Err(_) => bail!("connection timed out"),
+                    Err(_) => return Err(NetDrop("connection timed out").into()),
                 };
-                let Some(chunk) = chunk else { return Ok(false) };
+                let Some(mut chunk) = chunk else { return Ok(false) };
+                if skip > 0 {
+                    let n = (chunk.len() as u64).min(skip);
+                    skip -= n;
+                    let _ = chunk.split_to(n as usize);
+                    if chunk.is_empty() {
+                        continue;
+                    }
+                }
                 self.shared.limiter.acquire(chunk.len()).await;
                 self.job.limiter.acquire(chunk.len()).await;
                 // take the bytes now (under the lock, no disk work): a split
@@ -379,7 +440,36 @@ impl Worker {
         if s.pos >= s.end.min(req_end) {
             Ok(())
         } else {
-            bail!("connection closed early")
+            Err(NetDrop("connection closed early").into())
         }
+    }
+}
+
+/// "bytes 100-199/1000" -> (100, 199, Some(1000)); "bytes 100-199/*" -> total None.
+pub fn parse_content_range(v: &str) -> Option<(u64, u64, Option<u64>)> {
+    let v = v.trim();
+    let rest = v.strip_prefix("bytes").or_else(|| v.strip_prefix("Bytes"))?.trim_start();
+    let (range, total) = rest.split_once('/')?;
+    let (a, b) = range.trim().split_once('-')?;
+    let (a, b) = (a.trim().parse::<u64>().ok()?, b.trim().parse::<u64>().ok()?);
+    if b < a {
+        return None;
+    }
+    let total = match total.trim() {
+        "*" => None,
+        t => Some(t.parse::<u64>().ok()?),
+    };
+    Some((a, b, total))
+}
+
+#[cfg(test)]
+mod range_tests {
+    use super::parse_content_range;
+    #[test]
+    fn content_range() {
+        assert_eq!(parse_content_range("bytes 100-199/1000"), Some((100, 199, Some(1000))));
+        assert_eq!(parse_content_range("bytes 0-0/*"), Some((0, 0, None)));
+        assert_eq!(parse_content_range("bytes */1000"), None);
+        assert_eq!(parse_content_range("items 1-2/3"), None);
     }
 }

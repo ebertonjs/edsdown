@@ -12,6 +12,8 @@
   label { display: flex; align-items: center; gap: 10px; padding: 12px 0; color: var(--text-2); }
   label + label, .test + label { border-top: 1px solid var(--stroke); }
   input[type=number] { width: 100px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  output { min-width: 40px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }
   .test { font-size: 12px; margin: -6px 0 8px; min-height: 18px; }
   .test.ok { color: var(--ok); } .test.err { color: var(--err); }
   .saved { color: var(--ok); font-size: 12px; height: 16px; margin: 10px 4px 0; }
@@ -25,10 +27,17 @@
     <label><span data-i18n="appPort"></span> <input type="number" id="port" min="1024" max="65535"> <button class="btn ghost" id="test" data-i18n="testConnection"></button></label>
     <div class="test" id="testResult"></div>
     <label><span data-i18n="bubbleSizeLabel"></span>
-      <select id="bubbleSize">
-        <option value="small" data-i18n="sizeSmall"></option>
-        <option value="normal" data-i18n="sizeNormal"></option>
-        <option value="large" data-i18n="sizeLarge"></option>
+      <input type="range" id="bubbleScale" min="50" max="200" step="5" value="100">
+      <output id="bubbleScaleText">100%</output>
+    </label>
+    <label><span data-i18n="buttonStyle"></span>
+      <select id="bubbleStyle">
+        <option value="netlab" data-i18n="lookNetlab"></option>
+        <option value="blue" data-i18n="lookBlue"></option>
+        <option value="dark" data-i18n="lookDark"></option>
+        <option value="light" data-i18n="lookLight"></option>
+        <option value="green" data-i18n="lookGreen"></option>
+        <option value="icon" data-i18n="lookIcon"></option>
       </select>
     </label>
   </div>

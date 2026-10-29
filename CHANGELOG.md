@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.1 — 2026-10-28
+
+Novidades:
+- Torrents e links magnet (aria2): pelo menu ⋯, pelo dock ou pela extensão.
+- Assistir enquanto baixa: clique direito num vídeo/áudio → Play while downloading.
+- FFmpeg próprio e pequeno embutido (juntar vídeo + áudio, MP3, lives em MP4), sem baixar nada à parte.
+- Queda de internet: os downloads esperam e continuam sozinhos quando a conexão volta.
+- Árabe da direita para a esquerda em todas as janelas.
+- Qualidades AV1 quando o vídeo tem.
+- Janelas novas: confirmação e "O que há de novo".
+
+Correção (programas que "não podem ser executados neste PC"):
+- Cada parte confere o trecho que o servidor realmente mandou (Content-Range). Servidores/CDNs que respondem outro trecho deixavam o arquivo embaralhado sem erro; agora o trecho é ajustado ou o download para com o motivo.
+- Se o arquivo mudar no servidor no meio do download, ele para em vez de misturar versões.
+- Ao terminar, .exe/.dll é conferido (cabeçalho PE e seções dentro do arquivo, código não vazio) e todo programa é regravado como arquivo normal, do começo ao fim, como o navegador faz.
+
+Extensão:
+- Chave liga/desliga, tamanho do botão de 50% a 200% e seis visuais (NetLAB é o padrão).
+- Acha mais vídeos: dentro de frames, em players que escondem o vídeo e streams DASH.
+- Playlists do YouTube: "Baixar todos" abre a lista inteira no programa.
+- Arquivos .torrent baixados no navegador: o navegador salva o arquivo (sites de torrent atrás do Cloudflare recusam outro programa com HTTP 403) e ele abre na janela de torrent do EdsDown.
+- Links magnet vão direto para o EdsDown; "Abrir EdsDown" quando o programa está fechado.
+- Mantido: cookies só quando o programa pede (login), tradução pt-BR e o visual NetLAB.
+
 ## 0.2.1 — 2026-10-27
 
 Correção: programas (.exe/.msi) baixados pelo EdsDown que o Windows recusava executar.

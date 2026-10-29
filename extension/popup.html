@@ -15,10 +15,22 @@
   .row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); }
   .row + .row { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--stroke); }
   .row label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-  .seg { display: flex; margin-left: auto; flex: none; background: var(--btn); border-radius: var(--r-pill); padding: 3px; }
-  .seg button { background: transparent; color: var(--text-2); border-radius: var(--r-pill); padding: 3px 11px; font-size: 12px; font-weight: 600; white-space: nowrap; }
-  .seg button:hover { color: var(--text); }
-  .seg button.on { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--accent-text); }
+  /* the on / off switch */
+  .switch b { display: block; font-size: 13.5px; color: var(--text); }
+  .switch small { display: block; color: var(--muted); font-size: 11.5px; }
+  .toggle { margin-left: auto; position: relative; width: 42px; height: 24px; flex: none; cursor: pointer; }
+  .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .toggle .knob { position: absolute; inset: 0; background: var(--btn-hover); border: 1px solid var(--stroke); border-radius: 12px; transition: background .15s; }
+  .toggle .knob::before { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .toggle input:checked + .knob { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; }
+  .toggle input:checked + .knob::before { transform: translateX(18px); }
+  .toggle input:focus-visible + .knob { outline: 2px solid var(--blue); outline-offset: 2px; }
+  body.off .dim { opacity: .45; pointer-events: none; }
+  .row input[type=range] { flex: 1; accent-color: var(--accent); min-width: 0; }
+  .row output { min-width: 38px; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .row select { margin-left: auto; }
+  .link { background: none; color: var(--accent); padding: 0 2px; font-size: 12px; font-weight: 600; }
+  .link:hover { text-decoration: underline; }
   .add { display: flex; gap: 8px; }
   .add input { flex: 1; min-width: 0; }
   .note { font-size: 12px; min-height: 16px; margin: 6px 2px 0; }
@@ -30,6 +42,7 @@
   .media div { flex: 1; min-width: 0; font-weight: 600; }
   .media small { display: block; font-weight: 400; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .empty { color: var(--muted); font-size: 13px; padding: 4px 2px; }
+  .open { display: inline-block; margin-top: 10px; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -40,16 +53,37 @@
     <button class="gear" id="settings" data-i18n-title="settings">⚙</button>
   </header>
   <div class="glass card">
-    <div class="row">
+    <div class="row switch">
+      <div>
+        <b id="onText"></b>
+        <small id="onHint"></small>
+      </div>
+      <label class="toggle" data-i18n-title="onOffTitle">
+        <input type="checkbox" id="enabled" checked>
+        <span class="knob"></span>
+      </label>
+    </div>
+    <div class="row dim">
       <label><input type="checkbox" id="intercept"> <span data-i18n="captureDownloads"></span></label>
     </div>
+  </div>
+  <div class="glass card dim">
     <div class="row">
       <span data-i18n="buttonSize"></span>
-      <div class="seg" id="sizes">
-        <button data-size="small" data-i18n="sizeSmall"></button>
-        <button data-size="normal" data-i18n="sizeNormal"></button>
-        <button data-size="large" data-i18n="sizeLarge"></button>
-      </div>
+      <input type="range" id="scale" min="50" max="200" step="5" value="100">
+      <output id="scaleText">100%</output>
+      <button class="link" id="scaleReset" data-i18n="reset" data-i18n-title="resetTitle"></button>
+    </div>
+    <div class="row">
+      <span data-i18n="buttonStyle"></span>
+      <select id="look">
+        <option value="netlab" data-i18n="lookNetlab"></option>
+        <option value="blue" data-i18n="lookBlue"></option>
+        <option value="dark" data-i18n="lookDark"></option>
+        <option value="light" data-i18n="lookLight"></option>
+        <option value="green" data-i18n="lookGreen"></option>
+        <option value="icon" data-i18n="lookIcon"></option>
+      </select>
     </div>
   </div>
   <div class="glass card">
@@ -59,7 +93,7 @@
     </form>
     <div class="note" id="note"></div>
   </div>
-  <section class="glass card">
+  <section class="glass card dim">
     <h3><span class="label" data-i18n="mediaOnPage"></span><button class="btn" id="grab" data-i18n="grabVideo"></button></h3>
     <div id="media"><div class="empty" data-i18n="nothingYet"></div></div>
   </section>

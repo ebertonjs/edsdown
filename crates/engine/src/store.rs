@@ -21,14 +21,13 @@ pub fn load_downloads(path: &Path) -> Vec<DownloadRecord> {
         .unwrap_or_default()
 }
 
-/// The list is written often while files download: compact JSON (a long
-/// history in pretty JSON was several times bigger).
+/// The download list: saved often, so without spaces (smaller, faster).
 pub fn save_downloads(path: &Path, list: &[DownloadRecord]) -> anyhow::Result<()> {
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
     }
     let tmp = path.with_extension("json.tmp");
-    std::fs::write(&tmp, serde_json::to_vec(list)?)?;
+    std::fs::write(&tmp, serde_json::to_vec(&list)?)?;
     std::fs::rename(&tmp, path)?;
     Ok(())
 }

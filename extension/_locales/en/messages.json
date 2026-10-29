@@ -159,5 +159,118 @@
         "content": "$1"
       }
     }
+  },
+  "help": {
+    "message": "Help"
+  },
+  "lookingQualities": {
+    "message": "Looking for the video qualities…"
+  },
+  "openApp": {
+    "message": "Open EdsDown"
+  },
+  "openingApp": {
+    "message": "Opening EdsDown…"
+  },
+  "appDidNotStart": {
+    "message": "EdsDown did not start. Open it from the Start menu and try again."
+  },
+  "aboutSize": {
+    "message": "about $SIZE$",
+    "placeholders": {
+      "size": {
+        "content": "$1"
+      }
+    }
+  },
+  "mp3After": {
+    "message": "made into MP3 after the download"
+  },
+  "kindAudio": {
+    "message": "$EXT$ audio",
+    "placeholders": {
+      "ext": {
+        "content": "$1"
+      }
+    }
+  },
+  "kindFile": {
+    "message": "$EXT$ file",
+    "placeholders": {
+      "ext": {
+        "content": "$1"
+      }
+    }
+  },
+  "allPlaylist": {
+    "message": "Download all videos of this playlist"
+  },
+  "allFiles": {
+    "message": "Download all ($COUNT$ files)",
+    "placeholders": {
+      "count": {
+        "content": "$1"
+      }
+    }
+  },
+  "playlistOpened": {
+    "message": "The playlist is open in EdsDown ✔"
+  },
+  "helpText": {
+    "message": "Click the button to choose a quality. Drag it to move it on the video. ✕ hides it for this video. Its size and look can be changed in the EdsDown add-in menu."
+  },
+  "dashChoose": {
+    "message": "Video stream (DASH) · choose a quality"
+  },
+  "isOn": {
+    "message": "EdsDown is on"
+  },
+  "isPaused": {
+    "message": "EdsDown is paused"
+  },
+  "isOnHint": {
+    "message": "Downloads and videos of this browser go to EdsDown"
+  },
+  "isPausedHint": {
+    "message": "The browser keeps its downloads, no buttons on videos"
+  },
+  "onOffTitle": {
+    "message": "Turn the add-in on or off"
+  },
+  "buttonStyle": {
+    "message": "Button style"
+  },
+  "reset": {
+    "message": "Reset"
+  },
+  "resetTitle": {
+    "message": "Back to normal size"
+  },
+  "lookNetlab": {
+    "message": "NetLAB glass"
+  },
+  "lookBlue": {
+    "message": "Blue"
+  },
+  "lookDark": {
+    "message": "Dark"
+  },
+  "lookLight": {
+    "message": "Light"
+  },
+  "lookGreen": {
+    "message": "Green"
+  },
+  "lookIcon": {
+    "message": "Icon only"
+  },
+  "allVideosPlaylist": {
+    "message": "All videos of this playlist"
+  },
+  "downloadAll": {
+    "message": "Download all"
+  },
+  "opened": {
+    "message": "Opened ✔"
   }
 }

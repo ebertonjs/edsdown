@@ -7,3 +7,4 @@ dist/
 *.pem
 *.pfx
 UPDATE_SIGNING_KEY*
+tools/ffmpeg/win64/

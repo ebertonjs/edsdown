@@ -94,6 +94,9 @@ struct ResolveRequest {
     /// an earlier look-up answered `needLogin`: use the cookies at once
     #[serde(default)]
     login: bool,
+    /// a stream found on a page: that page
+    #[serde(default)]
+    referer: Option<String>,
 }
 
 /// "Download all links with EdsDown" from the browser's right click menu.
@@ -120,6 +123,8 @@ pub enum ApiEvent {
     Add(AddRequest),
     Links(LinksRequest),
     Show,
+    /// "Download all" on a playlist page: open the playlist window with it
+    Playlist(String),
 }
 
 /// What the extension needs to know from Options (file types to take,
@@ -177,6 +182,15 @@ pub fn serve(
         .expect("failed to start API thread");
 }
 
+/// A .torrent file the browser just saved (it opens in the torrent window,
+/// which asks before anything starts).
+fn is_torrent_file(u: &str) -> bool {
+    edsdown_engine::torrent::is_torrent_source(u)
+        && !edsdown_engine::torrent::is_magnet(u)
+        && std::path::Path::new(u).is_absolute()
+        && std::fs::metadata(u).map(|m| m.is_file() && m.len() < 64 << 20).unwrap_or(false)
+}
+
 fn is_http(u: &str) -> bool {
     u.starts_with("http://") || u.starts_with("https://")
 }
@@ -220,7 +234,7 @@ fn origin_allowed(origin: Option<&str>) -> bool {
 
 /// Video look-ups running now (each one is a yt-dlp process).
 static RESOLVING: AtomicUsize = AtomicUsize::new(0);
-const MAX_RESOLVING: usize = 4;
+const MAX_RESOLVING: usize = 3;
 
 fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(ApiEvent)) {
     // never answer CORS preflights: web pages must not reach this API
@@ -281,6 +295,19 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
             on_event(ApiEvent::Show);
             reply(req, 200, r#"{"ok":true,"app":"EdsDown"}"#)
         }
+        (Method::Post, "/playlist") => {
+            let mut body = String::new();
+            if req.as_reader().take(1 << 16).read_to_string(&mut body).is_err() {
+                return reply(req, 400, r#"{"error":"bad body"}"#);
+            }
+            match serde_json::from_str::<serde_json::Value>(&body).ok().and_then(|v| v["url"].as_str().map(String::from)) {
+                Some(url) if is_http(&url) => {
+                    on_event(ApiEvent::Playlist(url));
+                    reply(req, 200, r#"{"ok":true}"#)
+                }
+                _ => reply(req, 400, r#"{"error":"invalid request"}"#),
+            }
+        }
         (Method::Post, "/add") => {
             let mut body = String::new();
             if req.as_reader().take(1 << 20).read_to_string(&mut body).is_err() {
@@ -288,7 +315,8 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
             }
             match serde_json::from_str::<AddRequest>(&body) {
                 Ok(add)
-                    if is_http(&add.url) && add.audio_url.as_deref().map(is_http).unwrap_or(true) =>
+                    if (is_http(&add.url) || edsdown_engine::torrent::is_magnet(&add.url) || is_torrent_file(&add.url))
+                        && add.audio_url.as_deref().map(is_http).unwrap_or(true) =>
                 {
                     on_event(ApiEvent::Add(add));
                     reply(req, 200, r#"{"ok":true}"#)
@@ -324,14 +352,17 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
                 // the extension sends the site's cookies only after the app
                 // said the site wants a login ("needLogin")
                 let cookies = (!r.cookie_list.is_empty()).then_some(r.cookie_list.as_slice());
-                let body = match edsdown_engine::ytdlp::resolve_with(&r.url, cookies, r.login) {
+                let referer = r.referer.as_deref().filter(|u| is_http(u));
+                let body = match edsdown_engine::ytdlp::resolve_with(&r.url, cookies, referer, r.login) {
                     Ok(info) => serde_json::json!({
                         "ok": true, "title": info.title, "site": info.site, "options": info.options
                     }),
                     Err(e) => {
                         let error = format!("{e:#}");
+                        // no cookies came with this call and the site wants a
+                        // login: the add-in asks again, this time with them
                         let need = cookies.is_none() && edsdown_engine::ytdlp::needs_login(&error);
-                        serde_json::json!({ "ok": false, "error": error, "needLogin": need })
+                        serde_json::json!({ "ok": false, "error": crate::err_text(&error), "needLogin": need })
                     }
                 };
                 reply(req, 200, &body.to_string());
