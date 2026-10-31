@@ -493,5 +493,12 @@
  "Audio MP3": "Audio MP3",
  "Hide next to the clock": "Ocultar junto al reloj",
  "What's new in EdsDown": "Novedades de EdsDown",
- "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Algunas páginas crean sus enlaces solo en el navegador (con scripts o como texto). Para ellas: abre la página en el navegador, haz clic derecho y elige \\\"Download all links with EdsDown\\\": se recoge cada enlace que ves."
+ "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Algunas páginas crean sus enlaces solo en el navegador (con scripts o como texto). Para ellas: abre la página en el navegador, haz clic derecho y elige \\\"Download all links with EdsDown\\\": se recoge cada enlace que ves.",
+ "Ask before removing downloads from the list": "Preguntar antes de quitar descargas de la lista",
+ "Delete the downloaded files from the disk too (be careful)": "Borrar también los archivos descargados del disco (cuidado)",
+ "Don't show this question again": "No volver a mostrar esta pregunta",
+ "Download the subtitles of videos too, in these languages:": "Descargar también los subtítulos de los vídeos, en estos idiomas:",
+ "Quality of MP3 files": "Calidad de los archivos MP3",
+ "Next to the clock": "Junto al reloj",
+ "Draw the windows with the graphics card (uses more memory; after a restart)": "Dibujar las ventanas con la tarjeta gráfica (más memoria; tras reiniciar)"
 }

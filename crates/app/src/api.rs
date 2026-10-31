@@ -19,10 +19,6 @@ static FOR_BROWSER: std::sync::Mutex<Vec<(String, std::time::Instant)>> = std::s
 /// When the browser add-in last talked to us (seconds since 1970; 0 = never).
 static LAST_SEEN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
-fn now_secs() -> u64 {
-    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
-}
-
 /// The add-in asked something in the last few minutes (it pings every
 /// minute while the browser is open).
 pub fn browser_connected() -> bool {
@@ -125,6 +121,36 @@ pub enum ApiEvent {
     Show,
     /// "Download all" on a playlist page: open the playlist window with it
     Playlist(String),
+    /// a .torrent file / magnet link opened from Windows (double click):
+    /// the torrent window with it
+    OpenTorrent(String),
+    /// the setup of a new version wants the program closed (it saves
+    /// everything first; the downloads go on after the update)
+    Quit,
+}
+
+/// Ask the copy of the program that is open to close (for the setup).
+/// true = it said it will.
+pub fn notify_quit(port: u16) -> bool {
+    let Ok(mut s) = TcpStream::connect_timeout(&([127, 0, 0, 1], port).into(), Duration::from_millis(800)) else {
+        return false;
+    };
+    let _ = s.set_read_timeout(Some(Duration::from_secs(2)));
+    let req = "POST /quit HTTP/1.1\r\nHost: 127.0.0.1\r\nX-EdsDown: 1\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    if s.write_all(req.as_bytes()).is_err() {
+        return false;
+    }
+    let mut buf = String::new();
+    let _ = s.read_to_string(&mut buf);
+    buf.contains("EdsDown")
+}
+
+/// What Windows may hand over to open: a magnet link or a .torrent file
+/// that is there. Anything else is refused.
+pub fn torrent_source_ok(s: &str) -> bool {
+    let s = s.trim();
+    edsdown_engine::torrent::is_magnet(s)
+        || (s.to_ascii_lowercase().ends_with(".torrent") && std::path::Path::new(s).is_file())
 }
 
 /// What the extension needs to know from Options (file types to take,
@@ -138,6 +164,7 @@ pub fn config_json(s: &edsdown_engine::Settings) -> String {
         "skipAddresses": s.skip_addresses,
         "skipKey": s.skip_key,
         "forceKey": s.force_key,
+        "mp3Kbps": s.mp3_kbps,
         "panel": {
             "enabled": s.panel_enabled,
             "skipSites": split(&s.panel_skip_sites),
@@ -152,19 +179,72 @@ pub fn bind(port: u16) -> Result<Server, String> {
     Server::http(("127.0.0.1", port)).map_err(|e| e.to_string())
 }
 
-/// Another EdsDown is already running on this port: ask it to show itself.
-pub fn notify_existing(port: u16) -> bool {
+/// Another EdsDown is already running: hand it the torrent to open.
+pub fn notify_open_torrent(port: u16, source: &str) -> bool {
     let Ok(mut s) = TcpStream::connect_timeout(&([127, 0, 0, 1], port).into(), Duration::from_millis(800)) else {
         return false;
     };
     let _ = s.set_read_timeout(Some(Duration::from_secs(2)));
-    let req = "POST /show HTTP/1.1\r\nHost: 127.0.0.1\r\nX-EdsDown: 1\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    let body = serde_json::json!({ "source": source }).to_string();
+    let req = format!(
+        "POST /open-torrent HTTP/1.1\r\nHost: 127.0.0.1\r\nX-EdsDown: 1\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    );
     if s.write_all(req.as_bytes()).is_err() {
         return false;
     }
     let mut buf = String::new();
     let _ = s.read_to_string(&mut buf);
-    buf.contains("EdsDown") || buf.starts_with("HTTP/1.1 200")
+    buf.starts_with("HTTP/1.1 200")
+}
+
+/// Another EdsDown is already running on this port: ask it to show itself.
+/// Seconds (since 1970) when the window side of the program last moved; the
+/// main timer sets it a few times a second. Far behind = the windows hang.
+pub static UI_ALIVE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+/// a message box / file picker of ours is open (the windows wait for it)
+pub static UI_WAITS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+pub fn now_secs() -> u64 {
+    std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
+
+fn ui_hangs() -> bool {
+    use std::sync::atomic::Ordering;
+    let last = UI_ALIVE.load(Ordering::Relaxed);
+    last != 0 && !UI_WAITS.load(Ordering::Relaxed) && now_secs().saturating_sub(last) > 30
+}
+
+/// What the copy of the program that is open already said.
+#[derive(Debug, PartialEq)]
+pub enum Existing {
+    /// nobody (or something else) answers on the port
+    None,
+    /// it brings its window to the front
+    Shown,
+    /// it answers, but its windows hang (this is its process id)
+    Hangs(u32),
+}
+
+pub fn notify_existing(port: u16) -> Existing {
+    let Ok(mut s) = TcpStream::connect_timeout(&([127, 0, 0, 1], port).into(), Duration::from_millis(800)) else {
+        return Existing::None;
+    };
+    let _ = s.set_read_timeout(Some(Duration::from_secs(2)));
+    let req = "POST /show HTTP/1.1\r\nHost: 127.0.0.1\r\nX-EdsDown: 1\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    if s.write_all(req.as_bytes()).is_err() {
+        return Existing::None;
+    }
+    let mut buf = String::new();
+    let _ = s.read_to_string(&mut buf);
+    if !(buf.contains("EdsDown") || buf.starts_with("HTTP/1.1 200")) {
+        return Existing::None;
+    }
+    let body = buf.split("\r\n\r\n").nth(1).unwrap_or_default();
+    match serde_json::from_str::<serde_json::Value>(body) {
+        Ok(v) if v["hangs"].as_bool() == Some(true) => Existing::Hangs(v["pid"].as_u64().unwrap_or(0) as u32),
+        _ => Existing::Shown,
+    }
 }
 
 pub fn serve(
@@ -291,7 +371,28 @@ fn handle(mut req: Request, config: &impl Fn() -> String, on_event: &impl Fn(Api
             let keep = serde_json::from_str::<BrowserQuery>(&body).map(|q| take_for_browser(&q.urls)).unwrap_or(false);
             reply(req, 200, if keep { r#"{"browser":true}"# } else { r#"{"browser":false}"# })
         }
+        (Method::Post, "/open-torrent") => {
+            let mut body = String::new();
+            if req.as_reader().take(1 << 16).read_to_string(&mut body).is_err() {
+                return reply(req, 400, r#"{"error":"bad body"}"#);
+            }
+            match serde_json::from_str::<serde_json::Value>(&body).ok().and_then(|v| v["source"].as_str().map(String::from)) {
+                Some(s) if torrent_source_ok(&s) => {
+                    on_event(ApiEvent::OpenTorrent(s.trim().to_string()));
+                    reply(req, 200, r#"{"ok":true}"#)
+                }
+                _ => reply(req, 400, r#"{"error":"invalid request"}"#),
+            }
+        }
+        (Method::Post, "/quit") => {
+            on_event(ApiEvent::Quit);
+            reply(req, 200, r#"{"ok":true,"app":"EdsDown"}"#)
+        }
         (Method::Post, "/show") => {
+            if ui_hangs() {
+                let body = format!(r#"{{"ok":true,"app":"EdsDown","hangs":true,"pid":{}}}"#, std::process::id());
+                return reply(req, 200, &body);
+            }
             on_event(ApiEvent::Show);
             reply(req, 200, r#"{"ok":true,"app":"EdsDown"}"#)
         }

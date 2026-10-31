@@ -493,5 +493,12 @@
  "Audio MP3": "Ses MP3",
  "Hide next to the clock": "Saatin yanına gizle",
  "What's new in EdsDown": "EdsDown’da yenilikler",
- "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Bazı sayfalar bağlantılarını yalnızca tarayıcıda oluşturur (betiklerle ya da düz metin olarak). Bunlar için: sayfayı tarayıcıda açın, sağ tıklayın ve \\\"Download all links with EdsDown\\\" seçin: orada gördüğünüz her bağlantı toplanır."
+ "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Bazı sayfalar bağlantılarını yalnızca tarayıcıda oluşturur (betiklerle ya da düz metin olarak). Bunlar için: sayfayı tarayıcıda açın, sağ tıklayın ve \\\"Download all links with EdsDown\\\" seçin: orada gördüğünüz her bağlantı toplanır.",
+ "Ask before removing downloads from the list": "İndirmeleri listeden kaldırmadan önce sor",
+ "Delete the downloaded files from the disk too (be careful)": "İndirilen dosyaları diskten de sil (dikkat)",
+ "Don't show this question again": "Bu soruyu bir daha gösterme",
+ "Download the subtitles of videos too, in these languages:": "Videoların altyazılarını da bu dillerde indir:",
+ "Quality of MP3 files": "MP3 dosyalarının kalitesi",
+ "Next to the clock": "Saatin yanına",
+ "Draw the windows with the graphics card (uses more memory; after a restart)": "Pencereleri ekran kartıyla çiz (daha çok bellek; yeniden başlatınca)"
 }

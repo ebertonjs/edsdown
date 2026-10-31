@@ -177,6 +177,23 @@ pub(crate) struct RefreshKey {
     browser: bool,
 }
 
+/// One line in a small log next to the downloads list (data\events.log):
+/// when the program started, closed, updated itself, could not start...
+/// what someone asking for help can send.
+pub(crate) fn note(what: &str) {
+    let dir = default_data_dir();
+    let _ = std::fs::create_dir_all(&dir);
+    let path = dir.join("events.log");
+    if std::fs::metadata(&path).map(|m| m.len() > 128 * 1024).unwrap_or(false) {
+        let _ = std::fs::rename(&path, path.with_extension("old.log"));
+    }
+    let line = format!("{} {} {}\n", chrono::Local::now().format("%Y-%m-%d %H:%M:%S"), env!("CARGO_PKG_VERSION"), what);
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(&path) {
+        let _ = f.write_all(line.as_bytes());
+    }
+}
+
 /// A crash leaves a note (what and where, no personal data) in crash.log in
 /// the program's data folder, so it can be found and fixed.
 fn install_crash_log() {
@@ -210,12 +227,82 @@ fn install_crash_log() {
     }));
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     install_crash_log();
+    let data_dir = default_data_dir();
+    let gpu = Settings::load(&data_dir.join("settings.json")).gpu_drawing;
+    // The windows are drawn by the processor unless the user chose the
+    // graphics card: drawing with it needs a working OpenGL driver (without
+    // one the program closed by itself), takes hundreds of MB on some cards,
+    // and the progress window answered the mouse in the wrong place on some
+    // Windows 10 computers.
+    if std::env::var_os("SLINT_BACKEND").is_none() && !gpu {
+        std::env::set_var("SLINT_BACKEND", "winit-software");
+    }
+    if let Err(e) = run() {
+        let text = format!("{e:#}");
+        note(&format!("could not start: {text}"));
+        if gpu {
+            // the graphics card could not draw: the next start uses the processor
+            let path = data_dir.join("settings.json");
+            let mut s = Settings::load(&path);
+            s.gpu_drawing = false;
+            let _ = s.save(&path);
+        }
+        let _ = rfd::MessageDialog::new()
+            .set_title("EdsDown")
+            .set_level(rfd::MessageLevel::Error)
+            .set_description(format!(
+                "EdsDown could not start:\n\n{text}\n\nتعذّر تشغيل EdsDown. أعد تشغيل الجهاز ثم جرّب مرة أخرى."
+            ))
+            .show();
+        std::process::exit(1);
+    }
+}
+
+/// Opened "as administrator" (for the log: the program never needs it).
+fn elevated() -> bool {
+    #[cfg(windows)]
+    {
+        // SAFETY: no arguments; it only reads the token of this process
+        unsafe { windows_sys::Win32::UI::Shell::IsUserAnAdmin() != 0 }
+    }
+    #[cfg(not(windows))]
+    false
+}
+
+/// End a copy of this program that hangs (only ever one of ours: the id
+/// came from its own answer on our port, and the name is checked too).
+fn end_process(pid: u32) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        let exe = std::env::current_exe().ok().and_then(|e| e.file_name().map(|n| n.to_string_lossy().to_string()));
+        let exe = exe.unwrap_or_else(|| "EdsDown.exe".into());
+        let _ = std::process::Command::new(edsdown_engine::system::windows_tool("taskkill.exe"))
+            .args(["/F", "/PID", &pid.to_string(), "/FI", &format!("IMAGENAME eq {exe}")])
+            .creation_flags(0x0800_0000) // no console window
+            .status();
+    }
+    #[cfg(not(windows))]
+    let _ = pid;
+}
+
+fn run() -> anyhow::Result<()> {
     // started by Windows at sign-in: stay next to the clock, no window
     let background = std::env::args().any(|a| a == "--background");
     let data_dir = default_data_dir();
     let port = Settings::load(&data_dir.join("settings.json")).browser_port;
+    if std::env::args().any(|a| a == "--quit") {
+        // run by the setup: the open copy closes (saving everything), this one too
+        api::notify_quit(port);
+        return Ok(());
+    }
+    note(&format!(
+        "start{}{}",
+        if background { " (with Windows)" } else { "" },
+        if elevated() { " (as administrator)" } else { "" }
+    ));
 
     // opened again by the program itself: the old one may still be closing
     let mut first = api::bind(port);
@@ -228,14 +315,53 @@ fn main() -> anyhow::Result<()> {
             }
         }
     }
+    // a .torrent file / magnet link opened with EdsDown (double click)
+    let open_torrent = std::env::args().skip(1).find(|a| api::torrent_source_ok(a));
     // One instance only: if the port is taken by us, bring that one to front.
     let server = match first {
         Ok(s) => Some(s),
         Err(_) => {
-            if api::notify_existing(port) {
-                return Ok(());
+            if let Some(src) = &open_torrent {
+                if api::notify_open_torrent(port, src) {
+                    return Ok(());
+                }
             }
-            None
+            match api::notify_existing(port) {
+                api::Existing::Shown => {
+                    note("already open: brought to the front");
+                    return Ok(());
+                }
+                api::Existing::Hangs(pid) => {
+                    note(&format!("already open but not answering (process {pid})"));
+                    let yes = matches!(
+                        rfd::MessageDialog::new()
+                            .set_title(APP)
+                            .set_level(rfd::MessageLevel::Warning)
+                            .set_description(
+                                "EdsDown is already open but does not answer.\nClose it and open it again?\n\n\
+                                 EdsDown مفتوح بالفعل لكنه لا يستجيب.\nهل تريد إغلاقه وفتحه من جديد؟",
+                            )
+                            .set_buttons(rfd::MessageButtons::YesNo)
+                            .show(),
+                        rfd::MessageDialogResult::Yes
+                    );
+                    if !yes || pid == 0 || pid == std::process::id() {
+                        return Ok(());
+                    }
+                    end_process(pid);
+                    // its port is free a moment later
+                    let mut got = None;
+                    for _ in 0..40 {
+                        std::thread::sleep(Duration::from_millis(250));
+                        if let Ok(s) = api::bind(port) {
+                            got = Some(s);
+                            break;
+                        }
+                    }
+                    got
+                }
+                api::Existing::None => None,
+            }
         }
     };
 
@@ -270,7 +396,7 @@ fn main() -> anyhow::Result<()> {
     {
         about_dlg.on_open_link(|u| {
             if u.starts_with("https://") {
-                let _ = open::that(u.as_str());
+                let _ = open::that_detached(u.as_str());
             }
         });
         let w = about_dlg.as_weak();
@@ -481,9 +607,13 @@ fn main() -> anyhow::Result<()> {
         let ui = ui.clone();
         let hidden_ticks = Cell::new(0u32);
         timer.start(TimerMode::Repeated, Duration::from_millis(250), move || {
+            // the windows are alive (a second copy started by the user asks)
+            api::UI_ALIVE.store(api::now_secs(), std::sync::atomic::Ordering::Relaxed);
             if modal_open() {
                 return;
             }
+            // a file picker that was open is closed again
+            api::UI_WAITS.store(false, std::sync::atomic::Ordering::Relaxed);
             // next to the clock (window hidden): the list is brought up to
             // date only every few seconds, nobody looks at it
             let shown = ui.ctx.main.upgrade().map(|m| m.window().is_visible() && !m.window().is_minimized()).unwrap_or(false);
@@ -517,6 +647,7 @@ fn main() -> anyhow::Result<()> {
         let ui = ui.clone();
         power_timer.start(TimerMode::Repeated, Duration::from_secs(1), move || {
             extra::tick_countdown(&ui);
+            follow_sizes(&ui);
             // the window may have been shown again from the icon next to the clock
             if let Some(m) = ui.ctx.main.upgrade() {
                 if m.window().is_visible() {
@@ -554,10 +685,23 @@ fn main() -> anyhow::Result<()> {
             }
         }
     }
+    // the size the user gave the main window last time
+    if let Some((w, h)) = saved_size(&mgr, "main") {
+        main.window().set_size(slint::LogicalSize::new(w, h));
+    }
+    let was_maximized = mgr.settings().main_maximized;
     if !(background && has_tray) {
         main.show()?;
         // the main window: in the middle of the screen, and it can be maximized
         winfx::place(main.as_weak(), true);
+        if was_maximized {
+            let w = main.as_weak();
+            Timer::single_shot(Duration::from_millis(60), move || {
+                if let Some(m) = w.upgrade() {
+                    m.window().set_maximized(true);
+                }
+            });
+        }
         winfx::set_opacity(main.window(), mgr.settings().opacity);
         let mut s = mgr.settings();
         if !s.extension_prompted {
@@ -572,8 +716,30 @@ fn main() -> anyhow::Result<()> {
             Timer::single_shot(Duration::from_millis(600), move || extra::show_tip_when_free(ui));
         }
     }
+    if let Some(src) = open_torrent {
+        // opened from Windows with a torrent: its window, once everything is up
+        Timer::single_shot(Duration::from_millis(500), move || torrent_ui::open_source(&src));
+    }
+    {
+        // a .torrent file dropped on the window
+        winfx::on_files_dropped(main.window(), |path| {
+            if path.extension().is_some_and(|e| e.eq_ignore_ascii_case("torrent")) && path.is_file() {
+                torrent_ui::open_source(&path.display().to_string());
+            }
+        });
+    }
     slint::run_event_loop_until_quit()?;
+    note("closed");
     preview::clean_all();
+    {
+        // opens maximized next time when it was maximized now
+        let max = main.window().is_maximized();
+        let mut s = mgr.settings();
+        if s.main_maximized != max {
+            s.main_maximized = max;
+            let _ = mgr.set_settings(s);
+        }
+    }
 
     // save everything and stop downloads cleanly (they resume next time)
     drop(timer);
@@ -917,7 +1083,7 @@ fn wire_main(ui: &Ui) {
         main.on_open_download_folder(move || {
             let dir = mgr.settings().download_dir;
             let _ = std::fs::create_dir_all(&dir);
-            let _ = open::that(&dir);
+            let _ = open::that_detached(&dir);
         });
     }
     {
@@ -1208,6 +1374,11 @@ thread_local! {
 fn handle_api(ui: &Ui, event: api::ApiEvent) {
     match event {
         api::ApiEvent::Show => bring_to_front(&ui.ctx),
+        api::ApiEvent::Quit => {
+            note("closed for the setup");
+            let _ = slint::quit_event_loop();
+        }
+        api::ApiEvent::OpenTorrent(s) => torrent_ui::open_source(&s),
         api::ApiEvent::Playlist(url) => playlist::open_url(ui, &url),
         api::ApiEvent::Links(l) => grab::open_links(ui, l),
         api::ApiEvent::Add(req) => {
@@ -1237,6 +1408,11 @@ fn handle_api(ui: &Ui, event: api::ApiEvent) {
             // torrent window asks first
             if edsdown_engine::torrent::is_torrent_source(&req.url) {
                 torrent_ui::open_source(&req.url);
+                return;
+            }
+            // a .torrent file's link: straight to the torrent window too
+            if torrent_ui::looks_like_torrent(&req.url, req.file_name.as_deref()) {
+                torrent_ui::fetch_and_open(&ui.ctx, req.url, headers, req.file_name);
                 return;
             }
             // "Refresh download address": this is the new link we waited for
@@ -1333,7 +1509,14 @@ fn wire_add(ui: &Ui) {
             if let Some(name) = current.file_name() {
                 dlg = dlg.set_file_name(name.to_string_lossy());
             }
+            // Windows adds the file's own extension when a name is typed without it
+            if let Some(ext) = current.extension().map(|e| e.to_string_lossy().into_owned()).filter(|e| !e.is_empty()) {
+                dlg = dlg.add_filter(ext.to_ascii_uppercase(), &[ext.as_str()]).add_filter("*", &["*"]);
+            }
             if let Some(p) = dlg.save_file() {
+                let suggested = current.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
+                let name = p.file_name().map(|n| with_extension_of(&n.to_string_lossy(), &suggested)).unwrap_or_default();
+                let p = p.with_file_name(name);
                 d.set_save_as(p.display().to_string().into());
             }
         });
@@ -1353,7 +1536,7 @@ fn wire_add(ui: &Ui) {
             let _ = d.hide();
             if url.starts_with("http://") || url.starts_with("https://") {
                 api::leave_to_browser(&url);
-                let _ = open::that(&url);
+                let _ = open::that_detached(&url);
             }
             open_next(&ctx);
         });
@@ -1605,6 +1788,7 @@ pub(crate) struct ModalGuard(bool);
 
 impl ModalGuard {
     pub(crate) fn new() -> ModalGuard {
+        api::UI_WAITS.store(true, std::sync::atomic::Ordering::Relaxed);
         ModalGuard(MODAL.with(|m| m.replace(true)))
     }
 }
@@ -1613,6 +1797,9 @@ impl Drop for ModalGuard {
     fn drop(&mut self) {
         let before = self.0;
         MODAL.with(|m| m.set(before));
+        api::UI_WAITS.store(before, std::sync::atomic::Ordering::Relaxed);
+        // waiting for the box was no hang
+        api::UI_ALIVE.store(api::now_secs(), std::sync::atomic::Ordering::Relaxed);
     }
 }
 
@@ -1739,6 +1926,64 @@ pub(crate) fn bring_to_front(ctx: &Ctx) {
     }
 }
 
+// ------------------------------------------------------------ window sizes
+// The size the user gave a window is kept (Options don't have it: it is
+// dragged), and the window opens with it next time.
+
+thread_local! {
+    // the size each window had at the last look (saved once it stays the same)
+    static SEEN_SIZE: RefCell<HashMap<String, (f32, f32)>> = RefCell::new(HashMap::new());
+}
+
+/// The size a window had when the program was used last.
+pub(crate) fn saved_size(mgr: &Manager, key: &str) -> Option<(f32, f32)> {
+    mgr.settings()
+        .window_sizes
+        .get(key)
+        .copied()
+        .filter(|&(w, h)| (200.0..10000.0).contains(&w) && (80.0..10000.0).contains(&h))
+}
+
+/// The size of `w` now, in the units the windows are made with.
+fn size_now(w: &slint::Window) -> Option<(f32, f32)> {
+    if !w.is_visible() || w.is_minimized() || w.is_maximized() {
+        return None;
+    }
+    let s = w.size().to_logical(w.scale_factor());
+    Some((s.width.round(), s.height.round()))
+}
+
+/// Called about once a second: a size that stayed the same since the last
+/// look and is new is saved (not while the edge is still being dragged).
+pub(crate) fn follow_size(mgr: &Arc<Manager>, key: &str, size: Option<(f32, f32)>) {
+    let Some(size) = size else { return };
+    let steady = SEEN_SIZE.with(|m| m.borrow_mut().insert(key.to_string(), size) == Some(size));
+    if steady && mgr.settings().window_sizes.get(key) != Some(&size) {
+        let mut s = mgr.settings();
+        s.window_sizes.insert(key.to_string(), size);
+        let _ = mgr.set_settings(s);
+    }
+}
+
+/// The sizes of the main window and the progress windows, once a second.
+fn follow_sizes(ui: &Ui) {
+    if let Some(m) = ui.ctx.main.upgrade() {
+        follow_size(&ui.ctx.mgr, "main", size_now(m.window()));
+    }
+    for (d, _) in ui.progress.borrow().values() {
+        // the height counts only with the details shown (without them the
+        // window is as small as it can be)
+        if let Some((w, h)) = size_now(d.window()) {
+            let h = if d.get_show_details() {
+                h
+            } else {
+                saved_size(&ui.ctx.mgr, "progress").map(|s| s.1).unwrap_or(0.0)
+            };
+            follow_size(&ui.ctx.mgr, "progress", Some((w, h)));
+        }
+    }
+}
+
 /// Switch the whole program to another language right away.
 pub(crate) fn set_language(ui: &Ui, lang: &str) {
     i18n::apply(lang);
@@ -1847,6 +2092,8 @@ pub(crate) fn apply_theme(ui: &Ui, mode: i32) {
 fn set_theme_of(t: Theme<'_>, look: &Look) {
     t.set_rtl(i18n::is_rtl());
     t.set_mode(look.mode);
+    // drawn by the processor: no rounded gradients there
+    t.set_gradients(!std::env::var("SLINT_BACKEND").map(|b| b.contains("software")).unwrap_or(false));
     t.set_font_scale(look.scale);
     t.set_font_family(look.family.clone().into());
     // the Inter font of the NetLAB themes has Latin letters only
@@ -2203,9 +2450,16 @@ fn confirm_add(ui: &Ui, start: bool) {
         return;
     }
     let save_as = PathBuf::from(d.get_save_as().trim());
+    // the name as the program suggested it (its extension is the real one)
+    let suggested = {
+        let st = ctx.add_state.lock().unwrap();
+        let early = st.early_id.and_then(|id| ctx.mgr.get(id)).map(|v| v.file_name);
+        let auto = Path::new(&st.auto_path).file_name().map(|n| n.to_string_lossy().into_owned());
+        early.or(auto).or_else(|| st.probe.as_ref().map(|p| p.file_name.clone())).unwrap_or_default()
+    };
     let name = save_as
         .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
+        .map(|n| with_extension_of(&n.to_string_lossy(), &suggested))
         .filter(|n| !n.trim().is_empty());
     let dir = save_as.parent().map(Path::to_path_buf).filter(|p| !p.as_os_str().is_empty());
     let settings = ctx.mgr.settings();
@@ -2313,6 +2567,22 @@ fn confirm_add(ui: &Ui, start: bool) {
     }
 }
 
+/// A name typed without its extension ("My video") gets the one of the
+/// file (".mp4"), so Windows knows how to open it.
+pub(crate) fn with_extension_of(name: &str, suggested: &str) -> String {
+    let name = name.trim();
+    let ext = Path::new(suggested).extension().map(|e| e.to_string_lossy().into_owned()).unwrap_or_default();
+    let has_ext = Path::new(name)
+        .extension()
+        .map(|e| !e.is_empty() && e.len() <= 5 && e.to_string_lossy().chars().all(|c| c.is_ascii_alphanumeric()))
+        .unwrap_or(false);
+    if has_ext || ext.is_empty() || name.is_empty() {
+        name.to_string()
+    } else {
+        format!("{name}.{ext}")
+    }
+}
+
 /// Really add it; open its progress window when it starts.
 pub(crate) fn finish_add(ui: &Ui, req: NewDownload) -> u64 {
     let start = req.start;
@@ -2398,10 +2668,15 @@ fn row_action(ui: &Ui, id: u64, action: &str) {
                     dlg = dlg.set_directory(dir);
                 }
                 if let Some(to) = dlg.save_file() {
+                    let to = {
+                        let n = to.file_name().map(|n| with_extension_of(&n.to_string_lossy(), &v.file_name)).unwrap_or_default();
+                        to.with_file_name(n)
+                    };
                     // on its own thread: a move to another disk is a copy
                     let mgr = ui.ctx.mgr.clone();
                     std::thread::spawn(move || {
-                        if let Err(e) = mgr.move_file(id, &to) {
+                        // the save window asked already before a file was replaced
+                        if let Err(e) = mgr.move_file(id, &to, true) {
                             let text = tf("Could not move the file:\n\n{}", &[&format!("{e:#}")]);
                             let _ = slint::invoke_from_event_loop(move || message(&text));
                         }
@@ -2450,17 +2725,33 @@ fn sha256_of(path: &Path) -> std::io::Result<String> {
     Ok(hasher.finalize().iter().map(|b| format!("{b:02x}")).collect())
 }
 
+/// "Open with…": Windows' own list of programs for the file. On a thread
+/// of its own: the windows never wait for it.
 pub(crate) fn open_with(path: &Path) {
+    let path = path.to_path_buf();
     #[cfg(windows)]
-    {
-        let _ = std::process::Command::new(edsdown_engine::system::windows_tool("rundll32.exe"))
-            .arg("shell32.dll,OpenAs_RunDLL")
-            .arg(path)
-            .spawn();
-    }
+    std::thread::spawn(move || {
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::UI::Shell::{SHOpenWithDialog, OAIF_ALLOW_REGISTRATION, OAIF_EXEC, OPENASINFO};
+        let wide: Vec<u16> = path.as_os_str().encode_wide().chain(std::iter::once(0)).collect();
+        let info = OPENASINFO {
+            pcszFile: wide.as_ptr(),
+            pcszClass: std::ptr::null(),
+            oaifInFlags: OAIF_ALLOW_REGISTRATION | OAIF_EXEC,
+        };
+        // SAFETY: `wide` is a NUL-terminated path that outlives the call
+        let hr = unsafe { SHOpenWithDialog(std::ptr::null_mut(), &info) };
+        if hr < 0 {
+            // an older Windows: the classic way
+            let _ = std::process::Command::new(edsdown_engine::system::windows_tool("rundll32.exe"))
+                .arg("shell32.dll,OpenAs_RunDLL")
+                .arg(&path)
+                .spawn();
+        }
+    });
     #[cfg(not(windows))]
     {
-        let _ = open::that(path);
+        let _ = open::that_detached(path);
     }
 }
 
@@ -2470,24 +2761,23 @@ fn delete_downloads(ui: &Ui, ids: Vec<u64>) {
         0 => {}
         1 => delete_download(&ui.ctx, ids[0]),
         n => {
-            // the list only: files on the disk are never deleted from here
             let ui2 = ui.clone();
-            confirm(
-                &ui.ctx,
-                &t("Delete downloads"),
-                &tf(
-                    "Remove these {} downloads from the download list?\n\nOnly the list entries are removed: the downloaded files stay on your computer.\n(Parts of unfinished downloads are cleaned up.)",
-                    &[&n],
-                ),
-                move || {
-                    ui2.ctx.mgr.remove_many(&ids);
-                    ui2.sel.borrow_mut().ids.clear();
-                    if let Some(w) = ui2.ctx.main.upgrade() {
-                        w.set_selected_id(-1);
+            let text = tf("Remove these {} downloads from the download list?", &[&n]);
+            ask_remove(&ui.ctx, &t("Delete downloads"), &text, move |delete_files| {
+                if delete_files {
+                    for id in &ids {
+                        ui2.ctx.mgr.remove(*id, true);
                     }
-                    refresh(&ui2);
-                },
-            );
+                } else {
+                    // the list only (parts of unfinished downloads are cleaned up)
+                    ui2.ctx.mgr.remove_many(&ids);
+                }
+                ui2.sel.borrow_mut().ids.clear();
+                if let Some(w) = ui2.ctx.main.upgrade() {
+                    w.set_selected_id(-1);
+                }
+                refresh(&ui2);
+            });
         }
     }
 }
@@ -2495,23 +2785,42 @@ fn delete_downloads(ui: &Ui, ids: Vec<u64>) {
 fn delete_download(ctx: &Ctx, id: u64) {
     let Some(v) = ctx.mgr.get(id) else { return };
     let text = if v.status == Status::Completed {
-        // the list only: the file stays on the disk
-        tf(
-            "Remove “{}” from the download list?\n\nOnly the list entry is removed: the file stays on your computer.",
-            &[&v.file_name],
-        )
+        tf("Remove “{}” from the download list?", &[&v.file_name])
     } else {
         tf("Delete the unfinished download “{}”?\nThe partly downloaded data will be removed.", &[&v.file_name])
     };
     let ctx2 = ctx.clone();
-    confirm(ctx, &t("Delete download"), &text, move || {
+    ask_remove(ctx, &t("Delete download"), &text, move |delete_files| {
         // its progress window goes away with it
-        ctx2.mgr.remove(id, false);
+        ctx2.mgr.remove(id, delete_files);
         if let Some(w) = ctx2.main.upgrade() {
             if w.get_selected_id() == id as i32 {
                 w.set_selected_id(-1);
             }
         }
+    });
+}
+
+/// Removing downloads from the list: the question (with "delete the files
+/// from the disk too" and "don't show this again"), or straight away when
+/// the user said not to ask. `remove` gets whether files go too.
+fn ask_remove(ctx: &Ctx, title: &str, text: &str, remove: impl FnOnce(bool) + 'static) {
+    let s = ctx.mgr.settings();
+    if !s.ask_before_remove {
+        // without the question only the list entries go: files are never
+        // deleted from the disk without the user seeing it right then
+        remove(false);
+        return;
+    }
+    let mgr = ctx.mgr.clone();
+    confirm_with(ctx, title, text, Some(s.remove_deletes_files), move |delete_files, dont_ask| {
+        let mut s = mgr.settings();
+        if s.remove_deletes_files != delete_files || s.ask_before_remove == dont_ask {
+            s.remove_deletes_files = delete_files;
+            s.ask_before_remove = !dont_ask;
+            let _ = mgr.set_settings(s);
+        }
+        remove(delete_files);
     });
 }
 
@@ -2521,22 +2830,30 @@ thread_local! {
 }
 
 /// What runs when a question is answered with OK.
-type OnOk = Box<dyn FnOnce()>;
+type OnOk = Box<dyn FnOnce(bool, bool)>;
 
 /// A yes / no question in a window of our own: it is shown in front of the
 /// download windows and the program goes on working while it waits (a
 /// Windows message box could end up behind them and seem to freeze it all).
 /// `on_ok` runs when OK is pressed.
 pub(crate) fn confirm(ctx: &Ctx, title: &str, text: &str, on_ok: impl FnOnce() + 'static) {
+    confirm_with(ctx, title, text, None, move |_, _| on_ok());
+}
+
+/// The same; `delete_files`: a question about removing downloads, with its
+/// two check boxes (this one ticked as given). `on_ok` gets both of them.
+fn confirm_with(ctx: &Ctx, title: &str, text: &str, delete_files: Option<bool>, on_ok: impl FnOnce(bool, bool) + 'static) {
     let Ok(d) = ConfirmDialog::new() else {
         if ask(text) {
-            on_ok();
+            on_ok(false, false);
         }
         return;
     };
     set_theme_of(d.global::<Theme>(), &Look::of(&ctx.mgr.settings()));
     d.set_heading(title.into());
     d.set_text(text.into());
+    d.set_removing(delete_files.is_some());
+    d.set_delete_files(delete_files.unwrap_or(false));
     let pending: Rc<RefCell<Option<OnOk>>> = Rc::new(RefCell::new(Some(Box::new(on_ok))));
     let close = |d: &ConfirmDialog| {
         let _ = d.hide();
@@ -2553,7 +2870,7 @@ pub(crate) fn confirm(ctx: &Ctx, title: &str, text: &str, on_ok: impl FnOnce() +
             let f = pending.borrow_mut().take();
             if ok {
                 if let Some(f) = f {
-                    f();
+                    f(d.get_delete_files(), d.get_dont_ask());
                 }
             }
         });
@@ -2584,7 +2901,7 @@ pub(crate) fn reveal_in_folder(v: &DownloadView) {
         }
     }
     let _ = std::fs::create_dir_all(&dir);
-    let _ = open::that(&dir);
+    let _ = open::that_detached(&dir);
 }
 
 pub(crate) fn state_of(s: Status) -> i32 {
@@ -2669,7 +2986,9 @@ pub(crate) fn open_download(path: &std::path::Path) {
     if path.extension().map(|e| e.eq_ignore_ascii_case("torrent")).unwrap_or(false) && path.is_file() {
         torrent_ui::open_source(&path.display().to_string());
     } else {
-        let _ = open::that(path);
+        // the program that opens it may take its time (or Windows asks which
+        // one to use): the windows don't wait for it
+        let _ = open::that_detached(path);
     }
 }
 
@@ -2681,12 +3000,99 @@ pub(crate) fn err_text(e: &str) -> String {
         t("The drive of the download folder is locked by BitLocker. Unlock it in Windows, or choose another folder (right-click the download > Properties).")
     } else if e.contains("is already registered") {
         t("This torrent is already running (it may still be sharing its files). Wait a little, or exit EdsDown and open it again.")
+    } else if let Some(rest) = e.split("the link stopped working - getting a new one in ").nth(1) {
+        let secs = rest.split(' ').next().unwrap_or("?");
+        tf("The link stopped working. A new one is fetched in {} s and checked before the download goes on.", &[&secs])
+    } else if e.contains("ffmpeg.exe is missing") {
+        t("ffmpeg.exe (it joins the video and the sound) is missing and could not be downloaded again. Allow it in your antivirus or install EdsDown again, then click Resume: nothing downloaded is lost.")
+    } else if e.contains("the new link is not the same file") {
+        t("The new link gives another file, so nothing more was written. Right-click the download and use \"Refresh download address\".")
     } else if e.contains("the link has expired or the file was removed") {
         t("The link has expired or the file was removed. Right-click the download and use \"Refresh download address\".")
     } else {
-        e.to_string()
+        // the engine speaks English: each known part in the user's language
+        let mut out = e.to_string();
+        for part in ERROR_PARTS {
+            if out.contains(part) {
+                out = out.replace(part, &t(part));
+            }
+        }
+        out
     }
 }
+
+/// Parts of the engine's error texts (longest first: a shorter one never
+/// eats into a longer one).
+pub(crate) const ERROR_PARTS: [&str; 68] = [
+    "open the .torrent link in the browser: the add-in sends the saved file to the torrent window",
+    "the server sent a web page instead of the program (sign in or open the link in the browser first)",
+    "the server asks for a user name and password (HTTP 401)",
+    "aria2c.exe is missing. EdsDown gets it by itself in a minute (internet needed), then try again",
+    "yt-dlp.exe is missing. EdsDown gets it by itself in a minute (internet needed), then try again",
+    "live streams are not supported (the playlist has no end)",
+    "the file on the server changed during the download",
+    "the server sent the wrong part of the file",
+    "the server did not say which part of the file it sent",
+    "the downloaded update was changed on the disk, so it is not installed",
+    "the update is not signed by EdsDown, so it is not installed",
+    "download ended before all parts were received",
+    "no downloadable video was found on this page",
+    "the program arrived damaged",
+    "download it again",
+    "start it again",
+    "server did not accept the byte range",
+    "the link has expired or the file was removed",
+    "use \"Refresh download address\"",
+    "the server did not answer (timed out)",
+    "this stream is DRM protected",
+    "and cannot be downloaded",
+    "a part of the stream is shorter than its list says",
+    "a part of the stream came incomplete",
+    "the stream's list has a broken byte range",
+    "the stream's list is too big",
+    "the stream has too many parts",
+    "ffmpeg could not merge video and audio",
+    "ffmpeg could not make the MP3 file",
+    "ffmpeg could not make the MP4 file",
+    "ffmpeg could not prepare the preview",
+    "a file with this name is already in that folder",
+    "could not move the partly downloaded data",
+    "the address of a finished download can't be changed",
+    "only finished downloads can be moved",
+    "use Move / Rename for finished files",
+    "this quality is not offered any more",
+    "this download has no audio stream",
+    "the main queue can't be deleted",
+    "the proxy address is not valid",
+    "not enough room on the disk",
+    "the file could not be moved",
+    "could not connect to server",
+    "connection closed early",
+    "connection timed out",
+    "slow connection, made again",
+    "server answered HTTP",
+    "could not start ffmpeg",
+    "could not start yt-dlp",
+    "could not start aria2c",
+    "yt-dlp.exe is missing",
+    "yt-dlp returned something unexpected",
+    "could not load playlist",
+    "not a valid HLS playlist",
+    "could not decrypt stream part",
+    "the playlist has no parts",
+    "not a torrent file",
+    "the .torrent file can't be read",
+    "the torrent file is cut short",
+    "this torrent has no files",
+    "the torrent program stopped",
+    "the torrent was stopped",
+    "aria2c did not start",
+    "aria2 did not take the torrent",
+    "stop the download first",
+    "download not found",
+    "download was removed",
+    "trying again",
+];
 
 fn row_of(v: &DownloadView, sel: bool) -> DownloadRow {
     let pct = v.progress();
@@ -3089,6 +3495,16 @@ pub(crate) fn open_progress(ui: &Ui, id: u64) {
     let Ok(d) = DetailsDialog::new() else { return };
     let settings = ui.ctx.mgr.settings();
     set_theme_of(d.global::<Theme>(), &Look::of(&settings));
+    // the details (connections) only when the user chose to see them; the
+    // window opens as wide / tall as it was last time
+    d.set_show_details(settings.progress_details);
+    {
+        let saved = saved_size(&ui.ctx.mgr, "progress");
+        let width = saved.map(|s| s.0).unwrap_or(500.0).max(440.0);
+        let small = d.get_content_height();
+        let height = if settings.progress_details { saved.map(|s| s.1).unwrap_or(0.0).max(small) } else { small };
+        d.window().set_size(slint::LogicalSize::new(width, height.max(120.0)));
+    }
     // the tabs' controls are set once, so typing in them isn't overwritten
     d.set_limit_on(v.speed_limit_kb.is_some());
     d.set_limit_kb(v.speed_limit_kb.unwrap_or(500).min(1_000_000) as i32);
@@ -3155,55 +3571,31 @@ pub(crate) fn open_progress(ui: &Ui, id: u64) {
         });
     }
     {
-        let w = d.as_weak();
-        d.on_start_drag(move || {
-            if let Some(d) = w.upgrade() {
-                winfx::drag_window(d.window());
-            }
-        });
-    }
-    {
         // "Hide details": the window gets small; "Show details": back to
         // the height it had
-        let (w, tall) = (d.as_weak(), Rc::new(Cell::new(0f32)));
+        // the choice is kept for the next windows
+        let (w, mgr) = (d.as_weak(), ui.ctx.mgr.clone());
         d.on_details_toggled(move || {
-            let (w, tall) = (w.clone(), tall.clone());
+            let (w, mgr) = (w.clone(), mgr.clone());
+            let mut st = mgr.settings();
+            if let Some(d) = w.upgrade() {
+                if st.progress_details != d.get_show_details() {
+                    st.progress_details = d.get_show_details();
+                    let _ = mgr.set_settings(st);
+                }
+            }
             slint::Timer::single_shot(Duration::from_millis(1), move || {
                 let Some(d) = w.upgrade() else { return };
                 let scale = d.window().scale_factor();
                 let now = d.window().size().to_logical(scale);
                 let height = if d.get_show_details() {
-                    let before = tall.get();
-                    if before > 0.0 { before } else { now.height.max(d.get_content_height()) }
+                    let before = saved_size(&mgr, "progress").map(|s| s.1).unwrap_or(0.0);
+                    before.max(d.get_content_height())
                 } else {
-                    tall.set(now.height);
                     d.get_content_height()
                 };
                 d.window().set_size(slint::LogicalSize::new(now.width, height.max(120.0)));
             });
-        });
-    }
-    {
-        let w = d.as_weak();
-        d.on_start_resize(move || {
-            if let Some(d) = w.upgrade() {
-                winfx::drag_resize_window(d.window());
-            }
-        });
-    }
-    {
-        let w = d.as_weak();
-        d.on_minimize(move || {
-            if let Some(d) = w.upgrade() {
-                d.window().set_minimized(true);
-            }
-        });
-    }
-    {
-        // its own X (title bar) does what the Windows X did: stop and close
-        let (map, mgr) = (ui.progress.clone(), ui.ctx.mgr.clone());
-        d.on_close_clicked(move || {
-            stop_and_close(&map, &mgr, id);
         });
     }
     {
@@ -3380,5 +3772,18 @@ mod tests {
         let l = expand_pattern("https://example.com/*.pdf", true, "a", "c", 1).unwrap();
         assert_eq!(l.len(), 3);
         assert!(expand_pattern("https://example.com/x.pdf", false, "1", "2", 1).is_err());
+    }
+}
+
+#[cfg(test)]
+mod name_tests {
+    use super::with_extension_of;
+    #[test]
+    fn typed_names_keep_the_extension() {
+        assert_eq!(with_extension_of("My video", "Title [1080p].mp4"), "My video.mp4");
+        assert_eq!(with_extension_of("My video.mkv", "Title.mp4"), "My video.mkv");
+        assert_eq!(with_extension_of("Ep. 12 final", "a.rar"), "Ep. 12 final.rar");
+        assert_eq!(with_extension_of("setup", ""), "setup");
+        assert_eq!(with_extension_of("v1.2", "x.zip"), "v1.2");
     }
 }

@@ -128,7 +128,13 @@ jobs:
           # fails on published vulnerabilities; "unmaintained" notices only warn
           cargo audit
       - name: Build release
-        run: cargo build --release
+        shell: pwsh
+        run: |
+          # the program can fetch this very ffmpeg.exe again when it goes
+          # missing (an antivirus...), and uses it only with this SHA-256
+          $env:EDSDOWN_FFMPEG_SHA256 = (Get-FileHash ffmpeg-out/ffmpeg.exe -Algorithm SHA256).Hash.ToLower()
+          cargo build --release
+          if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
       - name: Package
         shell: pwsh
         env:
@@ -178,6 +184,14 @@ jobs:
             Copy-Item $signed "dist/edsdown-firefox.xpi"
             $fx = "{`n  ""addons"": {`n    ""edsdown@ebertonjs.github.io"": {`n      ""updates"": [`n        { ""version"": ""$extVersion"", ""update_link"": ""https://github.com/${{ github.repository }}/releases/download/v$version/edsdown-firefox.xpi"" }`n      ]`n    }`n  }`n}`n"
             [IO.File]::WriteAllText("$PWD/dist/firefox-updates.json", $fx)
+          }
+          # not signed this time: the newest signed one kept in the project, so
+          # the setup still has an add-on that stays in Firefox (it updates
+          # itself later from the releases)
+          if (-not (Test-Path "$p/edsdown-firefox.xpi")) {
+            $newest = Get-ChildItem "extension-signed" -Filter "edsdown-firefox-*.xpi" -ErrorAction SilentlyContinue |
+              Sort-Object { [version]($_.BaseName -replace "^edsdown-firefox-", "") } -Descending | Select-Object -First 1
+            if ($newest) { Copy-Item $newest.FullName "$p/edsdown-firefox.xpi" }
           }
           # our own small ffmpeg (job "ffmpeg") and its licences
           Copy-Item ffmpeg-out/* "$p/tools/"
@@ -230,7 +244,8 @@ jobs:
         run: |
           gh release view "v$env:VERSION" --repo "${{ github.repository }}" *> $null
           if ($LASTEXITCODE -eq 0) { Write-Host "v$env:VERSION is already released"; exit 0 }
-          $files = @("dist/EdsDown-Setup.exe", "dist/version.json")
+          Copy-Item ffmpeg-out/ffmpeg.exe dist/ffmpeg.exe
+          $files = @("dist/EdsDown-Setup.exe", "dist/version.json", "dist/ffmpeg.exe")
           if (Test-Path dist/edsdown-firefox.xpi) { $files += "dist/edsdown-firefox.xpi", "dist/firefox-updates.json" }
           # release page text: .github/release-notes.md (images and all), if present
           $notes = @("--notes", "EdsDown $env:VERSION")

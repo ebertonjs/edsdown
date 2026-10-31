@@ -4,51 +4,6 @@ msgstr ""
 "Language: es\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Download a file from an address you type or paste (Ctrl+N)."
-msgstr "Descargar un archivo desde una dirección que escribes o pegas (Ctrl+N)."
-
-msgid "Download many links at once, or numbered files from one address (Ctrl+B)."
-msgstr "Descargar muchos enlaces a la vez, o archivos numerados de una misma dirección (Ctrl+B)."
-
-msgid "Continue the selected downloads from where they stopped."
-msgstr "Continuar las descargas elegidas desde donde se detuvieron."
-
-msgid "Pause the selected downloads; they can be resumed later."
-msgstr "Pausar las descargas elegidas; se pueden continuar más tarde."
-
-msgid "Pause every running download."
-msgstr "Pausar todas las descargas en curso."
-
-msgid "Remove the selected downloads from the list. The files stay on your computer."
-msgstr "Quitar de la lista las descargas elegidas. Los archivos se quedan en tu equipo."
-
-msgid "Remove all finished downloads from the list. The files stay on your computer."
-msgstr "Quitar de la lista todas las descargas terminadas. Los archivos se quedan en tu equipo."
-
-msgid "All the settings of the program."
-msgstr "Todos los ajustes del programa."
-
-msgid "Start or stop queues at the times you choose."
-msgstr "Iniciar o detener las colas a las horas que elijas."
-
-msgid "Limit the download speed so the internet stays usable for other things."
-msgstr "Limitar la velocidad para que internet siga siendo útil para otras cosas."
-
-msgid "Start the files of a queue, one after another."
-msgstr "Iniciar los archivos de una cola, uno tras otro."
-
-msgid "Stop the files of a queue."
-msgstr "Detener los archivos de una cola."
-
-msgid "Collect the files of a web site: pictures, videos, archives…"
-msgstr "Reunir los archivos de un sitio web: imágenes, vídeos, comprimidos…"
-
-msgid "Download all or some videos of a playlist."
-msgstr "Descargar todos o algunos vídeos de una lista de reproducción."
-
-msgid "Download a .torrent file or a magnet link."
-msgstr "Descargar un archivo .torrent o un enlace magnet."
-
 msgid "{} downloads selected"
 msgstr "{} descargas seleccionadas"
 
@@ -61,11 +16,11 @@ msgstr "Mostrar el progreso"
 msgid "Open with…"
 msgstr "Abrir con…"
 
-msgid "Play while downloading"
-msgstr "Reproducir mientras se descarga"
-
 msgid "Open folder"
 msgstr "Abrir carpeta"
+
+msgid "Play while downloading"
+msgstr "Reproducir mientras se descarga"
 
 msgid "Resume download"
 msgstr "Reanudar descarga"
@@ -100,38 +55,35 @@ msgstr "Propiedades"
 msgid "Remove"
 msgstr "Quitar"
 
-msgid "Start queue"
-msgstr "Iniciar cola"
-
 msgid "Stop queue"
 msgstr "Detener cola"
 
-msgid "Edit queue / schedule…"
-msgstr "Editar cola / programación…"
-
-msgid "New queue…"
-msgstr "Nueva cola…"
-
-msgid "Delete queue"
-msgstr "Eliminar cola"
-
-msgid "Add category…"
-msgstr "Añadir categoría…"
-
-msgid "Delete category"
-msgstr "Eliminar categoría"
-
-msgid "Properties…"
-msgstr "Propiedades…"
+msgid "Start queue"
+msgstr "Iniciar cola"
 
 msgid "EdsDown"
 msgstr "EdsDown"
 
-msgid "File Name"
-msgstr "Nombre del archivo"
+msgid "Shut down"
+msgstr "Apagar"
 
-msgid "Q"
-msgstr "C"
+msgid "Sleep"
+msgstr "Suspender"
+
+msgid "Exit EdsDown"
+msgstr "Salir de EdsDown"
+
+msgid "Hibernate"
+msgstr "Hibernar"
+
+msgid "Do nothing"
+msgstr "No hacer nada"
+
+msgid "By order of addition"
+msgstr "Por orden de adición"
+
+msgid "File name"
+msgstr "Nombre del archivo"
 
 msgid "Size"
 msgstr "Tamaño"
@@ -145,44 +97,65 @@ msgstr "Tiempo restante"
 msgid "Transfer rate"
 msgstr "Velocidad"
 
-msgid "Last Try Date"
+msgid "Last try date"
 msgstr "Último intento"
 
-msgid "Description"
-msgstr "Descripción"
+msgid "Resume all"
+msgstr "Reanudar todo"
 
-msgid "Date Added"
-msgstr "Fecha de adición"
+msgid "Stop all"
+msgstr "Detener todo"
 
-msgid "Save To"
-msgstr "Guardar en"
+msgid "Delete all completed"
+msgstr "Eliminar todas las completadas"
 
-msgid "Referer"
-msgstr "Referente"
-
-msgid "Parent Web Page"
-msgstr "Página web de origen"
-
-msgid "Tasks"
-msgstr "Tareas"
-
-msgid "Add new download…"
-msgstr "Añadir nueva descarga…"
-
-msgid "Add batch download…"
-msgstr "Añadir descarga por lotes…"
+msgid "Add a torrent / magnet link…"
+msgstr "Añadir un torrent / enlace magnet…"
 
 msgid "Add batch download from clipboard"
 msgstr "Añadir descarga por lotes desde el portapapeles"
 
-msgid "Run site grabber…"
-msgstr "Ejecutar el capturador de sitios…"
+msgid "Find…   Ctrl+F"
+msgstr "Buscar…   Ctrl+F"
 
-msgid "Download a playlist…"
-msgstr "Descargar una lista de reproducción…"
+msgid "Open download folder"
+msgstr "Abrir la carpeta de descargas"
 
-msgid "Add a torrent / magnet link…"
-msgstr "Añadir un torrent / enlace magnet…"
+msgid "Export / Import"
+msgstr "Exportar / Importar"
+
+msgid "When all downloads finish"
+msgstr "Cuando terminen todas las descargas"
+
+msgid "Arrange files"
+msgstr "Ordenar archivos"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Appearance…"
+msgstr "Apariencia…"
+
+msgid "Add EdsDown to my browser…"
+msgstr "Añadir EdsDown a mi navegador…"
+
+msgid "Tip of the day…"
+msgstr "Consejo del día…"
+
+msgid "Check for updates"
+msgstr "Buscar actualizaciones"
+
+msgid "Check for updates (video downloader)"
+msgstr "Buscar actualizaciones (descargador de vídeo)"
+
+msgid "About EdsDown"
+msgstr "Acerca de EdsDown"
+
+msgid "Exit"
+msgstr "Salir"
+
+msgid "Back"
+msgstr "Volver"
 
 msgid "Export"
 msgstr "Exportar"
@@ -202,170 +175,92 @@ msgstr "Desde un archivo de lista (.ef2)…"
 msgid "From text file…"
 msgstr "Desde un archivo de texto…"
 
-msgid "Open download folder"
-msgstr "Abrir la carpeta de descargas"
+msgid "Delete"
+msgstr "Eliminar"
 
-msgid "Exit"
-msgstr "Salir"
+msgid "New category…"
+msgstr "Nueva categoría…"
 
-msgid "File"
-msgstr "Archivo"
+msgid "Edit"
+msgstr "Editar"
 
-msgid "Download now"
-msgstr "Descargar ahora"
+msgid "DOWNLOADING NOW"
+msgstr "DESCARGANDO AHORA"
 
-msgid "Select all   Ctrl+A"
-msgstr "Seleccionar todo   Ctrl+A"
+msgid "Nothing downloading right now ✓"
+msgstr "Nada descargando ahora ✓"
 
-msgid "Downloads"
-msgstr "Descargas"
+msgid "TODAY"
+msgstr "HOY"
 
-msgid "Resume all"
-msgstr "Reanudar todo"
+msgid "finished"
+msgstr "terminadas"
 
-msgid "Stop all"
-msgstr "Detener todo"
+msgid "downloaded"
+msgstr "descargados"
 
-msgid "Delete all completed"
-msgstr "Eliminar todas las completadas"
+msgid "QUEUES"
+msgstr "COLAS"
 
-msgid "Find…   Ctrl+F"
-msgstr "Buscar…   Ctrl+F"
+msgid "New queue"
+msgstr "Nueva cola"
 
-msgid "Find next   F3"
-msgstr "Buscar siguiente   F3"
+msgid "{} downloading"
+msgstr "{} descargando"
 
-msgid "Speed Limiter"
-msgstr "Limitador de velocidad"
+msgid "Idle"
+msgstr "En reposo"
 
-msgid "Turn on"
-msgstr "Activar"
+msgid "Limiter on"
+msgstr "Limitador activado"
 
-msgid "Turn off"
-msgstr "Desactivar"
+msgid "No speed limit"
+msgstr "Sin límite"
 
-msgid "Settings…"
-msgstr "Ajustes…"
+msgid "Browser connected"
+msgstr "Navegador conectado"
 
-msgid "When all downloads finish"
-msgstr "Cuando terminen todas las descargas"
+msgid "Browser not connected"
+msgstr "Navegador desconectado"
 
-msgid "Do nothing"
-msgstr "No hacer nada"
+msgid "Filter the list…"
+msgstr "Filtrar la lista…"
 
-msgid "Shut down the computer"
-msgstr "Apagar el equipo"
+msgid "NetLAB light"
+msgstr "NetLAB claro"
 
-msgid "Sleep"
-msgstr "Suspender"
+msgid "NetLAB dark"
+msgstr "NetLAB oscuro"
 
-msgid "Hibernate"
-msgstr "Hibernar"
+msgid "All"
+msgstr "Todo"
 
-msgid "Exit EdsDown"
-msgstr "Salir de EdsDown"
+msgid "In progress"
+msgstr "En curso"
 
-msgid "Scheduler…"
-msgstr "Programador…"
+msgid "Finished"
+msgstr "Terminadas"
 
-msgid "Options…"
-msgstr "Opciones…"
+msgid "Category"
+msgstr "Categoría"
 
-msgid "View"
-msgstr "Ver"
+msgid "FINISHED"
+msgstr "TERMINADAS"
 
-msgid "Show categories"
-msgstr "Mostrar categorías"
+msgid "Nothing matches “{}”."
+msgstr "Nada coincide con “{}”."
 
-msgid "Arrange files"
-msgstr "Ordenar archivos"
-
-msgid "By order of addition"
-msgstr "Por orden de adición"
-
-msgid "File name"
-msgstr "Nombre del archivo"
-
-msgid "Last try date"
-msgstr "Último intento"
-
-msgid "Save to"
-msgstr "Guardar en"
-
-msgid "Parent web page"
-msgstr "Página web de origen"
-
-msgid "Toolbar"
-msgstr "Barra de herramientas"
-
-msgid "Large buttons"
-msgstr "Botones grandes"
-
-msgid "Small buttons"
-msgstr "Botones pequeños"
-
-msgid "Columns…"
-msgstr "Columnas…"
-
-msgid "Language"
-msgstr "Idioma"
-
-msgid "Theme"
-msgstr "Tema"
-
-msgid "Light"
-msgstr "Claro"
-
-msgid "Dark"
-msgstr "Oscuro"
-
-msgid "Ocean blue"
-msgstr "Azul océano"
-
-msgid "Midnight purple"
-msgstr "Morado medianoche"
-
-msgid "Forest green"
-msgstr "Verde bosque"
-
-msgid "Black"
-msgstr "Negro"
-
-msgid "Sunset"
-msgstr "Atardecer"
-
-msgid "Teal night"
-msgstr "Noche turquesa"
-
-msgid "Rose"
-msgstr "Rosa"
-
-msgid "Appearance…"
-msgstr "Apariencia…"
-
-msgid "Help"
-msgstr "Ayuda"
-
-msgid "Add EdsDown to my browser…"
-msgstr "Añadir EdsDown a mi navegador…"
-
-msgid "Tip of the day…"
-msgstr "Consejo del día…"
-
-msgid "Check for updates"
-msgstr "Buscar actualizaciones"
-
-msgid "Check for updates (video downloader)"
-msgstr "Buscar actualizaciones (descargador de vídeo)"
-
-msgid "About EdsDown"
-msgstr "Acerca de EdsDown"
+msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
+msgstr "No hay descargas aquí.\nHaga clic en “Añadir URL”, copie un enlace o descargue algo en su navegador."
 
 msgid "Add URL"
 msgstr "Añadir URL"
 
 msgid "Add Batch"
 msgstr "Por lotes"
+
+msgid "Torrent"
+msgstr "Torrent"
 
 msgid "Resume"
 msgstr "Reanudar"
@@ -376,29 +271,11 @@ msgstr "Detener"
 msgid "Stop All"
 msgstr "Detener todo"
 
-msgid "Delete"
-msgstr "Eliminar"
-
-msgid "Delete Done"
-msgstr "Borrar completadas"
-
-msgid "Options"
-msgstr "Opciones"
-
 msgid "Scheduler"
 msgstr "Programador"
 
-msgid "Limiter: On"
-msgstr "Limitador: activado"
-
-msgid "Limiter: Off"
-msgstr "Limitador: desactivado"
-
-msgid "Start Queue"
-msgstr "Iniciar cola"
-
-msgid "Stop Queue"
-msgstr "Detener cola"
+msgid "Speed Limiter"
+msgstr "Limitador de velocidad"
 
 msgid "Grabber"
 msgstr "Capturador"
@@ -406,41 +283,8 @@ msgstr "Capturador"
 msgid "Playlist"
 msgstr "Lista"
 
-msgid "Torrent"
-msgstr "Torrent"
-
-msgid "Filter the list…"
-msgstr "Filtrar la lista…"
-
-msgid "Categories"
-msgstr "Categorías"
-
-msgid "All Downloads"
-msgstr "Todas las descargas"
-
-msgid "Unfinished"
-msgstr "Sin terminar"
-
-msgid "Finished"
-msgstr "Terminadas"
-
-msgid "Queues"
-msgstr "Colas"
-
-msgid "{} (running)"
-msgstr "{} (en curso)"
-
-msgid "New queue"
-msgstr "Nueva cola"
-
-msgid "Edit"
-msgstr "Editar"
-
-msgid "Nothing matches “{}”."
-msgstr "Nada coincide con “{}”."
-
-msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
-msgstr "No hay descargas aquí.\nHaga clic en “Añadir URL”, copie un enlace o descargue algo en su navegador."
+msgid "Options"
+msgstr "Opciones"
 
 msgid "Download File Info"
 msgstr "Información del archivo"
@@ -454,14 +298,14 @@ msgstr "https://example.com/file"
 msgid "Check"
 msgstr "Comprobar"
 
-msgid "Category"
-msgstr "Categoría"
-
 msgid "Save As"
 msgstr "Guardar como"
 
 msgid "Remember this path for \"{}\" category"
 msgstr "Recordar esta ruta para la categoría \"{}\""
+
+msgid "Description"
+msgstr "Descripción"
 
 msgid "optional note"
 msgstr "nota opcional"
@@ -583,6 +427,9 @@ msgstr "Cuando termine esta descarga:"
 msgid "Do nothing (keep the computer on)"
 msgstr "No hacer nada (dejar el equipo encendido)"
 
+msgid "Shut down the computer"
+msgstr "Apagar el equipo"
+
 msgid "Force programs to close when shutting down"
 msgstr "Forzar el cierre de los programas al apagar"
 
@@ -598,6 +445,9 @@ msgstr "<< Ocultar detalles"
 msgid "Show details >>"
 msgstr "Mostrar detalles >>"
 
+msgid "Next to the clock"
+msgstr "Junto al reloj"
+
 msgid "Pause"
 msgstr "Pausa"
 
@@ -612,9 +462,6 @@ msgstr "N.º"
 
 msgid "Info"
 msgstr "Info"
-
-msgid "Hide next to the clock"
-msgstr "Ocultar junto al reloj"
 
 msgid "Download complete"
 msgstr "Descarga completada"
@@ -639,6 +486,21 @@ msgstr "Nombre del archivo (siempre visible)"
 
 msgid "Q (queue number)"
 msgstr "C (número de cola)"
+
+msgid "Last Try Date"
+msgstr "Último intento"
+
+msgid "Date Added"
+msgstr "Fecha de adición"
+
+msgid "Save To"
+msgstr "Guardar en"
+
+msgid "Referer"
+msgstr "Referente"
+
+msgid "Parent Web Page"
+msgstr "Página web de origen"
 
 msgid "Reset"
 msgstr "Restablecer"
@@ -732,6 +594,12 @@ msgstr "Si está terminado mostrarlo, si no reanudarlo"
 
 msgid "Remember my choice (Options > Downloads)"
 msgstr "Recordar mi elección (Opciones > Descargas)"
+
+msgid "Delete the downloaded files from the disk too (be careful)"
+msgstr "Borrar también los archivos descargados del disco (cuidado)"
+
+msgid "Don't show this question again"
+msgstr "No volver a mostrar esta pregunta"
 
 msgid "All downloads are finished."
 msgstr "Todas las descargas han terminado."
@@ -928,6 +796,9 @@ msgstr "Explorando…"
 msgid "Type a start page and click \"Start exploring\"."
 msgstr "Escriba una página de inicio y haga clic en \"Empezar a explorar\"."
 
+msgid "Save to"
+msgstr "Guardar en"
+
 msgid "Use link texts as descriptions"
 msgstr "Usar el texto de los enlaces como descripción"
 
@@ -982,6 +853,9 @@ msgstr "General"
 msgid "File Types"
 msgstr "Tipos de archivo"
 
+msgid "Downloads"
+msgstr "Descargas"
+
 msgid "Connection"
 msgstr "Conexión"
 
@@ -999,6 +873,9 @@ msgstr "Apariencia"
 
 msgid "Torrents"
 msgstr "Torrents"
+
+msgid "Theme"
+msgstr "Tema"
 
 msgid "Window opacity"
 msgstr "Opacidad de la ventana"
@@ -1035,6 +912,9 @@ msgstr "Vigilar el portapapeles en busca de enlaces de descarga"
 
 msgid "Automatically start downloading links placed in the clipboard"
 msgstr "Iniciar automáticamente los enlaces copiados al portapapeles"
+
+msgid "Draw the windows with the graphics card (uses more memory; after a restart)"
+msgstr "Dibujar las ventanas con la tarjeta gráfica (más memoria; tras reiniciar)"
 
 msgid "Show \"Tip of the day\" at startup"
 msgstr "Mostrar el \"Consejo del día\" al iniciar"
@@ -1128,6 +1008,15 @@ msgstr "Mostrar la ventana \"Información del archivo\" para las descargas del n
 
 msgid "Start downloading immediately while showing \"Download File Info\""
 msgstr "Empezar a descargar en seguida mientras se muestra \"Información del archivo\""
+
+msgid "Ask before removing downloads from the list"
+msgstr "Preguntar antes de quitar descargas de la lista"
+
+msgid "Quality of MP3 files"
+msgstr "Calidad de los archivos MP3"
+
+msgid "Download the subtitles of videos too, in these languages:"
+msgstr "Descargar también los subtítulos de los vídeos, en estos idiomas:"
 
 msgid "Show the download progress window"
 msgstr "Mostrar la ventana de progreso"
@@ -1312,6 +1201,9 @@ msgstr "magnet:?xt=urn:btih:…  o  C:\\…\\file.torrent"
 msgid "Open .torrent file…"
 msgstr "Abrir archivo .torrent…"
 
+msgid "File"
+msgstr "Archivo"
+
 msgid "A magnet link brings its file list from the other computers when it starts: all its files are downloaded."
 msgstr "Un enlace magnet trae su lista de archivos de los otros equipos al empezar: se descargan todos sus archivos."
 
@@ -1399,74 +1291,11 @@ msgstr "Copiar la ruta de la carpeta"
 msgid "Version {}"
 msgstr "Versión {}"
 
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "Gestor de descargas para Windows, con el aspecto de NetLAB."
+
 msgid "What's new in EdsDown"
 msgstr "Novedades de EdsDown"
 
 msgid "Hide"
 msgstr "Ocultar"
-
-msgid "NetLAB dark"
-msgstr "NetLAB oscuro"
-
-msgid "NetLAB light"
-msgstr "NetLAB claro"
-
-msgid "Shut down"
-msgstr "Apagar"
-
-msgid "Export / Import"
-msgstr "Exportar / Importar"
-
-msgid "Back"
-msgstr "Volver"
-
-msgid "New category…"
-msgstr "Nueva categoría…"
-
-msgid "DOWNLOADING NOW"
-msgstr "DESCARGANDO AHORA"
-
-msgid "Nothing downloading right now ✓"
-msgstr "Nada descargando ahora ✓"
-
-msgid "TODAY"
-msgstr "HOY"
-
-msgid "finished"
-msgstr "terminadas"
-
-msgid "downloaded"
-msgstr "descargados"
-
-msgid "QUEUES"
-msgstr "COLAS"
-
-msgid "{} downloading"
-msgstr "{} descargando"
-
-msgid "Idle"
-msgstr "En reposo"
-
-msgid "Limiter on"
-msgstr "Limitador activado"
-
-msgid "No speed limit"
-msgstr "Sin límite"
-
-msgid "Browser connected"
-msgstr "Navegador conectado"
-
-msgid "Browser not connected"
-msgstr "Navegador desconectado"
-
-msgid "All"
-msgstr "Todo"
-
-msgid "In progress"
-msgstr "En curso"
-
-msgid "FINISHED"
-msgstr "TERMINADAS"
-
-msgid "Download manager for Windows, in the look of NetLAB."
-msgstr "Gestor de descargas para Windows, con el aspecto de NetLAB."

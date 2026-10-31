@@ -492,4 +492,11 @@ AR = {
     "Hide next to the clock": "إخفاء بجوار الساعة",
     "What's new in EdsDown": "الجديد في EdsDown",
     "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "بعض الصفحات تصنع روابطها داخل المتصفح فقط (بالسكربتات، أو كنص عادي). لهذه الصفحات: افتح الصفحة في المتصفح، واضغط عليها بزر الفأرة الأيمن واختر \\\"Download all links with EdsDown\\\": كل رابط تراه هناك يُجمع.",
+    "Ask before removing downloads from the list": "السؤال قبل إزالة التحميلات من القائمة",
+    "Delete the downloaded files from the disk too (be careful)": "حذف الملفات المحمَّلة من القرص أيضًا (انتبه)",
+    "Don't show this question again": "عدم إظهار هذا السؤال مرة أخرى",
+    "Download the subtitles of videos too, in these languages:": "تحميل ترجمة الفيديوهات أيضًا، بهذه اللغات:",
+    "Quality of MP3 files": "جودة ملفات MP3",
+    "Next to the clock": "بجوار الساعة",
+    "Draw the windows with the graphics card (uses more memory; after a restart)": "رسم النوافذ بكارت الشاشة (يستهلك ذاكرة أكثر؛ بعد إعادة التشغيل)",
 }

@@ -272,5 +272,38 @@
   },
   "opened": {
     "message": "Aberto ✔"
+  },
+  "buttonFullscreen": {
+    "message": "Mostrar o botão do vídeo também em tela cheia"
+  },
+  "buttonSolid": {
+    "message": "Transparência do botão"
+  },
+  "chooseQuality": {
+    "message": "escolher a qualidade"
+  },
+  "lookCompact": {
+    "message": "Pequeno (seta + ✕)"
+  },
+  "openVideoFirst": {
+    "message": "Abra o vídeo primeiro (clique no horário ao lado do nome acima do vídeo) e aperte o botão de novo."
+  },
+  "otherQualities": {
+    "message": "Outras qualidades desta transmissão…"
+  },
+  "playForMoment": {
+    "message": "Dê play no vídeo por um instante"
+  },
+  "playForMomentSub": {
+    "message": "As qualidades aparecem aqui assim que ele tocar"
+  },
+  "playThenPress": {
+    "message": "Dê play no vídeo por um instante e aperte o botão de novo."
+  },
+  "streamWord": {
+    "message": "transmissão"
+  },
+  "videoWord": {
+    "message": "Vídeo"
   }
 }

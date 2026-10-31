@@ -260,14 +260,23 @@ fn save_properties(ui: &Ui) {
         d.set_message(format!("{e:#}").into());
         return;
     }
-    let target = PathBuf::from(d.get_save_to().trim());
+    let mut target = PathBuf::from(d.get_save_to().trim());
+    // a name typed without its extension keeps the file's own
+    if let Some(n) = target.file_name().map(|n| crate::with_extension_of(&n.to_string_lossy(), &v.file_name)) {
+        target.set_file_name(n);
+    }
     if !target.as_os_str().is_empty() && target != v.save_path {
         let result = if v.status == Status::Completed {
             // on its own thread: a move to another disk is a copy
             let mgr = ui.ctx.mgr.clone();
             std::thread::spawn(move || {
-                if let Err(e) = mgr.move_file(id, &target) {
+                if let Err(e) = mgr.move_file(id, &target, false) {
                     let text = format!("{e:#}");
+                    let text = if text.contains("is already in that folder") {
+                        crate::i18n::t("A file with this name is already in that folder, so nothing was moved. Choose another name.")
+                    } else {
+                        text
+                    };
                     let _ = slint::invoke_from_event_loop(move || crate::message(&text));
                 }
             });
@@ -357,17 +366,21 @@ pub(crate) fn is_web_address(s: &str) -> bool {
 }
 
 /// What the newest version brings (shown once after an automatic update).
-const WHATS_NEW: [&str; 10] = [
-    "Torrents and magnet links: add them from the ⋯ menu, the dock or the browser add-in.",
-    "Play while downloading: right click a video or audio download > Play while downloading.",
-    "The program has its own small FFmpeg inside: video and sound are joined, MP3 files are made and live streams are saved, with nothing extra to download.",
-    "When the internet drops, downloads wait and continue by themselves when it is back.",
-    "The browser add-in has an on / off switch, a button size from 50% to 200% and six looks to choose from.",
-    "The browser button finds more videos: inside frames, in players that hide them, and streams in several qualities.",
-    "YouTube playlists: \"Download all\" in the add-in's window opens the whole list in the program.",
-    "Arabic: every window now reads from right to left.",
-    "AV1 qualities are offered when a video has them.",
-    "Much less memory and processor work, also with many downloads at once.",
+const WHATS_NEW: [&str; 14] = [
+    "A click on a file link in the browser goes straight to EdsDown: the browser's own Save As window no longer opens.",
+    "Downloads never wait for ever any more: when a server stops answering, EdsDown asks again by itself, so a file no longer stays at 0 KB/s.",
+    "Big files keep going by themselves when the server has trouble: EdsDown tries again later on its own.",
+    "A link that stops working (expired) is renewed by itself and checked first, then the download goes on from where it was.",
+    "The number of connections changes at once, even while a file downloads, and a connection much slower than the others is made again.",
+    "The windows are drawn without the graphics card: much less memory, and the program no longer closes by itself at start on some computers (Options > General switches it back).",
+    "When EdsDown is open but does not answer, opening it again offers to close it and start it fresh.",
+    "Torrents: .torrent files and magnet links open with EdsDown, and a .torrent file can be dropped on the window.",
+    "Removing downloads can delete their files from the disk too (if you tick it), and the question can be turned off.",
+    "Playlists have 240p and 144p, the MP3 quality can be chosen, and the subtitles of videos can be downloaded too (Options > Downloads).",
+    "The video button in the browser: a small style, hides in full screen, stays closed when you close it, and finds videos in the Facebook feed and on many more sites.",
+    "ffmpeg.exe is downloaded again by itself when an antivirus removed it.",
+    "Changing the folder or the name of a download no longer gives a small broken file, and a moved file never replaces another one.",
+    "The windows keep the size you gave them.",
 ];
 
 thread_local! {
@@ -385,7 +398,7 @@ pub(crate) fn whats_new(ui: &Ui) {
     d.set_items(ModelRc::new(VecModel::from(items)));
     d.on_open_link(|u| {
         if u.starts_with("https://") {
-            let _ = open::that(u.as_str());
+            let _ = open::that_detached(u.as_str());
         }
     });
     let w = d.as_weak();
@@ -736,7 +749,7 @@ pub(crate) fn wire(ui: &Ui) {
                     // only a web page: the address came from the browser or
                     // a list file and must never start a program
                     if is_web_address(&page) {
-                        let _ = open::that(page.trim());
+                        let _ = open::that_detached(page.trim());
                     }
                 }
             });

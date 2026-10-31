@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.3.2 — 2026-10-31
+
+Novidades:
+- Downloads não ficam mais parados em 0 KB/s: se o servidor para de responder, o pedido é refeito sozinho.
+- Erro passageiro do servidor (503, conexão cortada): tenta de novo sozinho mais tarde, sem precisar pausar e retomar.
+- Link expirado: um link novo é buscado e conferido (mesmo arquivo), e o download continua de onde parou.
+- Número de conexões muda na hora, mesmo com o download rodando; uma conexão muito mais lenta que as outras é refeita.
+- Janelas desenhadas pelo processador por padrão: bem menos memória e o programa não fecha mais sozinho ao abrir em alguns PCs (Opções > Geral volta a usar a placa de vídeo).
+- Janela de download com a barra de título do Windows (botões respondem no lugar certo no Windows 10 e 11); as janelas guardam o tamanho.
+- Programa travado: abrir o EdsDown de novo oferece fechar o travado e iniciar limpo. A atualização mostra uma janelinha e não fica fechando o programa em loop.
+- Remover downloads pode apagar os arquivos do disco também, e a pergunta pode ser desligada.
+- Playlists com 240p e 144p, qualidade do MP3 nas opções e legendas dos vídeos (Opções > Downloads).
+- O ffmpeg.exe é baixado de novo sozinho se um antivírus apagar.
+- Torrent: arquivos .torrent e links magnet abrem com o EdsDown e dá para arrastar um .torrent para a janela.
+- Tudo em português, inclusive a janela "O que há de novo" e as mensagens de erro do download.
+
+Extensão:
+- Clique em link de arquivo vai direto para o EdsDown, sem a janela "Salvar como" do navegador. Links .torrent continuam sendo salvos pelo navegador e abertos na janela de torrent.
+- Botão de vídeo: estilo pequeno (seta + ✕), transparência ajustável, some em tela cheia (opcional) e continua fechado quando você fecha.
+- Acha vídeos no feed do Facebook e as qualidades de transmissões em muito mais sites.
+
 ## 0.3.1 — 2026-10-28
 
 Novidades:

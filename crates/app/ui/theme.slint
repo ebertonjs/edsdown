@@ -8,6 +8,9 @@ export global Theme {
     out property <bool> netlab: true;
     // Options > Appearance > Text size / Font
     in-out property <float> font-scale: 1.0;
+    // false when the windows are drawn by the processor: it can't round a
+    // gradient, so rounded buttons use one plain color there
+    in-out property <bool> gradients: true;
     in-out property <string> font-family: "";
     // the program's language is written in Latin letters (Inter has no
     // Cyrillic / Arabic here)

@@ -150,7 +150,7 @@ export component Button inherits Rectangle {
     height: 32px;
     horizontal-stretch: 0;
     border-radius: 16px;
-    background: root.primary ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%)
+    background: root.primary ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f)
         : ta.pressed ? Theme.btn-press : ta.has-hover ? Theme.btn-hover : Theme.btn;
     border-width: root.primary ? 0px : 1px;
     border-color: Theme.stroke;
@@ -221,7 +221,7 @@ export component CheckBox inherits Rectangle {
         width: 18px;
         height: 18px;
         border-radius: 6px;
-        background: root.checked ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
+        background: root.checked ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f) : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
         border-width: root.checked ? 0px : 1.5px;
         border-color: Theme.dark ? #ffffff40 : #1c233340;
         if root.checked: Ico {
@@ -332,6 +332,8 @@ export component ToolBtn inherits Rectangle {
     // small buttons: every one fits a 960 px wide window
     width: root.small ? 34px : 56px;
     height: root.small ? 34px : 52px;
+    // a name that is still too long never covers the next button
+    clip: true;
     border-radius: Theme.netlab ? 10px : 3px;
     border-width: ta.has-hover && root.enabled ? 1px : 0px;
     border-color: Theme.select-line;
@@ -490,6 +492,9 @@ export component TreeItem inherits Rectangle {
             }
         }
         Text {
+            // a long name is cut ("…"), it never makes the window wider
+            min-width: 0px;
+            horizontal-alignment: Theme.rtl ? TextHorizontalAlignment.right : TextHorizontalAlignment.left;
             text: root.text;
             vertical-alignment: center;
             horizontal-stretch: 1;
@@ -601,6 +606,8 @@ export component HeaderCell inherits Rectangle {
 }
 
 export component Cell inherits Text {
+    // cut with "…" in its column, never wider than the column
+    min-width: 0px;
     vertical-alignment: center;
     font-size: 12px * Theme.font-scale;
     color: Theme.text;
@@ -644,6 +651,8 @@ export component MenuEntry inherits Rectangle {
             }
         }
         Text {
+            // a long name is cut ("…"), it never makes the window wider
+            min-width: 0px;
             text: root.text;
             color: Theme.text;
             horizontal-alignment: Theme.rtl ? TextHorizontalAlignment.right : TextHorizontalAlignment.left;

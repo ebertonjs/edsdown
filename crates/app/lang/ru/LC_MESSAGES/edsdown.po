@@ -4,51 +4,6 @@ msgstr ""
 "Language: ru\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Download a file from an address you type or paste (Ctrl+N)."
-msgstr "Скачать файл по введённому или вставленному адресу (Ctrl+N)."
-
-msgid "Download many links at once, or numbered files from one address (Ctrl+B)."
-msgstr "Скачать много ссылок сразу или пронумерованные файлы с одного адреса (Ctrl+B)."
-
-msgid "Continue the selected downloads from where they stopped."
-msgstr "Продолжить выбранные загрузки с того места, где они остановились."
-
-msgid "Pause the selected downloads; they can be resumed later."
-msgstr "Приостановить выбранные загрузки; их можно продолжить позже."
-
-msgid "Pause every running download."
-msgstr "Приостановить все идущие загрузки."
-
-msgid "Remove the selected downloads from the list. The files stay on your computer."
-msgstr "Убрать выбранные загрузки из списка. Файлы остаются на компьютере."
-
-msgid "Remove all finished downloads from the list. The files stay on your computer."
-msgstr "Убрать из списка все завершённые загрузки. Файлы остаются на компьютере."
-
-msgid "All the settings of the program."
-msgstr "Все настройки программы."
-
-msgid "Start or stop queues at the times you choose."
-msgstr "Запускать или останавливать очереди в выбранное время."
-
-msgid "Limit the download speed so the internet stays usable for other things."
-msgstr "Ограничить скорость, чтобы интернетом можно было пользоваться для другого."
-
-msgid "Start the files of a queue, one after another."
-msgstr "Запустить файлы очереди один за другим."
-
-msgid "Stop the files of a queue."
-msgstr "Остановить файлы очереди."
-
-msgid "Collect the files of a web site: pictures, videos, archives…"
-msgstr "Собрать файлы сайта: картинки, видео, архивы…"
-
-msgid "Download all or some videos of a playlist."
-msgstr "Скачать все или некоторые видео плейлиста."
-
-msgid "Download a .torrent file or a magnet link."
-msgstr "Скачать файл .torrent или magnet-ссылку."
-
 msgid "{} downloads selected"
 msgstr "Выбрано загрузок: {}"
 
@@ -61,11 +16,11 @@ msgstr "Показать ход загрузки"
 msgid "Open with…"
 msgstr "Открыть с помощью…"
 
-msgid "Play while downloading"
-msgstr "Воспроизвести во время загрузки"
-
 msgid "Open folder"
 msgstr "Открыть папку"
+
+msgid "Play while downloading"
+msgstr "Воспроизвести во время загрузки"
 
 msgid "Resume download"
 msgstr "Продолжить загрузку"
@@ -100,38 +55,35 @@ msgstr "Свойства"
 msgid "Remove"
 msgstr "Убрать"
 
-msgid "Start queue"
-msgstr "Запустить очередь"
-
 msgid "Stop queue"
 msgstr "Остановить очередь"
 
-msgid "Edit queue / schedule…"
-msgstr "Изменить очередь / расписание…"
-
-msgid "New queue…"
-msgstr "Новая очередь…"
-
-msgid "Delete queue"
-msgstr "Удалить очередь"
-
-msgid "Add category…"
-msgstr "Добавить категорию…"
-
-msgid "Delete category"
-msgstr "Удалить категорию"
-
-msgid "Properties…"
-msgstr "Свойства…"
+msgid "Start queue"
+msgstr "Запустить очередь"
 
 msgid "EdsDown"
 msgstr "EdsDown"
 
-msgid "File Name"
-msgstr "Имя файла"
+msgid "Shut down"
+msgstr "Выключить"
 
-msgid "Q"
-msgstr "О"
+msgid "Sleep"
+msgstr "Спящий режим"
+
+msgid "Exit EdsDown"
+msgstr "Выйти из EdsDown"
+
+msgid "Hibernate"
+msgstr "Гибернация"
+
+msgid "Do nothing"
+msgstr "Ничего не делать"
+
+msgid "By order of addition"
+msgstr "По порядку добавления"
+
+msgid "File name"
+msgstr "Имя файла"
 
 msgid "Size"
 msgstr "Размер"
@@ -145,44 +97,65 @@ msgstr "Осталось"
 msgid "Transfer rate"
 msgstr "Скорость"
 
-msgid "Last Try Date"
+msgid "Last try date"
 msgstr "Последняя попытка"
 
-msgid "Description"
-msgstr "Описание"
+msgid "Resume all"
+msgstr "Продолжить все"
 
-msgid "Date Added"
-msgstr "Дата добавления"
+msgid "Stop all"
+msgstr "Остановить все"
 
-msgid "Save To"
-msgstr "Сохранить в"
+msgid "Delete all completed"
+msgstr "Удалить все завершённые"
 
-msgid "Referer"
-msgstr "Реферер"
-
-msgid "Parent Web Page"
-msgstr "Исходная веб-страница"
-
-msgid "Tasks"
-msgstr "Задачи"
-
-msgid "Add new download…"
-msgstr "Добавить загрузку…"
-
-msgid "Add batch download…"
-msgstr "Добавить пакетную загрузку…"
+msgid "Add a torrent / magnet link…"
+msgstr "Добавить торрент / magnet-ссылку…"
 
 msgid "Add batch download from clipboard"
 msgstr "Пакетная загрузка из буфера обмена"
 
-msgid "Run site grabber…"
-msgstr "Запустить сборщик сайтов…"
+msgid "Find…   Ctrl+F"
+msgstr "Найти…   Ctrl+F"
 
-msgid "Download a playlist…"
-msgstr "Скачать плейлист…"
+msgid "Open download folder"
+msgstr "Открыть папку загрузок"
 
-msgid "Add a torrent / magnet link…"
-msgstr "Добавить торрент / magnet-ссылку…"
+msgid "Export / Import"
+msgstr "Экспорт / Импорт"
+
+msgid "When all downloads finish"
+msgstr "Когда все загрузки завершатся"
+
+msgid "Arrange files"
+msgstr "Упорядочить файлы"
+
+msgid "Language"
+msgstr "Язык"
+
+msgid "Appearance…"
+msgstr "Оформление…"
+
+msgid "Add EdsDown to my browser…"
+msgstr "Добавить EdsDown в мой браузер…"
+
+msgid "Tip of the day…"
+msgstr "Совет дня…"
+
+msgid "Check for updates"
+msgstr "Проверить обновления"
+
+msgid "Check for updates (video downloader)"
+msgstr "Проверить обновления (загрузчик видео)"
+
+msgid "About EdsDown"
+msgstr "О программе EdsDown"
+
+msgid "Exit"
+msgstr "Выход"
+
+msgid "Back"
+msgstr "Назад"
 
 msgid "Export"
 msgstr "Экспорт"
@@ -202,170 +175,92 @@ msgstr "Из файла списка загрузок (.ef2)…"
 msgid "From text file…"
 msgstr "Из текстового файла…"
 
-msgid "Open download folder"
-msgstr "Открыть папку загрузок"
+msgid "Delete"
+msgstr "Удалить"
 
-msgid "Exit"
-msgstr "Выход"
+msgid "New category…"
+msgstr "Новая категория…"
 
-msgid "File"
-msgstr "Файл"
+msgid "Edit"
+msgstr "Изменить"
 
-msgid "Download now"
-msgstr "Скачать сейчас"
+msgid "DOWNLOADING NOW"
+msgstr "СЕЙЧАС ЗАГРУЖАЕТСЯ"
 
-msgid "Select all   Ctrl+A"
-msgstr "Выделить всё   Ctrl+A"
+msgid "Nothing downloading right now ✓"
+msgstr "Сейчас ничего не загружается ✓"
 
-msgid "Downloads"
-msgstr "Загрузки"
+msgid "TODAY"
+msgstr "СЕГОДНЯ"
 
-msgid "Resume all"
-msgstr "Продолжить все"
+msgid "finished"
+msgstr "завершено"
 
-msgid "Stop all"
-msgstr "Остановить все"
+msgid "downloaded"
+msgstr "загружено"
 
-msgid "Delete all completed"
-msgstr "Удалить все завершённые"
+msgid "QUEUES"
+msgstr "ОЧЕРЕДИ"
 
-msgid "Find…   Ctrl+F"
-msgstr "Найти…   Ctrl+F"
+msgid "New queue"
+msgstr "Новая очередь"
 
-msgid "Find next   F3"
-msgstr "Найти далее   F3"
+msgid "{} downloading"
+msgstr "Загружается: {}"
 
-msgid "Speed Limiter"
-msgstr "Ограничитель скорости"
+msgid "Idle"
+msgstr "Ожидание"
 
-msgid "Turn on"
-msgstr "Включить"
+msgid "Limiter on"
+msgstr "Ограничитель включён"
 
-msgid "Turn off"
-msgstr "Выключить"
+msgid "No speed limit"
+msgstr "Без ограничения"
 
-msgid "Settings…"
-msgstr "Настройки…"
+msgid "Browser connected"
+msgstr "Браузер подключён"
 
-msgid "When all downloads finish"
-msgstr "Когда все загрузки завершатся"
+msgid "Browser not connected"
+msgstr "Браузер не подключён"
 
-msgid "Do nothing"
-msgstr "Ничего не делать"
+msgid "Filter the list…"
+msgstr "Фильтр списка…"
 
-msgid "Shut down the computer"
-msgstr "Выключить компьютер"
+msgid "NetLAB light"
+msgstr "NetLAB светлая"
 
-msgid "Sleep"
-msgstr "Спящий режим"
+msgid "NetLAB dark"
+msgstr "NetLAB тёмная"
 
-msgid "Hibernate"
-msgstr "Гибернация"
+msgid "All"
+msgstr "Все"
 
-msgid "Exit EdsDown"
-msgstr "Выйти из EdsDown"
+msgid "In progress"
+msgstr "В процессе"
 
-msgid "Scheduler…"
-msgstr "Планировщик…"
+msgid "Finished"
+msgstr "Завершённые"
 
-msgid "Options…"
-msgstr "Параметры…"
+msgid "Category"
+msgstr "Категория"
 
-msgid "View"
-msgstr "Вид"
+msgid "FINISHED"
+msgstr "ЗАВЕРШЕНО"
 
-msgid "Show categories"
-msgstr "Показывать категории"
+msgid "Nothing matches “{}”."
+msgstr "Ничего не найдено по «{}»."
 
-msgid "Arrange files"
-msgstr "Упорядочить файлы"
-
-msgid "By order of addition"
-msgstr "По порядку добавления"
-
-msgid "File name"
-msgstr "Имя файла"
-
-msgid "Last try date"
-msgstr "Последняя попытка"
-
-msgid "Save to"
-msgstr "Сохранить в"
-
-msgid "Parent web page"
-msgstr "Исходная веб-страница"
-
-msgid "Toolbar"
-msgstr "Панель инструментов"
-
-msgid "Large buttons"
-msgstr "Большие кнопки"
-
-msgid "Small buttons"
-msgstr "Маленькие кнопки"
-
-msgid "Columns…"
-msgstr "Столбцы…"
-
-msgid "Language"
-msgstr "Язык"
-
-msgid "Theme"
-msgstr "Тема"
-
-msgid "Light"
-msgstr "Светлая"
-
-msgid "Dark"
-msgstr "Тёмная"
-
-msgid "Ocean blue"
-msgstr "Синий океан"
-
-msgid "Midnight purple"
-msgstr "Полуночный фиолетовый"
-
-msgid "Forest green"
-msgstr "Зелёный лес"
-
-msgid "Black"
-msgstr "Чёрная"
-
-msgid "Sunset"
-msgstr "Закат"
-
-msgid "Teal night"
-msgstr "Бирюзовая ночь"
-
-msgid "Rose"
-msgstr "Розовая"
-
-msgid "Appearance…"
-msgstr "Оформление…"
-
-msgid "Help"
-msgstr "Справка"
-
-msgid "Add EdsDown to my browser…"
-msgstr "Добавить EdsDown в мой браузер…"
-
-msgid "Tip of the day…"
-msgstr "Совет дня…"
-
-msgid "Check for updates"
-msgstr "Проверить обновления"
-
-msgid "Check for updates (video downloader)"
-msgstr "Проверить обновления (загрузчик видео)"
-
-msgid "About EdsDown"
-msgstr "О программе EdsDown"
+msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
+msgstr "Здесь нет загрузок.\nНажмите «Добавить URL», скопируйте ссылку или скачайте что-нибудь в браузере."
 
 msgid "Add URL"
 msgstr "Добавить URL"
 
 msgid "Add Batch"
 msgstr "Пакет"
+
+msgid "Torrent"
+msgstr "Торрент"
 
 msgid "Resume"
 msgstr "Продолжить"
@@ -376,29 +271,11 @@ msgstr "Стоп"
 msgid "Stop All"
 msgstr "Стоп все"
 
-msgid "Delete"
-msgstr "Удалить"
-
-msgid "Delete Done"
-msgstr "Удалить готовые"
-
-msgid "Options"
-msgstr "Параметры"
-
 msgid "Scheduler"
 msgstr "Планировщик"
 
-msgid "Limiter: On"
-msgstr "Ограничитель: вкл"
-
-msgid "Limiter: Off"
-msgstr "Ограничитель: выкл"
-
-msgid "Start Queue"
-msgstr "Запуск очереди"
-
-msgid "Stop Queue"
-msgstr "Стоп очереди"
+msgid "Speed Limiter"
+msgstr "Ограничитель скорости"
 
 msgid "Grabber"
 msgstr "Сборщик"
@@ -406,41 +283,8 @@ msgstr "Сборщик"
 msgid "Playlist"
 msgstr "Плейлист"
 
-msgid "Torrent"
-msgstr "Торрент"
-
-msgid "Filter the list…"
-msgstr "Фильтр списка…"
-
-msgid "Categories"
-msgstr "Категории"
-
-msgid "All Downloads"
-msgstr "Все загрузки"
-
-msgid "Unfinished"
-msgstr "Незавершённые"
-
-msgid "Finished"
-msgstr "Завершённые"
-
-msgid "Queues"
-msgstr "Очереди"
-
-msgid "{} (running)"
-msgstr "{} (выполняется)"
-
-msgid "New queue"
-msgstr "Новая очередь"
-
-msgid "Edit"
-msgstr "Изменить"
-
-msgid "Nothing matches “{}”."
-msgstr "Ничего не найдено по «{}»."
-
-msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
-msgstr "Здесь нет загрузок.\nНажмите «Добавить URL», скопируйте ссылку или скачайте что-нибудь в браузере."
+msgid "Options"
+msgstr "Параметры"
 
 msgid "Download File Info"
 msgstr "Сведения о файле"
@@ -454,14 +298,14 @@ msgstr "https://example.com/file"
 msgid "Check"
 msgstr "Проверить"
 
-msgid "Category"
-msgstr "Категория"
-
 msgid "Save As"
 msgstr "Сохранить как"
 
 msgid "Remember this path for \"{}\" category"
 msgstr "Запомнить этот путь для категории \"{}\""
+
+msgid "Description"
+msgstr "Описание"
 
 msgid "optional note"
 msgstr "примечание (необязательно)"
@@ -583,6 +427,9 @@ msgstr "Когда эта загрузка завершится:"
 msgid "Do nothing (keep the computer on)"
 msgstr "Ничего не делать (не выключать компьютер)"
 
+msgid "Shut down the computer"
+msgstr "Выключить компьютер"
+
 msgid "Force programs to close when shutting down"
 msgstr "Принудительно закрывать программы при выключении"
 
@@ -598,6 +445,9 @@ msgstr "<< Скрыть подробности"
 msgid "Show details >>"
 msgstr "Подробнее >>"
 
+msgid "Next to the clock"
+msgstr "К часам"
+
 msgid "Pause"
 msgstr "Пауза"
 
@@ -612,9 +462,6 @@ msgstr "№"
 
 msgid "Info"
 msgstr "Инфо"
-
-msgid "Hide next to the clock"
-msgstr "Спрятать к часам"
 
 msgid "Download complete"
 msgstr "Загрузка завершена"
@@ -639,6 +486,21 @@ msgstr "Имя файла (всегда показывается)"
 
 msgid "Q (queue number)"
 msgstr "О (номер очереди)"
+
+msgid "Last Try Date"
+msgstr "Последняя попытка"
+
+msgid "Date Added"
+msgstr "Дата добавления"
+
+msgid "Save To"
+msgstr "Сохранить в"
+
+msgid "Referer"
+msgstr "Реферер"
+
+msgid "Parent Web Page"
+msgstr "Исходная веб-страница"
 
 msgid "Reset"
 msgstr "Сбросить"
@@ -732,6 +594,12 @@ msgstr "Если завершена — показать, если нет — п
 
 msgid "Remember my choice (Options > Downloads)"
 msgstr "Запомнить мой выбор (Параметры > Загрузки)"
+
+msgid "Delete the downloaded files from the disk too (be careful)"
+msgstr "Удалить и скачанные файлы с диска (осторожно)"
+
+msgid "Don't show this question again"
+msgstr "Больше не задавать этот вопрос"
 
 msgid "All downloads are finished."
 msgstr "Все загрузки завершены."
@@ -928,6 +796,9 @@ msgstr "Обход…"
 msgid "Type a start page and click \"Start exploring\"."
 msgstr "Введите начальную страницу и нажмите \"Начать обход\"."
 
+msgid "Save to"
+msgstr "Сохранить в"
+
 msgid "Use link texts as descriptions"
 msgstr "Использовать текст ссылок как описание"
 
@@ -982,6 +853,9 @@ msgstr "Общие"
 msgid "File Types"
 msgstr "Типы файлов"
 
+msgid "Downloads"
+msgstr "Загрузки"
+
 msgid "Connection"
 msgstr "Соединение"
 
@@ -999,6 +873,9 @@ msgstr "Оформление"
 
 msgid "Torrents"
 msgstr "Торренты"
+
+msgid "Theme"
+msgstr "Тема"
 
 msgid "Window opacity"
 msgstr "Непрозрачность окна"
@@ -1035,6 +912,9 @@ msgstr "Следить за буфером обмена на ссылки для
 
 msgid "Automatically start downloading links placed in the clipboard"
 msgstr "Автоматически скачивать ссылки, попавшие в буфер обмена"
+
+msgid "Draw the windows with the graphics card (uses more memory; after a restart)"
+msgstr "Рисовать окна видеокартой (больше памяти; после перезапуска)"
 
 msgid "Show \"Tip of the day\" at startup"
 msgstr "Показывать \"Совет дня\" при запуске"
@@ -1128,6 +1008,15 @@ msgstr "Показывать окно \"Сведения о файле\" для 
 
 msgid "Start downloading immediately while showing \"Download File Info\""
 msgstr "Сразу начинать загрузку, показывая \"Сведения о файле\""
+
+msgid "Ask before removing downloads from the list"
+msgstr "Спрашивать перед удалением загрузок из списка"
+
+msgid "Quality of MP3 files"
+msgstr "Качество файлов MP3"
+
+msgid "Download the subtitles of videos too, in these languages:"
+msgstr "Скачивать и субтитры видео на этих языках:"
 
 msgid "Show the download progress window"
 msgstr "Показывать окно хода загрузки"
@@ -1312,6 +1201,9 @@ msgstr "magnet:?xt=urn:btih:…  или  C:\\…\\file.torrent"
 msgid "Open .torrent file…"
 msgstr "Открыть файл .torrent…"
 
+msgid "File"
+msgstr "Файл"
+
 msgid "A magnet link brings its file list from the other computers when it starts: all its files are downloaded."
 msgstr "Magnet-ссылка получает список файлов от других компьютеров при запуске: скачиваются все её файлы."
 
@@ -1399,74 +1291,11 @@ msgstr "Копировать путь к папке"
 msgid "Version {}"
 msgstr "Версия {}"
 
+msgid "Download manager for Windows, in the look of NetLAB."
+msgstr "Менеджер загрузок для Windows в стиле NetLAB."
+
 msgid "What's new in EdsDown"
 msgstr "Что нового в EdsDown"
 
 msgid "Hide"
 msgstr "Скрыть"
-
-msgid "NetLAB dark"
-msgstr "NetLAB тёмная"
-
-msgid "NetLAB light"
-msgstr "NetLAB светлая"
-
-msgid "Shut down"
-msgstr "Выключить"
-
-msgid "Export / Import"
-msgstr "Экспорт / Импорт"
-
-msgid "Back"
-msgstr "Назад"
-
-msgid "New category…"
-msgstr "Новая категория…"
-
-msgid "DOWNLOADING NOW"
-msgstr "СЕЙЧАС ЗАГРУЖАЕТСЯ"
-
-msgid "Nothing downloading right now ✓"
-msgstr "Сейчас ничего не загружается ✓"
-
-msgid "TODAY"
-msgstr "СЕГОДНЯ"
-
-msgid "finished"
-msgstr "завершено"
-
-msgid "downloaded"
-msgstr "загружено"
-
-msgid "QUEUES"
-msgstr "ОЧЕРЕДИ"
-
-msgid "{} downloading"
-msgstr "Загружается: {}"
-
-msgid "Idle"
-msgstr "Ожидание"
-
-msgid "Limiter on"
-msgstr "Ограничитель включён"
-
-msgid "No speed limit"
-msgstr "Без ограничения"
-
-msgid "Browser connected"
-msgstr "Браузер подключён"
-
-msgid "Browser not connected"
-msgstr "Браузер не подключён"
-
-msgid "All"
-msgstr "Все"
-
-msgid "In progress"
-msgstr "В процессе"
-
-msgid "FINISHED"
-msgstr "ЗАВЕРШЕНО"
-
-msgid "Download manager for Windows, in the look of NetLAB."
-msgstr "Менеджер загрузок для Windows в стиле NetLAB."

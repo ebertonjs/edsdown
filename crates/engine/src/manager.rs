@@ -94,6 +94,9 @@ pub struct Manager {
     settings_gen: std::sync::atomic::AtomicU64,
     /// the hidden torrent program (started when the first torrent runs)
     torrents: Arc<torrent::Aria2>,
+    /// downloads whose link stopped working: the next start gets a new link
+    /// and goes on only when it is the same file (size, ranges)
+    relink: Mutex<HashSet<DownloadId>>,
 }
 
 /// Default place for settings.json and downloads.json
@@ -104,10 +107,24 @@ pub fn default_data_dir() -> PathBuf {
         .unwrap_or_else(|| PathBuf::from("edsdown-data"))
 }
 
+/// The new link of a download whose old link stopped working gives the same
+/// file: as big as before, a web page it is not, and it takes part requests.
+fn same_file(p: &ProbeResult, size: Option<u64>) -> anyhow::Result<()> {
+    if p.is_web_page() || !p.resumable || size.is_none() || p.total_size != size {
+        anyhow::bail!(
+            "the new link is not the same file ({} instead of {}) - nothing was written; use \"Refresh download address\"",
+            p.total_size.map(|n| n.to_string()).unwrap_or_else(|| "unknown size".into()),
+            size.map(|n| n.to_string()).unwrap_or_else(|| "unknown".into())
+        );
+    }
+    Ok(())
+}
+
 impl Manager {
     pub fn new(rt: Handle, data_dir: PathBuf) -> anyhow::Result<Arc<Manager>> {
         std::fs::create_dir_all(&data_dir)?;
         let settings = Settings::load(&data_dir.join("settings.json"));
+        ytdlp::set_mp3_kbps(settings.mp3_kbps);
         settings.create_folders();
         let proxy = ProxyConfig::from_settings(&settings);
         // a broken manual proxy must not keep the app from starting
@@ -173,6 +190,7 @@ impl Manager {
             data_dir,
             saving: std::sync::atomic::AtomicBool::new(false),
             settings_gen: std::sync::atomic::AtomicU64::new(0),
+            relink: Mutex::new(HashSet::new()),
         });
 
         for q in startup_queues {
@@ -196,7 +214,23 @@ impl Manager {
     }
 
     pub fn set_settings(self: &Arc<Self>, s: Settings) -> anyhow::Result<()> {
+        let before = self.settings.read().unwrap().connections();
+        if s.connections() != before {
+            // Options > connections: every download that is not finished takes
+            // the new number, a running one at once (no restart)
+            let mut inner = self.inner.lock().unwrap();
+            for e in inner.entries.values_mut() {
+                if e.rec.status == Status::Completed || e.rec.kind == DownloadKind::Torrent {
+                    continue;
+                }
+                let n = s.connections_for(&e.rec.url, s.connections());
+                e.rec.connections = n;
+                e.progress.want_connections.store(n, Ordering::Relaxed);
+            }
+            inner.dirty = true;
+        }
         self.shared.limiter.set_rate(s.effective_limit());
+        ytdlp::set_mp3_kbps(s.mp3_kbps);
         let proxy = ProxyConfig::from_settings(&s);
         if *self.proxy.lock().unwrap() != proxy {
             self.shared.set_client(build_client_with(&proxy)?);
@@ -226,6 +260,35 @@ impl Manager {
     }
 
     /// The HTTP client (with the proxy settings), for the site grabber.
+    /// A .torrent file from a web address (a link clicked in the browser):
+    /// fetched at once and kept in our data folder, so the torrent window can
+    /// show what it shares. Never more than a few MB, and only a real
+    /// torrent file is kept.
+    pub async fn fetch_torrent_file(&self, url: &str, headers: &RequestHeaders) -> anyhow::Result<PathBuf> {
+        const MAX: usize = 16 << 20;
+        let ua = self.settings().user_agent.clone();
+        let mut resp = http::request(&self.client(), url, headers, &ua).send().await?.error_for_status()?;
+        if resp.content_length().is_some_and(|n| n > MAX as u64) {
+            anyhow::bail!("too big for a .torrent file");
+        }
+        let mut data = Vec::new();
+        while let Some(chunk) = resp.chunk().await? {
+            data.extend_from_slice(&chunk);
+            if data.len() > MAX {
+                anyhow::bail!("too big for a .torrent file");
+            }
+        }
+        let info = torrent::parse_torrent(&data)?;
+        let dir = self.data_dir.join("torrents").join("from-browser");
+        std::fs::create_dir_all(&dir)?;
+        // a name of our own: never a path from the server
+        let stem: String = info.name.chars().filter(|c| c.is_alphanumeric() || " -_.()[]".contains(*c)).take(80).collect();
+        let stem = if stem.trim().is_empty() { "download".to_string() } else { stem.trim().to_string() };
+        let path = dir.join(filename::unique_name(&dir, &format!("{stem}.torrent")));
+        std::fs::write(&path, &data)?;
+        Ok(path)
+    }
+
     pub fn client(&self) -> reqwest::Client {
         self.shared.client()
     }
@@ -544,7 +607,8 @@ impl Manager {
     }
 
     /// Move / rename a finished file ("Save as" for downloads that are done).
-    pub fn move_file(&self, id: DownloadId, new_path: &Path) -> anyhow::Result<()> {
+    /// `replace`: the user agreed to replace a file of that name there.
+    pub fn move_file(&self, id: DownloadId, new_path: &Path, replace: bool) -> anyhow::Result<()> {
         // the list is not held while the file moves: a copy to another disk
         // can take minutes and everything else must go on meanwhile
         let from = {
@@ -555,13 +619,44 @@ impl Manager {
             }
             e.rec.target_path()
         };
+        if from == new_path {
+            return Ok(());
+        }
+        // a file of that name there already is replaced only when the user said so
+        if new_path.exists() && !replace {
+            anyhow::bail!("a file with this name is already in that folder: {}", new_path.display());
+        }
         if let Some(dir) = new_path.parent() {
             std::fs::create_dir_all(dir)?;
         }
-        if std::fs::rename(&from, new_path).is_err() {
-            // another drive: copy, then delete the old one
-            std::fs::copy(&from, new_path)?;
-            std::fs::remove_file(&from)?;
+        if let Err(e) = std::fs::rename(&from, new_path) {
+            if !from.exists() {
+                return Err(e.into());
+            }
+            // another drive: a copy under a passing name first, then the real
+            // name, and only then the old file goes
+            let tmp = new_path.with_file_name(format!(
+                ".{}.edsdown-move",
+                new_path.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default()
+            ));
+            let copied = std::fs::copy(&from, &tmp).and_then(|n| {
+                let same = std::fs::metadata(&from).map(|m| m.len() == n).unwrap_or(false);
+                if same {
+                    Ok(())
+                } else {
+                    Err(std::io::Error::other("the copy is not complete"))
+                }
+            });
+            if let Err(e) = copied.and_then(|_| {
+                if new_path.exists() && !replace {
+                    return Err(std::io::Error::other("a file with this name appeared in that folder"));
+                }
+                std::fs::rename(&tmp, new_path)
+            }) {
+                let _ = std::fs::remove_file(&tmp);
+                return Err(anyhow!("the file could not be moved: {e}"));
+            }
+            let _ = std::fs::remove_file(&from);
         }
         let mut inner = self.inner.lock().unwrap();
         if let Some(e) = inner.entries.get_mut(&id) {
@@ -683,6 +778,13 @@ impl Manager {
                 let name = filename::sanitize(name);
                 if dir != e.rec.save_dir || name != e.rec.file_name {
                     std::fs::create_dir_all(dir)?;
+                    // it may be downloading already (in the folder first
+                    // chosen): its temporary files stay where they are, only
+                    // the finished file goes to the new folder. Without this
+                    // a resumed download wrote a new, nearly empty file there.
+                    if e.rec.work_stem.is_some() && e.rec.temp_dir.as_ref().is_none_or(|t| t.as_os_str().is_empty()) {
+                        e.rec.temp_dir = Some(e.rec.work_dir());
+                    }
                     e.rec.save_dir = dir.to_path_buf();
                     e.rec.file_name = name;
                     e.rec.category = self.settings.read().unwrap().category_of(&e.rec.file_name, &e.rec.url);
@@ -696,7 +798,7 @@ impl Manager {
             let target = dir.join(filename::sanitize(name));
             let current = self.get(id).map(|v| v.save_path).unwrap_or_default();
             if target != current {
-                self.move_file(id, &target)?;
+                self.move_file(id, &target, false)?;
             }
         }
         Ok(())
@@ -1081,16 +1183,58 @@ impl Manager {
     async fn run_entry(self: Arc<Self>, id: DownloadId, cancel: CancellationToken) {
         let progress = self.inner.lock().unwrap().entries.get(&id).map(|e| e.progress.clone());
         let mut tries = 0u32;
+        // server trouble: tries without anything new downloaded in between
+        let mut stuck = 0u32;
+        // new links fetched because the old one stopped working
+        let mut relinks = 0u32;
+        let mut last_bytes = progress.as_ref().map(|p| p.bytes.load(Ordering::Relaxed)).unwrap_or(0);
         let result = loop {
             let r = self.run_download(id, cancel.clone()).await;
-            // no internet when starting (or the whole transfer broke off):
-            // wait in place and try again until it is back or the user stops it
             match (&r, &progress) {
+                // no internet when starting (or the whole transfer broke off):
+                // wait in place and try again until it is back or the user stops it
                 (Err(e), Some(p)) if !cancel.is_cancelled() && !e.is::<Cancelled>() && http::is_network_error(e) => {
                     tries += 1;
                     p.waiting.store(true, Ordering::Relaxed);
                     tokio::select! {
                         _ = tokio::time::sleep(http::reconnect_delay(tries)) => {}
+                        _ = cancel.cancelled() => break Err(Cancelled.into()),
+                    }
+                }
+                // a busy server, a transfer that broke off (big files): it
+                // goes on by itself later, from where it was. Given up only
+                // when many tries in a row brought nothing new (hours).
+                // the link stopped working (expired): a new one, checked before
+                // anything more is written; given up after 6 tries
+                // (a download that got nothing yet: 2 tries, it may never have worked)
+                (Err(e), Some(p))
+                    if !cancel.is_cancelled()
+                        && !e.is::<Cancelled>()
+                        && http::is_link_gone(e)
+                        && relinks < if p.bytes.load(Ordering::Relaxed) > 0 { 6 } else { 2 } =>
+                {
+                    relinks += 1;
+                    self.relink.lock().unwrap().insert(id);
+                    let wait = http::relink_delay(relinks);
+                    let note = format!("the link stopped working - getting a new one in {} s (try {relinks})", wait.as_secs());
+                    self.update(id, move |x| x.error = Some(note));
+                    tokio::select! {
+                        _ = tokio::time::sleep(wait) => {}
+                        _ = cancel.cancelled() => break Err(Cancelled.into()),
+                    }
+                }
+                (Err(e), Some(p)) if !cancel.is_cancelled() && !e.is::<Cancelled>() && http::is_passing_error(e) && self.resumable(id) => {
+                    let now = p.bytes.load(Ordering::Relaxed);
+                    stuck = if now > last_bytes { 1 } else { stuck + 1 };
+                    last_bytes = now;
+                    if stuck > 12 {
+                        break r;
+                    }
+                    let wait = http::retry_delay(stuck);
+                    let note = format!("{e:#} - trying again in {} s", wait.as_secs());
+                    self.update(id, move |x| x.error = Some(note));
+                    tokio::select! {
+                        _ = tokio::time::sleep(wait) => {}
                         _ = cancel.cancelled() => break Err(Cancelled.into()),
                     }
                 }
@@ -1100,6 +1244,7 @@ impl Manager {
         if let Some(p) = &progress {
             p.waiting.store(false, Ordering::Relaxed);
         }
+        self.relink.lock().unwrap().remove(&id);
         {
             let mut inner = self.inner.lock().unwrap();
             let mut finished = false;
@@ -1162,6 +1307,21 @@ impl Manager {
                     }
                 }
             }
+            if finished && settings.subtitles && !settings.subtitle_langs.trim().is_empty() {
+                // a site's video: its subtitles next to it (when there are any)
+                if let Some(e) = inner.entries.get(&id) {
+                    if let (Some(page), DownloadKind::Dash | DownloadKind::Http | DownloadKind::Hls) = (e.rec.source_page.clone(), e.rec.kind) {
+                        let (dir, langs) = (e.rec.save_dir.clone(), settings.subtitle_langs.clone());
+                        let (stem, _) = filename::split_ext(&e.rec.file_name);
+                        let stem = stem.to_string();
+                        if !matches!(filename::extension(&e.rec.file_name).as_str(), "mp3" | "m4a" | "opus" | "ogg") {
+                            self.rt.spawn_blocking(move || {
+                                let _ = ytdlp::fetch_subtitles(&page, &dir, &stem, &langs);
+                            });
+                        }
+                    }
+                }
+            }
             if finished {
                 // before anything can open it: the file comes from the internet
                 if let Some((path, host, referrer)) = &mark {
@@ -1183,6 +1343,12 @@ impl Manager {
             }
         }
         self.pump();
+    }
+
+    /// It can go on from where it stopped (a later try keeps what it has).
+    fn resumable(&self, id: DownloadId) -> bool {
+        let inner = self.inner.lock().unwrap();
+        inner.entries.get(&id).map(|e| e.rec.resumable || e.rec.kind != DownloadKind::Http).unwrap_or(false)
     }
 
     fn update(&self, id: DownloadId, f: impl FnOnce(&mut DownloadRecord)) {
@@ -1225,6 +1391,12 @@ impl Manager {
                 "the address opens a web page, not a file (the link may have expired - use \"Refresh download address\")"
             );
         }
+        // a new link after the old one stopped working: only the same file
+        // (same size, parts can be asked for) goes on from where it was
+        if self.relink.lock().unwrap().contains(&id) && !segs.lock().unwrap().is_empty() {
+            same_file(&p, rec.total_size)?;
+            self.relink.lock().unwrap().remove(&id);
+        }
         {
             let mut table = segs.lock().unwrap();
             let changed = rec.total_size.is_some() && p.total_size != rec.total_size;
@@ -1245,6 +1417,9 @@ impl Manager {
         rec.kind = p.kind;
         rec.server_time = p.last_modified.or(rec.server_time);
         rec.connections = settings.connections_for(&p.final_url, rec.connections);
+        // where it was to go when this start began (the user may choose
+        // another name / folder meanwhile, in "Download File Info")
+        let (was_dir, was_name) = (rec.save_dir.clone(), rec.file_name.clone());
         // added without a name (batch, clipboard): use the server's real name
         // and the matching category folder before the first byte is written
         if rec.auto_name && segs.lock().unwrap().is_empty() && rec.downloaded == 0 && p.file_name != rec.file_name {
@@ -1268,9 +1443,12 @@ impl Manager {
                 x.total_size = r.total_size;
                 x.resumable = r.resumable;
                 x.kind = r.kind;
-                x.file_name = r.file_name;
-                x.save_dir = r.save_dir;
-                x.category = r.category;
+                // only when nobody changed them in the meantime
+                if x.save_dir == was_dir && x.file_name == was_name {
+                    x.file_name = r.file_name;
+                    x.save_dir = r.save_dir;
+                    x.category = r.category;
+                }
                 x.auto_name = false;
                 x.server_time = r.server_time;
                 if x.status == Status::Connecting {
@@ -1328,7 +1506,10 @@ impl Manager {
             let (input, tmp) = (part.clone(), part.with_extension("mp3tmp"));
             let t2 = tmp.clone();
             let title = song_title(&rec.file_name);
-            tokio::task::spawn_blocking(move || mux::to_mp3(&input, &t2, ytdlp::MP3_KBPS, Some(&title))).await??;
+            let kbps = ytdlp::mp3_kbps();
+            // ffmpeg missing: fetched again first
+            crate::tools::restore_ffmpeg(&self.client()).await;
+            tokio::task::spawn_blocking(move || mux::to_mp3(&input, &t2, kbps, Some(&title))).await??;
             std::fs::rename(&tmp, &part)?;
         }
         if rec.kind == DownloadKind::Hls && filename::extension(&rec.file_name) == "ts" && mux::find_ffmpeg().is_some() {
@@ -1337,6 +1518,8 @@ impl Manager {
             progress.assembling.store(true, Ordering::Relaxed);
             let (input, tmp) = (part.clone(), part.with_extension("mp4tmp"));
             let t2 = tmp.clone();
+            // ffmpeg missing: fetched again first
+            crate::tools::restore_ffmpeg(&self.client()).await;
             let made = tokio::task::spawn_blocking(move || mux::ts_to_mp4(&input, &t2)).await.map(|r| r.is_ok()).unwrap_or(false);
             if made && std::fs::rename(&tmp, &part).is_ok() {
                 let (stem, _) = filename::split_ext(&rec.file_name);
@@ -1642,6 +1825,15 @@ impl Manager {
                 _ = cancel.cancelled() => return Err(Cancelled.into()),
             };
             let old_audio = rec.total_size.zip(rec.video_size).map(|(t, v)| t.saturating_sub(v));
+            if self.relink.lock().unwrap().contains(&id) {
+                if !segs.lock().unwrap().is_empty() {
+                    same_file(&vp, rec.video_size)?;
+                }
+                if !audio_segs.lock().unwrap().is_empty() {
+                    same_file(&ap, old_audio)?;
+                }
+                self.relink.lock().unwrap().remove(&id);
+            }
             if vp.total_size != rec.video_size || !vp.resumable {
                 segs.lock().unwrap().clear();
             }
@@ -1714,6 +1906,8 @@ impl Manager {
             rec.part_path(),
             rec.file_name.clone(),
         );
+        // ffmpeg missing: fetched again first
+        crate::tools::restore_ffmpeg(&self.client()).await;
         tokio::task::spawn_blocking(move || mux::merge(&video, &audio, &output, &name)).await??;
         let _ = std::fs::remove_file(rec.video_part_path());
         let _ = std::fs::remove_file(rec.audio_part_path());

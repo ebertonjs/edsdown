@@ -78,12 +78,21 @@
       <span data-i18n="buttonStyle"></span>
       <select id="look">
         <option value="netlab" data-i18n="lookNetlab"></option>
+        <option value="compact" data-i18n="lookCompact"></option>
         <option value="blue" data-i18n="lookBlue"></option>
         <option value="dark" data-i18n="lookDark"></option>
         <option value="light" data-i18n="lookLight"></option>
         <option value="green" data-i18n="lookGreen"></option>
         <option value="icon" data-i18n="lookIcon"></option>
       </select>
+    </div>
+    <div class="row">
+      <span data-i18n="buttonSolid"></span>
+      <input type="range" id="solid" min="20" max="100" step="5" value="90">
+      <output id="solidText">90%</output>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="fullscreen"> <span data-i18n="buttonFullscreen"></span></label>
     </div>
   </div>
   <div class="glass card">

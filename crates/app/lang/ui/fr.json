@@ -493,5 +493,12 @@
  "Audio MP3": "Audio MP3",
  "Hide next to the clock": "Masquer près de l'horloge",
  "What's new in EdsDown": "Nouveautés de EdsDown",
- "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Certaines pages créent leurs liens uniquement dans le navigateur (par scripts, ou en texte simple). Pour elles : ouvrez la page dans le navigateur, faites un clic droit et choisissez \\\"Download all links with EdsDown\\\" : chaque lien visible est collecté."
+ "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Certaines pages créent leurs liens uniquement dans le navigateur (par scripts, ou en texte simple). Pour elles : ouvrez la page dans le navigateur, faites un clic droit et choisissez \\\"Download all links with EdsDown\\\" : chaque lien visible est collecté.",
+ "Ask before removing downloads from the list": "Demander avant de retirer des téléchargements de la liste",
+ "Delete the downloaded files from the disk too (be careful)": "Supprimer aussi les fichiers téléchargés du disque (attention)",
+ "Don't show this question again": "Ne plus poser cette question",
+ "Download the subtitles of videos too, in these languages:": "Télécharger aussi les sous-titres des vidéos, dans ces langues :",
+ "Quality of MP3 files": "Qualité des fichiers MP3",
+ "Next to the clock": "Près de l'horloge",
+ "Draw the windows with the graphics card (uses more memory; after a restart)": "Dessiner les fenêtres avec la carte graphique (plus de mémoire ; après un redémarrage)"
 }

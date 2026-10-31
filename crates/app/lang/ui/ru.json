@@ -493,5 +493,12 @@
  "Audio MP3": "Аудио MP3",
  "Hide next to the clock": "Спрятать к часам",
  "What's new in EdsDown": "Что нового в EdsDown",
- "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Некоторые страницы создают ссылки только в браузере (скриптами или простым текстом). Для них: откройте страницу в браузере, щёлкните правой кнопкой и выберите \\\"Download all links with EdsDown\\\": будет собрана каждая видимая ссылка."
+ "Some pages make their links only in the browser (with scripts, or as plain text). For them: open the page in the browser, right-click it and choose \\\"Download all links with EdsDown\\\": every link you see there is collected.": "Некоторые страницы создают ссылки только в браузере (скриптами или простым текстом). Для них: откройте страницу в браузере, щёлкните правой кнопкой и выберите \\\"Download all links with EdsDown\\\": будет собрана каждая видимая ссылка.",
+ "Ask before removing downloads from the list": "Спрашивать перед удалением загрузок из списка",
+ "Delete the downloaded files from the disk too (be careful)": "Удалить и скачанные файлы с диска (осторожно)",
+ "Don't show this question again": "Больше не задавать этот вопрос",
+ "Download the subtitles of videos too, in these languages:": "Скачивать и субтитры видео на этих языках:",
+ "Quality of MP3 files": "Качество файлов MP3",
+ "Next to the clock": "К часам",
+ "Draw the windows with the graphics card (uses more memory; after a restart)": "Рисовать окна видеокартой (больше памяти; после перезапуска)"
 }

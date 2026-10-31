@@ -272,5 +272,38 @@
   },
   "opened": {
     "message": "Opened ✔"
+  },
+  "buttonFullscreen": {
+    "message": "Show the video button in full screen too"
+  },
+  "buttonSolid": {
+    "message": "Button see-through"
+  },
+  "chooseQuality": {
+    "message": "choose a quality"
+  },
+  "lookCompact": {
+    "message": "Small (arrow + ✕)"
+  },
+  "openVideoFirst": {
+    "message": "Open the video first (click the time next to the name above the video), then press the button again."
+  },
+  "otherQualities": {
+    "message": "Other qualities of this stream…"
+  },
+  "playForMoment": {
+    "message": "Play the video for a moment"
+  },
+  "playForMomentSub": {
+    "message": "Its qualities appear here as soon as it plays"
+  },
+  "playThenPress": {
+    "message": "Play the video for a moment, then press the button again."
+  },
+  "streamWord": {
+    "message": "stream"
+  },
+  "videoWord": {
+    "message": "Video"
   }
 }

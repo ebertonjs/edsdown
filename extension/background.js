@@ -48,10 +48,56 @@ async function fetchWithTimeout(url, opts = {}, ms = 1500) {
 // The add-in is loaded from the program's own folder. When the program
 // updates itself it brings newer add-in files along; the browser only reads
 // them after a reload, so the add-in reloads itself once per new version.
+//
+// The version alone is not enough (a new setup of the same version brings
+// changed files too): the files on the disk are compared with the files the
+// browser loaded, and when they differ the add-in reloads (once for them).
+const OWN_FILES = ["manifest.json", "background.js", "content.js", "yt-core.js", "popup.html", "popup.js", "options.html", "options.js"];
+
+async function filesStamp() {
+  let all = "";
+  for (const name of OWN_FILES) {
+    try {
+      const r = await fetch(chrome.runtime.getURL(name), { cache: "no-store" });
+      all += `${name}\n${await r.text()}\n`;
+    } catch {
+      all += `${name}\n-\n`;
+    }
+  }
+  const sum = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(all));
+  return [...new Uint8Array(sum)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// what the browser loaded: the files as they are when it (re)loads the add-in
+async function rememberLoadedFiles() {
+  try {
+    await chrome.storage.local.set({ loadedStamp: await filesStamp() });
+  } catch {
+    /* nothing to compare with: the version check still works */
+  }
+}
+chrome.runtime.onInstalled.addListener(rememberLoadedFiles);
+chrome.runtime.onStartup.addListener(rememberLoadedFiles);
+
+async function followOwnFiles() {
+  const { loadedStamp, reloadedForStamp } = await chrome.storage.local.get(["loadedStamp", "reloadedForStamp"]);
+  if (!loadedStamp) return false;
+  const now = await filesStamp();
+  if (now === loadedStamp || now === reloadedForStamp) return false;
+  await chrome.storage.local.set({ reloadedForStamp: now });
+  chrome.runtime.reload();
+  return true;
+}
+
 async function followAppVersion() {
   const last = (await chrome.storage.session.get("versionCheckAt")).versionCheckAt || 0;
   if (Date.now() - last < 60000) return;
   await chrome.storage.session.set({ versionCheckAt: Date.now() });
+  try {
+    if (await followOwnFiles()) return;
+  } catch {
+    /* fetch / crypto missing: the version check below */
+  }
   const { port } = await getOpts();
   try {
     const r = await fetchWithTimeout(apiUrl(port, "/ping"), { headers: { "X-EdsDown": "1" } }, 800);
@@ -336,6 +382,8 @@ async function shouldTake(item) {
     return false;
   }
   if (await takeBypass(url)) return false;
+  // already handed to the app by the click on its link: the browser's copy goes
+  if ((await justTaken(item.url)) || (await justTaken(url))) return true;
   if (opts.minSizeKB > 0 && item.totalBytes > 0 && item.totalBytes < opts.minSizeKB * 1024) return false;
   if (!(await appAlive())) return false; // app not running: let the browser handle it
   const cfg = await getConfig();
@@ -364,6 +412,32 @@ async function takeOver(item) {
     await addBypass(url);
     chrome.downloads.download({ url });
   }
+}
+
+/** A file link the page caught a click on: to the app, or back to the page. */
+async function takeLink(url, referrer) {
+  if (!/^https?:/i.test(url || "")) throw new Error("not a web address");
+  const opts = await getOpts();
+  if (!opts.enabled || !opts.intercept) throw new Error("sending is off");
+  if (!(await appAlive())) throw new Error("EdsDown is not running");
+  if (await appSaysBrowser([url])) throw new Error("the browser keeps it");
+  // the same link clicked twice in a row: once is enough
+  if (!(await sentRecently(url))) await sendToApp({ url, referrer });
+  // the browser may still start it (a second handler of the page): not again
+  await addBypassTaken(url);
+  return true;
+}
+
+// links just handed over from a click: if the browser starts them anyway, they are dropped
+const TAKEN_KEY = "takenLinks";
+async function addBypassTaken(url) {
+  const list = (await chrome.storage.session.get(TAKEN_KEY))[TAKEN_KEY] || [];
+  list.push({ url, at: Date.now() });
+  await chrome.storage.session.set({ [TAKEN_KEY]: list.slice(-50) });
+}
+async function justTaken(url) {
+  const list = (await chrome.storage.session.get(TAKEN_KEY))[TAKEN_KEY] || [];
+  return list.some((l) => l.url === url && Date.now() - l.at < 15000);
 }
 
 // Chrome, Edge, Brave, Opera: decided before the browser asks where to
@@ -436,7 +510,14 @@ async function itemsForTab(tabId) {
     } else if (res.resolving) {
       items.push({ label: T("gettingQualities"), sub: T("takesSeconds"), disabled: true, busy: true });
     } else if (res.resolveError && !media.length) {
-      items.push({ label: T("cantGetVideo"), sub: res.resolveError, disabled: true });
+      // the page itself is no video page the app knows: the streams the
+      // player opens show up here as soon as it plays
+      const unknown = /unsupported url|no video formats|unable to extract/i.test(res.resolveError);
+      items.push(
+        unknown
+          ? { label: T("playForMoment"), sub: T("playForMomentSub"), disabled: true }
+          : { label: T("cantGetVideo"), sub: res.resolveError, disabled: true }
+      );
     }
   }
   if (yt) {
@@ -445,7 +526,7 @@ async function itemsForTab(tabId) {
       items.push(...optionItems(yt.resolved, `https://www.youtube.com/watch?v=${yt.videoId}`));
     } else {
       // fallback: streams captured from the player itself
-      for (const o of buildOptions(yt.streams)) items.push({ label: o.label, sub: o.sub, yt: o });
+      for (const o of buildOptions(yt.streams, appConfig && appConfig.mp3Kbps)) items.push({ label: o.label, sub: o.sub, yt: o });
       if (!items.length) {
         if (yt.resolving) {
           items.push({ label: T("gettingQualities"), sub: T("takesSeconds"), disabled: true, busy: true });
@@ -462,6 +543,7 @@ async function itemsForTab(tabId) {
     }
   }
   const resolvedFound = items.some((i) => i.yt);
+  let hlsAsked = false;
   for (const m of media) {
     // when the app already found the real qualities, raw streams are noise
     if (resolvedFound && (m.ext === "ts" || m.dash || /video/i.test(m.type))) continue;
@@ -470,14 +552,55 @@ async function itemsForTab(tabId) {
       items.push({ label: T("dashChoose"), sub: m.url, resolve: m.url, ext: "mp4" });
       continue;
     }
+    if (m.type === "HLS stream") {
+      // a quality list of a stream whose qualities are listed already
+      if (m.child) continue;
+      if (m.master && !m.master.separateAudio) {
+        // every quality of the stream, read from its playlist
+        for (const v of m.master.variants) {
+          items.push({ label: `${hlsLabel(v)} · MP4 · ${T("streamWord")}`, sub: v.url, url: v.url, ext: "ts" });
+        }
+        continue;
+      }
+      if (m.master) {
+        // picture and sound come in separate lists: the app puts them together
+        items.push({
+          label: `${m.master.variants.map(hlsLabel).slice(0, 4).join(" / ")} · ${T("chooseQuality")}`,
+          sub: m.url,
+          resolve: m.url,
+          ext: "mp4",
+        });
+        continue;
+      }
+      // saved as an MP4 file; the quality first when the address tells it
+      items.push({ label: `${qualityOf(m.url) || T("videoWord")} · MP4 · ${T("streamWord")}`, sub: m.url, url: m.url, ext: "ts" });
+      if (!hlsAsked && !m.media) {
+        hlsAsked = true;
+        items.push({ label: T("otherQualities"), sub: m.url, resolve: m.url, ext: "mp4" });
+      }
+      continue;
+    }
+    const q = qualityOf(m.url);
     items.push({
-      label: `${m.type}${m.size ? " · " + fmtSize(m.size) : ""}`,
+      label: `${q ? q + " · " : ""}${(m.ext || "").toUpperCase() || m.type}${m.size ? " · " + fmtSize(m.size) : ""}`,
       sub: m.url,
       url: m.url,
       ext: m.ext,
     });
   }
   return items;
+}
+
+/** "720p" when a stream's address says which quality it is. */
+function qualityOf(url) {
+  let path = "";
+  try {
+    path = new URL(url).pathname;
+  } catch {
+    return "";
+  }
+  const m = /(?:^|[^0-9])(4320|2160|1440|1080|720|576|540|480|360|240|144)p?(?=[^0-9]|$)/i.exec(path);
+  return m ? `${m[1]}p` : "";
 }
 
 async function pushToTab(tabId) {
@@ -522,6 +645,88 @@ async function addMedia(tabId, item) {
   while (current.length > 15) current.shift();
   await chrome.storage.session.set({ [key]: current });
   pushToTab(tabId);
+  if (item.type === "HLS stream") readHls(tabId, item.url).catch(() => {});
+}
+
+/**
+ * An HLS stream: its playlist says which qualities it has (a "master" list
+ * of one list per quality). Read once, so the button shows "1080p", "720p"...
+ * instead of anonymous streams.
+ */
+function parseHlsMaster(text, base) {
+  if (!/#EXT-X-STREAM-INF/i.test(text)) return null;
+  const lines = text.split(/\r?\n/).map((l) => l.trim());
+  const variants = [];
+  // separate sound lists: a quality list alone would be without sound
+  const separateAudio = lines.some((l) => /^#EXT-X-MEDIA:.*TYPE=AUDIO.*URI=/i.test(l));
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^#EXT-X-STREAM-INF:/i.test(lines[i])) continue;
+    let uri = "";
+    for (let j = i + 1; j < lines.length; j++) {
+      if (lines[j] && !lines[j].startsWith("#")) {
+        uri = lines[j];
+        break;
+      }
+    }
+    if (!uri) continue;
+    let url = "";
+    try {
+      url = new URL(uri, base).toString();
+    } catch {
+      continue;
+    }
+    const res = /RESOLUTION=(\d+)x(\d+)/i.exec(lines[i]);
+    const bw = /[^-]BANDWIDTH=(\d+)/i.exec("," + lines[i]);
+    variants.push({ url, height: res ? Number(res[2]) : 0, width: res ? Number(res[1]) : 0, bw: bw ? Number(bw[1]) : 0 });
+  }
+  if (!variants.length) return null;
+  // one entry per quality, the best first
+  variants.sort((a, b) => b.height - a.height || b.bw - a.bw);
+  const seen = new Set();
+  const unique = variants.filter((v) => {
+    const k = v.height ? `h${v.height}` : `b${v.bw}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return { variants: unique, separateAudio };
+}
+
+async function readHls(tabId, url) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 8000);
+  let text = "";
+  try {
+    const r = await fetch(url, { credentials: "include", signal: ctl.signal });
+    if (!r.ok) return;
+    text = (await r.text()).slice(0, 512 * 1024);
+  } finally {
+    clearTimeout(timer);
+  }
+  if (!/^\s*#EXTM3U/.test(text)) return;
+  const master = parseHlsMaster(text, url);
+  const key = `media_${tabId}`;
+  const current = (await chrome.storage.session.get(key))[key] || [];
+  const me = current.find((m) => m.url === url);
+  if (!me) return;
+  if (master) {
+    me.master = master;
+    // the quality lists the player opened by itself: shown under the master
+    const inside = new Set(master.variants.map((v) => v.url));
+    for (const m of current) if (m !== me && inside.has(m.url)) m.child = true;
+  } else {
+    me.media = true;
+    if (current.some((m) => m.master && m.master.variants.some((v) => v.url === url))) me.child = true;
+  }
+  await chrome.storage.session.set({ [key]: current });
+  pushToTab(tabId);
+}
+
+/** "1080p" (or the bit rate when the list does not say the size). */
+function hlsLabel(v) {
+  if (v.height) return `${v.height}p`;
+  if (v.bw) return `${Math.round(v.bw / 1000)} kbps`;
+  return "Video";
 }
 
 chrome.webRequest.onHeadersReceived.addListener(
@@ -758,20 +963,35 @@ async function resolveOneVideo(msg, tab) {
     if (found.length) return { items: found };
   }
   const items = [];
+  if (msg.feed && !msg.page) {
+    // Facebook feed and no link next to this video: the page's own streams,
+    // else how to get the video's own page
+    const found = tab ? (await itemsForTab(tab.id)).filter((i) => !i.disabled && !i.yt) : [];
+    if (found.length) return { items: found };
+    return { error: T("openVideoFirst") };
+  }
   if (msg.src && /^https?:/i.test(msg.src)) {
     items.push({ label: T("videoFile"), sub: msg.src, url: msg.src, ext: (/\.(\w{2,4})(\?|$)/.exec(msg.src) || [])[1] || "mp4" });
   }
   const page = msg.page || (msg.src && !msg.frame ? "" : tab && tab.url);
+  let problem = "";
   if (page && /^https?:/i.test(page)) {
     try {
       const r = await askApp(page);
       if (r.resolved && r.resolved.options.length) items.unshift(...optionItems(r.resolved, page));
-      else if (!items.length) return { error: r.resolveError || T("cantGetVideo") };
+      else problem = r.resolveError || T("cantGetVideo");
     } catch (e) {
-      if (!items.length) return { ...((await appAlive()) ? { error: String((e && e.message) || e) } : { error: T("appNotRunning"), notRunning: true }) };
+      if (!(await appAlive())) return { error: T("appNotRunning"), notRunning: true };
+      problem = String((e && e.message) || e);
     }
   }
-  return items.length ? { items } : { error: T("cantGetVideo") };
+  if (items.length) return { items };
+  // the page is nothing the app knows (a player of its own): the streams the
+  // player opened are this video
+  const found = tab ? (await itemsForTab(tab.id)).filter((i) => !i.disabled && !i.yt) : [];
+  if (found.length) return { items: found };
+  if (/unsupported url/i.test(problem)) return { error: T("playThenPress") };
+  return { error: problem || T("cantGetVideo") };
 }
 
 // ---------------------------------------------------------------- tab lifecycle
@@ -909,13 +1129,32 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       getOpts().then((o) => {
         if (!o.enabled) return;
         if (isYoutube(sender.tab.url)) resolveYoutube(sender.tab.id, sender.tab.url);
-        else resolvePage(sender.tab.id, msg.page || sender.tab.url, !!msg.frame);
+        // a Facebook feed: its address is no video (the video's own post
+        // link is looked up when its button is clicked)
+        else if (!msg.feed) resolvePage(sender.tab.id, msg.page || sender.tab.url, !!msg.frame);
       });
       return false;
     case "edsdown-resolve-video":
       // one of several videos on the page: its own file, or its own link
       resolveOneVideo(msg, sender.tab).then(sendResponse);
       return true;
+    case "edsdown-link-rules":
+      // what a click on a file link in the page should do (decided in the
+      // page at once, so the browser never starts its own download)
+      Promise.all([getOpts(), getConfig()]).then(([o, cfg]) => {
+        if (!o.enabled || !o.intercept || !cfg) return sendResponse(null);
+        sendResponse({
+          exts: cfg.captureExts || [],
+          skipSites: cfg.skipSites || [],
+          skipAddresses: cfg.skipAddresses || [],
+          skipKey: cfg.skipKey || "none",
+          forceKey: cfg.forceKey || "none",
+        });
+      });
+      return true;
+    case "edsdown-link":
+      // a file link clicked in a page: straight to the app
+      return reply(takeLink(msg.url, sender.tab ? sender.tab.url : ""), sendResponse);
     case "edsdown-magnet":
       // a torrent's magnet link clicked on a page
       return reply(
