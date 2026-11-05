@@ -9,7 +9,7 @@
   header img { width: 28px; height: 28px; }
   header b { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
   header .pill { margin-left: auto; }
-  .gear { width: 32px; height: 32px; border-radius: 50%; background: var(--btn); color: var(--text-2); font-size: 16px; display: grid; place-items: center; }
+  .gear { width: 32px; height: 32px; border-radius: 8px; background: var(--btn); color: var(--text-2); font-size: 16px; display: grid; place-items: center; }
   .gear:hover { background: var(--btn-hover); color: var(--text); }
   .card { padding: 10px 12px; margin-bottom: 10px; }
   .row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-2); }
@@ -22,7 +22,7 @@
   .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
   .toggle .knob { position: absolute; inset: 0; background: var(--btn-hover); border: 1px solid var(--stroke); border-radius: 12px; transition: background .15s; }
   .toggle .knob::before { content: ""; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
-  .toggle input:checked + .knob { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; }
+  .toggle input:checked + .knob { background: var(--accent); border-color: transparent; }
   .toggle input:checked + .knob::before { transform: translateX(18px); }
   .toggle input:focus-visible + .knob { outline: 2px solid var(--blue); outline-offset: 2px; }
   body.off .dim { opacity: .45; pointer-events: none; }
@@ -50,7 +50,7 @@
     <img src="icons/icon32.png" alt="">
     <b>EdsDown</b>
     <span class="pill" id="status" data-i18n="checking"></span>
-    <button class="gear" id="settings" data-i18n-title="settings">⚙</button>
+    <button class="gear" id="settings" data-i18n-title="settings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.8l1.4 2.4 2.7-.8.5 2.8 2.8.7-.8 2.7L21 12l-2.4 1.4.8 2.7-2.8.7-.5 2.8-2.7-.8L12 21.2l-1.4-2.4-2.7.8-.5-2.8-2.8-.7.8-2.7L3 12l2.4-1.4-.8-2.7 2.8-.7.5-2.8 2.7.8z"/></svg></button>
   </header>
   <div class="glass card">
     <div class="row switch">

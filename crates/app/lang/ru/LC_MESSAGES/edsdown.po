@@ -61,6 +61,18 @@ msgstr "Остановить очередь"
 msgid "Start queue"
 msgstr "Запустить очередь"
 
+msgid "Downloading · {} left"
+msgstr "Downloading · {} left"
+
+msgid "Downloading"
+msgstr "Downloading"
+
+msgid "Paused"
+msgstr "Paused"
+
+msgid "Complete"
+msgstr "Complete"
+
 msgid "EdsDown"
 msgstr "EdsDown"
 
@@ -184,53 +196,11 @@ msgstr "Новая категория…"
 msgid "Edit"
 msgstr "Изменить"
 
-msgid "DOWNLOADING NOW"
-msgstr "СЕЙЧАС ЗАГРУЖАЕТСЯ"
+msgid "Download manager"
+msgstr "Download manager"
 
-msgid "Nothing downloading right now ✓"
-msgstr "Сейчас ничего не загружается ✓"
-
-msgid "TODAY"
-msgstr "СЕГОДНЯ"
-
-msgid "finished"
-msgstr "завершено"
-
-msgid "downloaded"
-msgstr "загружено"
-
-msgid "QUEUES"
-msgstr "ОЧЕРЕДИ"
-
-msgid "New queue"
-msgstr "Новая очередь"
-
-msgid "{} downloading"
-msgstr "Загружается: {}"
-
-msgid "Idle"
-msgstr "Ожидание"
-
-msgid "Limiter on"
-msgstr "Ограничитель включён"
-
-msgid "No speed limit"
-msgstr "Без ограничения"
-
-msgid "Browser connected"
-msgstr "Браузер подключён"
-
-msgid "Browser not connected"
-msgstr "Браузер не подключён"
-
-msgid "Filter the list…"
-msgstr "Фильтр списка…"
-
-msgid "NetLAB light"
-msgstr "NetLAB светлая"
-
-msgid "NetLAB dark"
-msgstr "NetLAB тёмная"
+msgid "New download"
+msgstr "New download"
 
 msgid "All"
 msgstr "Все"
@@ -241,23 +211,23 @@ msgstr "В процессе"
 msgid "Finished"
 msgstr "Завершённые"
 
-msgid "Category"
-msgstr "Категория"
+msgid "CATEGORIES"
+msgstr "CATEGORIES"
 
-msgid "FINISHED"
-msgstr "ЗАВЕРШЕНО"
+msgid "QUEUES"
+msgstr "ОЧЕРЕДИ"
 
-msgid "Nothing matches “{}”."
-msgstr "Ничего не найдено по «{}»."
+msgid "New queue"
+msgstr "Новая очередь"
 
-msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
-msgstr "Здесь нет загрузок.\nНажмите «Добавить URL», скопируйте ссылку или скачайте что-нибудь в браузере."
+msgid "TOTAL SPEED"
+msgstr "TOTAL SPEED"
 
-msgid "Add URL"
-msgstr "Добавить URL"
+msgid "Options"
+msgstr "Параметры"
 
-msgid "Add Batch"
-msgstr "Пакет"
+msgid "Batch"
+msgstr "Batch"
 
 msgid "Torrent"
 msgstr "Торрент"
@@ -274,8 +244,8 @@ msgstr "Стоп все"
 msgid "Scheduler"
 msgstr "Планировщик"
 
-msgid "Speed Limiter"
-msgstr "Ограничитель скорости"
+msgid "Limiter"
+msgstr "Limiter"
 
 msgid "Grabber"
 msgstr "Сборщик"
@@ -283,8 +253,56 @@ msgstr "Сборщик"
 msgid "Playlist"
 msgstr "Плейлист"
 
-msgid "Options"
-msgstr "Параметры"
+msgid "Search downloads…"
+msgstr "Search downloads…"
+
+msgid "More"
+msgstr "More"
+
+msgid "NAME"
+msgstr "NAME"
+
+msgid "SIZE"
+msgstr "SIZE"
+
+msgid "PROGRESS"
+msgstr "PROGRESS"
+
+msgid "SPEED"
+msgstr "SPEED"
+
+msgid "TIME LEFT"
+msgstr "TIME LEFT"
+
+msgid "DATE"
+msgstr "DATE"
+
+msgid "Nothing matches “{}”."
+msgstr "Ничего не найдено по «{}»."
+
+msgid "No downloads yet"
+msgstr "No downloads yet"
+
+msgid "Paste a link, click “New download”, or download something in your browser."
+msgstr "Paste a link, click “New download”, or download something in your browser."
+
+msgid "{} downloading"
+msgstr "Загружается: {}"
+
+msgid "Idle"
+msgstr "Ожидание"
+
+msgid "Today: {} · {}"
+msgstr "Today: {} · {}"
+
+msgid "No speed limit"
+msgstr "Без ограничения"
+
+msgid "Browser connected"
+msgstr "Браузер подключён"
+
+msgid "Browser not connected"
+msgstr "Браузер не подключён"
 
 msgid "Download File Info"
 msgstr "Сведения о файле"
@@ -297,6 +315,9 @@ msgstr "https://example.com/file"
 
 msgid "Check"
 msgstr "Проверить"
+
+msgid "Category"
+msgstr "Категория"
 
 msgid "Save As"
 msgstr "Сохранить как"
@@ -393,6 +414,9 @@ msgstr "Добавить"
 
 msgid "Download status"
 msgstr "Состояние загрузки"
+
+msgid "Speed Limiter"
+msgstr "Ограничитель скорости"
 
 msgid "Options on completion"
 msgstr "Действия по завершении"
@@ -874,9 +898,6 @@ msgstr "Оформление"
 msgid "Torrents"
 msgstr "Торренты"
 
-msgid "Theme"
-msgstr "Тема"
-
 msgid "Window opacity"
 msgstr "Непрозрачность окна"
 
@@ -1291,8 +1312,8 @@ msgstr "Копировать путь к папке"
 msgid "Version {}"
 msgstr "Версия {}"
 
-msgid "Download manager for Windows, in the look of NetLAB."
-msgstr "Менеджер загрузок для Windows в стиле NetLAB."
+msgid "Fast download manager for Windows: many connections, videos, torrents and the browser add-in."
+msgstr "Fast download manager for Windows: many connections, videos, torrents and the browser add-in."
 
 msgid "What's new in EdsDown"
 msgstr "Что нового в EdsDown"

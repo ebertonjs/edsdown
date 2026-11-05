@@ -359,5 +359,11 @@
  "The video button in the browser: a small style, hides in full screen, stays closed when you close it, and finds videos in the Facebook feed and on many more sites.": "O botão de vídeo no navegador: estilo pequeno, some em tela cheia, continua fechado quando você fecha e acha vídeos no feed do Facebook e em muito mais sites.",
  "ffmpeg.exe is downloaded again by itself when an antivirus removed it.": "O ffmpeg.exe é baixado de novo sozinho quando um antivírus o remove.",
  "Changing the folder or the name of a download no longer gives a small broken file, and a moved file never replaces another one.": "Mudar a pasta ou o nome de um download não gera mais um arquivo pequeno e quebrado, e um arquivo movido nunca substitui outro.",
- "The windows keep the size you gave them.": "As janelas guardam o tamanho que você deu a elas."
+ "The windows keep the size you gave them.": "As janelas guardam o tamanho que você deu a elas.",
+ "A new look from scratch: a professional dark theme with one blue accent, new icons and a new logo.": "Visual novo do zero: tema escuro profissional com um acento azul, ícones novos e logo novo.",
+ "The main window has a side bar with the views, categories, queues and the total speed with its graph.": "A janela principal tem uma barra lateral com as visões, categorias, filas e a velocidade total com gráfico.",
+ "All downloads are in one list you can sort, with the progress, speed and time left in each row.": "Todos os downloads ficam numa lista que pode ser ordenada, com progresso, velocidade e tempo restante em cada linha.",
+ "The toolbar shows the names of its buttons, and only their icons when the window is narrow.": "A barra de ferramentas mostra o nome dos botões, e só os ícones quando a janela está estreita.",
+ "A status bar shows the speed, the downloads running, today's total, the speed limiter and the browser.": "Uma barra de status mostra a velocidade, os downloads ativos, o total de hoje, o limitador e o navegador.",
+ "The browser add-in has the same new look.": "A extensão do navegador ganhou o mesmo visual novo."
 }

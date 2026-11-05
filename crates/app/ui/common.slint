@@ -1,4 +1,4 @@
-// EdsDown – shared look: data types, the NetLAB widgets, icons.
+// EdsDown – shared look: data types, the widgets, icons.
 
 import { LineEdit, SpinBox, ComboBox, ListView, TabWidget, TextEdit, Palette } from "std-widgets.slint";
 import { Theme } from "theme.slint";
@@ -132,14 +132,13 @@ export component ThemedWindow inherits Window {
     init => {
         Palette.color-scheme = self.dark ? ColorScheme.dark : ColorScheme.light;
     }
-    // NetNOC's indigo (or blue-grey) gradient behind every window
-    background: @linear-gradient(160deg, Theme.bg-a 0%, Theme.bg-b 100%);
+    background: Theme.bg;
     default-font-size: 12px * Theme.font-scale;
     default-font-family: Theme.font-family != "" ? Theme.font-family : Theme.latin ? "Inter" : "";
     icon: @image-url("icon-window.png");
 }
 
-// ---- buttons and check boxes in the NetLAB look (same use as the standard ones)
+// ---- buttons and check boxes (same use as the standard ones)
 export component Button inherits Rectangle {
     in property <string> text;
     in property <bool> enabled: true;
@@ -149,15 +148,13 @@ export component Button inherits Rectangle {
     min-width: max(80px, label.preferred-width + 30px);
     height: 32px;
     horizontal-stretch: 0;
-    border-radius: 16px;
-    background: root.primary ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f)
+    border-radius: Theme.r-ctl;
+    background: root.primary ? (ta.pressed ? Theme.primary-press : ta.has-hover ? Theme.primary-hover : Theme.primary)
         : ta.pressed ? Theme.btn-press : ta.has-hover ? Theme.btn-hover : Theme.btn;
     border-width: root.primary ? 0px : 1px;
     border-color: Theme.stroke;
     opacity: root.enabled ? 1.0 : 0.45;
-    drop-shadow-blur: root.primary && root.enabled ? 12px : 0px;
-    drop-shadow-color: root.primary && root.enabled ? #f59e2e4d : transparent;
-    drop-shadow-offset-y: root.primary && root.enabled ? 3px : 0px;
+    animate background { duration: 120ms; }
     ta := TouchArea {
         enabled: root.enabled;
         mouse-cursor: root.enabled ? pointer : default;
@@ -169,7 +166,7 @@ export component Button inherits Rectangle {
         text: root.text;
         font-size: 12px * Theme.font-scale;
         font-weight: 600;
-        color: root.primary ? #2a1600 : Theme.text;
+        color: root.primary ? Theme.on-primary : Theme.text;
         horizontal-alignment: center;
         vertical-alignment: center;
     }
@@ -220,15 +217,15 @@ export component CheckBox inherits Rectangle {
         y: (parent.height - 18px) / 2;
         width: 18px;
         height: 18px;
-        border-radius: 6px;
-        background: root.checked ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f) : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
+        border-radius: 5px;
+        background: root.checked ? Theme.primary : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.input-bg;
         border-width: root.checked ? 0px : 1.5px;
-        border-color: Theme.dark ? #ffffff40 : #1c233340;
+        border-color: Theme.stroke-2;
         if root.checked: Ico {
             kind: "check";
             width: 14px;
             height: 14px;
-            tint: #2a1600;
+            tint: Theme.on-primary;
             weight: 3;
         }
     }
@@ -274,7 +271,7 @@ export component Icon inherits Rectangle {
     height: 32px;
     Ico {
         kind: root.kind;
-        tint: root.kind == "add" ? Theme.orange : root.kind == "delete" || root.kind == "stopall" ? Theme.red : Theme.btn-ico;
+        tint: root.kind == "add" ? Theme.primary : root.kind == "delete" || root.kind == "stopall" ? Theme.red : Theme.btn-ico;
         width: parent.width;
         height: parent.height;
     }
@@ -285,7 +282,7 @@ export component G inherits Path {
     viewbox-height: 16;
 }
 
-// File type icon (old name): the tinted NetLAB badge.
+// File type icon (old name): the tinted badge.
 export component TypeIcon inherits Rectangle {
     in property <string> kind: "general";
     width: 18px;
@@ -701,11 +698,11 @@ export component MenuLabel inherits Rectangle {
 
 // The frame of every popup menu.
 export component MenuFrame inherits Rectangle {
-    border-radius: 16px;
-    background: Theme.dark ? #23253ef7 : #f4f7fbf7;
+    border-radius: 10px;
+    background: Theme.surface-2;
     border-width: 1px;
-    border-color: Theme.stroke;
-    drop-shadow-blur: 26px;
-    drop-shadow-color: #05061480;
-    drop-shadow-offset-y: 10px;
+    border-color: Theme.stroke-2;
+    drop-shadow-blur: 18px;
+    drop-shadow-color: #00000080;
+    drop-shadow-offset-y: 6px;
 }

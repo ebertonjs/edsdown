@@ -1,10 +1,10 @@
-// EdsDown – the NetLAB look (NetNOC's "glass" skin): colors and sizes.
-// Two themes: 9 = NetLAB dark (default), 10 = NetLAB light.
+// EdsDown – colors and sizes: one professional dark theme (flat slate
+// surfaces, a single blue accent, Inter).
 
 export global Theme {
     in-out property <int> mode: 9;
-    out property <bool> dark: mode != 10;
-    // kept for the windows written before the NetLAB look (always on now)
+    out property <bool> dark: true;
+    // kept for windows written for the earlier looks (always on)
     out property <bool> netlab: true;
     // Options > Appearance > Text size / Font
     in-out property <float> font-scale: 1.0;
@@ -20,58 +20,70 @@ export global Theme {
     // Arabic: every window reads from right to left
     in-out property <bool> rtl: false;
 
-    // ---- NetNOC tokens
-    out property <color> bg-a: dark ? #15142b : #c9d6e8;
-    out property <color> bg-b: dark ? #2a2452 : #a9bdd8;
-    out property <color> text: dark ? #eef0f8 : #1c2333;
-    out property <color> text-2: dark ? #b9bfd3 : #3d475c;
-    out property <color> muted: dark ? #8c93ab : #66728a;
-    out property <color> glass: dark ? #2c2e4a9e : #f0f4fa9e;
-    out property <color> glass-2: dark ? #3a3d5e8c : #ffffff8c;
-    out property <color> glass-hi: dark ? #ffffff12 : #ffffff8c;
-    out property <color> side: dark ? #242640b8 : #5668869e;
-    out property <color> side-text: dark ? #eef0f8 : #ffffff;
-    out property <color> stroke: dark ? #ffffff17 : #ffffffbf;
-    out property <color> rule: dark ? #ffffff14 : #1c23331a;
-    out property <color> shadow: dark ? #05061473 : #30466e33;
-    out property <color> btn: dark ? #ffffff17 : #ffffff9e;
-    out property <color> btn-hover: dark ? #ffffff26 : #ffffffd9;
-    out property <color> btn-press: dark ? #ffffff33 : #ffffff;
-    out property <color> btn-ico: dark ? #d9dcea : #58637a;
-    out property <color> track: dark ? #ffffff29 : #1c233321;
-    out property <color> tile: dark ? #ffffff0f : #ffffffb3;
-    out property <color> tooltip: dark ? #0d0c1ef2 : #1c2333f2;
+    // ---- EdsDown Pro: flat dark slate, one blue accent
+    // surfaces
+    out property <color> bg: #0b1220;
+    out property <color> bg-a: bg;
+    out property <color> bg-b: bg;
+    out property <color> surface: #111a2e;
+    out property <color> surface-2: #16213a;
+    out property <color> surface-3: #1c2945;
+    out property <color> text: #e6edf7;
+    out property <color> text-2: #b6c2d6;
+    out property <color> muted: #8a98b3;
+    out property <color> glass: surface;
+    out property <color> glass-2: surface-2;
+    out property <color> glass-hi: #ffffff0a;
+    out property <color> side: #0e1626;
+    out property <color> side-text: text;
+    out property <color> stroke: #23304a;
+    out property <color> stroke-2: #2e3d5c;
+    out property <color> rule: #1e2a42;
+    out property <color> shadow: #00000059;
+    out property <color> btn: surface-2;
+    out property <color> btn-hover: surface-3;
+    out property <color> btn-press: #22325a;
+    out property <color> btn-ico: #c5d0e3;
+    out property <color> track: #1f2a40;
+    out property <color> tile: surface;
+    out property <color> tooltip: #050a14f2;
     out property <color> tooltip-text: #ffffff;
-    out property <color> chip-on: #4f8dff;
-    out property <color> chip-on-line: #4f8dff;
-    out property <color> chip-on-text: #ffffff;
-    out property <color> blue: #4f8dff;
-    out property <color> orange: #f59e2e;
-    out property <color> green: #36c06f;
-    out property <color> red: #ef5350;
-    out property <color> purple: #9b7bff;
-    out property <length> r-card: 22px;
-    out property <length> r-panel: 22px;
-    out property <length> r-ctl: 12px;
+    // the one accent
+    out property <color> primary: #3b82f6;
+    out property <color> primary-hover: #4c8ef7;
+    out property <color> primary-press: #2563eb;
+    out property <color> on-primary: #ffffff;
+    out property <color> chip-on: #3b82f626;
+    out property <color> chip-on-line: #3b82f6;
+    out property <color> chip-on-text: #e6edf7;
+    // states and file types
+    out property <color> blue: primary;
+    out property <color> orange: #f59e0b;
+    out property <color> green: #22c55e;
+    out property <color> red: #ef4444;
+    out property <color> purple: #a78bfa;
+    out property <length> r-card: 10px;
+    out property <length> r-panel: 10px;
+    out property <length> r-ctl: 8px;
 
     // ---- names the dialogs use
-    out property <color> window: bg-a;
-    out property <color> panel: glass;
+    out property <color> window: bg;
+    out property <color> panel: surface;
     out property <color> toolbar-top: side;
     out property <color> toolbar-bottom: side;
-    out property <color> toolbar-text: side-text;
+    out property <color> toolbar-text: text;
     out property <color> toolbar-hover: btn-hover;
-    out property <color> line: dark ? #ffffff1a : #1c23331f;
-    out property <color> grid: tile;
-    out property <color> header-top: transparent;
-    out property <color> header-bottom: transparent;
-    out property <color> accent: dark ? #f59e2e : #c26a08;
-    out property <color> select: dark ? #4f8dff38 : #4f8dff2e;
-    out property <color> select-line: #4f8dffaa;
-    out property <color> hover: dark ? #ffffff12 : #ffffff8c;
-    out property <color> ok: dark ? #36c06f : #168a4a;
-    out property <color> warn: dark ? #f5c451 : #b7791f;
-    out property <color> err: dark ? #ef5350 : #d23b32;
+    out property <color> line: stroke;
+    out property <color> grid: surface;
+    out property <color> header-top: surface-2;
+    out property <color> header-bottom: surface-2;
+    out property <color> accent: primary;
+    out property <color> select: #3b82f624;
+    out property <color> select-line: #3b82f6;
+    out property <color> hover: #ffffff08;
+    out property <color> ok: green;
+    out property <color> warn: orange;
+    out property <color> err: red;
     out property <color> bar-bg: track;
-    out property <color> input-bg: dark ? #1e2038 : #ffffff;
+    out property <color> input-bg: #0e1626;
 }

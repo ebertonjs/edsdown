@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0 — 2026-11-05
+
+Visual novo, do zero:
+- Tema escuro profissional: superfícies em grafite/azul-ardósia, um único acento azul, fonte Inter, sem vidro nem sombras pesadas (leve também no desenho pelo processador).
+- Janela principal: barra lateral (Tudo, Em andamento, Concluídos, categorias com contagem, filas e velocidade total com gráfico), barra de ferramentas com nomes que viram só ícones em janelas estreitas, lista única ordenável (nome, tamanho, progresso, velocidade, tempo restante, data) com o progresso em cada linha e barra de status.
+- Logo e ícone novos (programa, instalador, bandeja e extensão).
+- Ícones de linha revisados e cores por tipo de arquivo ajustadas ao fundo escuro.
+- Extensão no mesmo visual: popup, opções e o botão "Baixar este vídeo".
+- Removidos o tema claro, a imagem de fundo e o fundo de ondas do visual NetLAB.
+
 ## 0.3.2 — 2026-10-31
 
 Novidades:

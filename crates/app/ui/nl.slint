@@ -1,7 +1,7 @@
-// EdsDown – NetLAB look: line icons and the glass widgets (round buttons,
-// pills, chips, cards) shared by every window.
+// EdsDown – line icons and the flat widgets (icon buttons, pills, chips,
+// cards, bars) shared by every window.
 //
-// Icons are drawn on a 24×24 grid with round strokes, like NetNOC's.
+// Icons are drawn on a 24×24 grid with round strokes (Lucide-like).
 
 import { Theme } from "theme.slint";
 
@@ -29,7 +29,7 @@ export component Ico inherits Rectangle {
     in property <string> kind;
     in property <color> tint: Theme.text;
     // stroke width for a 24 px icon; scales with the size
-    in property <float> weight: 1.9;
+    in property <float> weight: 1.75;
     width: 20px;
     height: 20px;
     property <length> w: self.width / 24 * root.weight;
@@ -107,18 +107,22 @@ export component Ico inherits Rectangle {
     }
 }
 
-// The color of a file type (NetNOC's chart palette).
+// The color of a file type.
 export global Kinds {
     pure public function tint(kind: string) -> color {
-        if (kind == "video" || kind == "pdf") { return #ef5350; }
-        if (kind == "audio") { return #9b7bff; }
-        if (kind == "archive" || kind == "slides") { return #f59e2e; }
-        if (kind == "doc") { return #4f8dff; }
-        if (kind == "sheet" || kind == "apk") { return #36c06f; }
-        if (kind == "exe") { return #22b8cf; }
-        if (kind == "torrent") { return #36c06f; }
-        if (kind == "image") { return #ec6fb3; }
-        return #8c93ab;
+        if (kind == "video") { return #f87171; }
+        if (kind == "pdf") { return #fb7185; }
+        if (kind == "audio") { return #a78bfa; }
+        if (kind == "archive") { return #fbbf24; }
+        if (kind == "slides") { return #fb923c; }
+        if (kind == "doc" || kind == "text") { return #60a5fa; }
+        if (kind == "sheet") { return #34d399; }
+        if (kind == "apk") { return #4ade80; }
+        if (kind == "exe") { return #22d3ee; }
+        if (kind == "torrent") { return #2dd4bf; }
+        if (kind == "image") { return #f472b6; }
+        if (kind == "disc") { return #c084fc; }
+        return #94a3b8;
     }
 }
 
@@ -128,20 +132,18 @@ export component KindBadge inherits Rectangle {
     width: 36px;
     height: 36px;
     property <color> c: Kinds.tint(root.kind);
-    border-radius: self.width * 0.32;
-    background: root.c.with-alpha(Theme.dark ? 0.18 : 0.16);
-    border-width: 1px;
-    border-color: root.c.with-alpha(0.28);
+    border-radius: self.width * 0.25;
+    background: root.c.with-alpha(0.14);
     Ico {
         kind: root.kind;
         tint: root.c;
         width: parent.width * 0.56;
         height: parent.height * 0.56;
-        weight: 2.0;
+        weight: 1.9;
     }
 }
 
-// Round glass button (NetNOC's dock / header buttons). `active` glows blue.
+// Icon button (toolbar, rows, side bar). `active`: highlighted in the accent.
 export component RoundBtn inherits Rectangle {
     in property <string> icon;
     in property <string> label;
@@ -155,15 +157,13 @@ export component RoundBtn inherits Rectangle {
     callback clicked();
     width: root.size;
     height: root.size;
-    border-radius: self.width / 2;
-    background: root.accent ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f)
+    border-radius: Theme.r-ctl;
+    background: root.accent ? (ta.pressed ? Theme.primary-press : ta.has-hover ? Theme.primary-hover : Theme.primary)
+        : root.active ? Theme.select
         : ta.pressed && root.enabled ? Theme.btn-press
-        : ta.has-hover && root.enabled ? Theme.btn-hover : Theme.btn;
-    border-width: 1px;
-    border-color: root.active ? #4f8dffaa : Theme.stroke;
-    drop-shadow-blur: root.active ? 18px : root.accent ? 14px : 10px;
-    drop-shadow-color: root.active ? #4f8dff66 : root.accent ? #f59e2e55 : Theme.shadow;
-    drop-shadow-offset-y: root.active ? 0px : 4px;
+        : ta.has-hover && root.enabled ? Theme.btn-hover : transparent;
+    border-width: root.active ? 1px : 0px;
+    border-color: Theme.select-line;
     animate background { duration: 120ms; }
     ta := TouchArea {
         enabled: root.enabled;
@@ -176,18 +176,18 @@ export component RoundBtn inherits Rectangle {
         kind: root.icon;
         width: root.size * 0.46;
         height: root.size * 0.46;
-        tint: !root.enabled ? Theme.muted.with-alpha(0.5) : root.accent ? #2a1600 : root.active ? #4f8dff : Theme.btn-ico;
-        weight: 2.0;
+        tint: !root.enabled ? Theme.muted.with-alpha(0.45) : root.accent ? Theme.on-primary : root.active ? Theme.primary : Theme.btn-ico;
+        weight: 1.9;
     }
     if ta.has-hover && root.label != "": Rectangle {
         y: root.label-above ? -30px : root.height + 6px;
         x: (root.width - self.width) / 2;
         width: tip.preferred-width + 18px;
-        height: 22px;
-        border-radius: 11px;
+        height: 24px;
+        border-radius: 6px;
         background: Theme.tooltip;
-        drop-shadow-blur: 8px;
-        drop-shadow-color: #00000040;
+        border-width: 1px;
+        border-color: Theme.stroke;
         tip := Text {
             text: root.label;
             font-size: 11px;
@@ -197,7 +197,7 @@ export component RoundBtn inherits Rectangle {
     }
 }
 
-// Pill: a small rounded glass label, like NetNOC's header indicators.
+// Pill: a small label with an icon or a colored dot (status bar).
 export component Pill inherits Rectangle {
     in property <string> icon;
     in property <string> text;
@@ -206,12 +206,11 @@ export component Pill inherits Rectangle {
     in property <string> state;
     in property <bool> clickable;
     callback clicked();
-    height: 32px;
-    border-radius: 16px;
-    background: ta.has-hover && root.clickable ? Theme.btn-hover : Theme.btn;
-    border-width: 1px;
-    border-color: Theme.stroke;
-    property <color> dot: root.state == "ok" ? #36c06f : root.state == "warn" ? #f59e2e : root.state == "bad" ? #ef5350 : root.state == "blue" ? #4f8dff : Theme.muted;
+    height: 28px;
+    horizontal-stretch: 0;
+    border-radius: 6px;
+    background: ta.has-hover && root.clickable ? Theme.btn-hover : transparent;
+    property <color> dot: root.state == "ok" ? Theme.green : root.state == "warn" ? Theme.orange : root.state == "bad" ? Theme.red : root.state == "blue" ? Theme.primary : Theme.muted;
     ta := TouchArea {
         enabled: root.clickable;
         mouse-cursor: root.clickable ? pointer : default;
@@ -220,8 +219,8 @@ export component Pill inherits Rectangle {
         }
     }
     HorizontalLayout {
-        padding-left: 12px;
-        padding-right: 13px;
+        padding-left: 8px;
+        padding-right: 8px;
         spacing: 7px;
         alignment: center;
         if root.icon == "" && root.state != "": Rectangle {
@@ -232,8 +231,6 @@ export component Pill inherits Rectangle {
                 height: 8px;
                 border-radius: 4px;
                 background: root.dot;
-                drop-shadow-blur: 6px;
-                drop-shadow-color: root.dot;
             }
         }
         if root.icon != "": Ico {
@@ -268,8 +265,8 @@ export component Chip inherits Rectangle {
     callback clicked();
     // right click at (x, y) inside the chip
     callback context(length, length);
-    height: 30px;
-    border-radius: 15px;
+    height: 28px;
+    border-radius: 6px;
     background: root.selected ? Theme.chip-on : ta.has-hover ? Theme.btn-hover : Theme.btn;
     border-width: 1px;
     border-color: root.selected ? Theme.chip-on-line : Theme.stroke;
@@ -313,24 +310,21 @@ export component Chip inherits Rectangle {
     }
 }
 
-// Frosted glass card.
+// A flat card: surface color with a hairline border.
 export component Glass inherits Rectangle {
     in property <length> radius: Theme.r-card;
     border-radius: root.radius;
-    background: Theme.glass;
+    background: Theme.surface;
     border-width: 1px;
     border-color: Theme.stroke;
-    drop-shadow-blur: 24px;
-    drop-shadow-color: Theme.shadow;
-    drop-shadow-offset-y: 8px;
 }
 
 // Small uppercase section title ("ATIVOS", "HOJE"...).
 export component SectionTitle inherits Text {
     font-size: 11px * Theme.font-scale;
-    font-weight: 700;
+    font-weight: 600;
     color: Theme.muted;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
 }
 
 // Thin rounded progress bar.
@@ -345,7 +339,7 @@ export component Bar inherits Rectangle {
         width: parent.width * clamp(root.value, 0, 1);
         height: parent.height;
         border-radius: parent.border-radius;
-        background: Theme.gradients ? @linear-gradient(90deg, root.tint.darker(0.05) 0%, root.tint.brighter(0.25) 100%) : root.tint;
+        background: root.tint;
         animate width { duration: 300ms; easing: ease-out; }
     }
 }

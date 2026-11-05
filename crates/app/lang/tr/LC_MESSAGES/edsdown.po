@@ -61,6 +61,18 @@ msgstr "Kuyruğu durdur"
 msgid "Start queue"
 msgstr "Kuyruğu başlat"
 
+msgid "Downloading · {} left"
+msgstr "Downloading · {} left"
+
+msgid "Downloading"
+msgstr "Downloading"
+
+msgid "Paused"
+msgstr "Paused"
+
+msgid "Complete"
+msgstr "Complete"
+
 msgid "EdsDown"
 msgstr "EdsDown"
 
@@ -184,53 +196,11 @@ msgstr "Yeni kategori…"
 msgid "Edit"
 msgstr "Düzenle"
 
-msgid "DOWNLOADING NOW"
-msgstr "ŞU AN İNDİRİLİYOR"
+msgid "Download manager"
+msgstr "Download manager"
 
-msgid "Nothing downloading right now ✓"
-msgstr "Şu an indirilen yok ✓"
-
-msgid "TODAY"
-msgstr "BUGÜN"
-
-msgid "finished"
-msgstr "tamamlandı"
-
-msgid "downloaded"
-msgstr "indirildi"
-
-msgid "QUEUES"
-msgstr "KUYRUKLAR"
-
-msgid "New queue"
-msgstr "Yeni kuyruk"
-
-msgid "{} downloading"
-msgstr "{} indiriliyor"
-
-msgid "Idle"
-msgstr "Boşta"
-
-msgid "Limiter on"
-msgstr "Sınırlayıcı açık"
-
-msgid "No speed limit"
-msgstr "Sınır yok"
-
-msgid "Browser connected"
-msgstr "Tarayıcı bağlı"
-
-msgid "Browser not connected"
-msgstr "Tarayıcı bağlı değil"
-
-msgid "Filter the list…"
-msgstr "Listeyi filtrele…"
-
-msgid "NetLAB light"
-msgstr "NetLAB açık"
-
-msgid "NetLAB dark"
-msgstr "NetLAB koyu"
+msgid "New download"
+msgstr "New download"
 
 msgid "All"
 msgstr "Tümü"
@@ -241,23 +211,23 @@ msgstr "Devam eden"
 msgid "Finished"
 msgstr "Bitmiş"
 
-msgid "Category"
-msgstr "Kategori"
+msgid "CATEGORIES"
+msgstr "CATEGORIES"
 
-msgid "FINISHED"
-msgstr "TAMAMLANANLAR"
+msgid "QUEUES"
+msgstr "KUYRUKLAR"
 
-msgid "Nothing matches “{}”."
-msgstr "“{}” ile eşleşen bir şey yok."
+msgid "New queue"
+msgstr "Yeni kuyruk"
 
-msgid "No downloads here.\nClick “Add URL”, copy a link, or download something in your browser."
-msgstr "Burada indirme yok.\n“URL ekle”ye tıklayın, bir bağlantı kopyalayın ya da tarayıcınızda bir şey indirin."
+msgid "TOTAL SPEED"
+msgstr "TOTAL SPEED"
 
-msgid "Add URL"
-msgstr "URL ekle"
+msgid "Options"
+msgstr "Seçenekler"
 
-msgid "Add Batch"
-msgstr "Toplu ekle"
+msgid "Batch"
+msgstr "Batch"
 
 msgid "Torrent"
 msgstr "Torrent"
@@ -274,8 +244,8 @@ msgstr "Tümünü durdur"
 msgid "Scheduler"
 msgstr "Zamanlayıcı"
 
-msgid "Speed Limiter"
-msgstr "Hız sınırlayıcı"
+msgid "Limiter"
+msgstr "Limiter"
 
 msgid "Grabber"
 msgstr "Toplayıcı"
@@ -283,8 +253,56 @@ msgstr "Toplayıcı"
 msgid "Playlist"
 msgstr "Liste"
 
-msgid "Options"
-msgstr "Seçenekler"
+msgid "Search downloads…"
+msgstr "Search downloads…"
+
+msgid "More"
+msgstr "More"
+
+msgid "NAME"
+msgstr "NAME"
+
+msgid "SIZE"
+msgstr "SIZE"
+
+msgid "PROGRESS"
+msgstr "PROGRESS"
+
+msgid "SPEED"
+msgstr "SPEED"
+
+msgid "TIME LEFT"
+msgstr "TIME LEFT"
+
+msgid "DATE"
+msgstr "DATE"
+
+msgid "Nothing matches “{}”."
+msgstr "“{}” ile eşleşen bir şey yok."
+
+msgid "No downloads yet"
+msgstr "No downloads yet"
+
+msgid "Paste a link, click “New download”, or download something in your browser."
+msgstr "Paste a link, click “New download”, or download something in your browser."
+
+msgid "{} downloading"
+msgstr "{} indiriliyor"
+
+msgid "Idle"
+msgstr "Boşta"
+
+msgid "Today: {} · {}"
+msgstr "Today: {} · {}"
+
+msgid "No speed limit"
+msgstr "Sınır yok"
+
+msgid "Browser connected"
+msgstr "Tarayıcı bağlı"
+
+msgid "Browser not connected"
+msgstr "Tarayıcı bağlı değil"
 
 msgid "Download File Info"
 msgstr "Dosya bilgileri"
@@ -297,6 +315,9 @@ msgstr "https://example.com/file"
 
 msgid "Check"
 msgstr "Denetle"
+
+msgid "Category"
+msgstr "Kategori"
 
 msgid "Save As"
 msgstr "Farklı kaydet"
@@ -393,6 +414,9 @@ msgstr "Ekle"
 
 msgid "Download status"
 msgstr "İndirme durumu"
+
+msgid "Speed Limiter"
+msgstr "Hız sınırlayıcı"
 
 msgid "Options on completion"
 msgstr "Bitince yapılacaklar"
@@ -874,9 +898,6 @@ msgstr "Görünüm"
 msgid "Torrents"
 msgstr "Torrentler"
 
-msgid "Theme"
-msgstr "Tema"
-
 msgid "Window opacity"
 msgstr "Pencere opaklığı"
 
@@ -1291,8 +1312,8 @@ msgstr "Klasör yolunu kopyala"
 msgid "Version {}"
 msgstr "Sürüm {}"
 
-msgid "Download manager for Windows, in the look of NetLAB."
-msgstr "NetLAB görünümünde Windows indirme yöneticisi."
+msgid "Fast download manager for Windows: many connections, videos, torrents and the browser add-in."
+msgstr "Fast download manager for Windows: many connections, videos, torrents and the browser add-in."
 
 msgid "What's new in EdsDown"
 msgstr "EdsDown’da yenilikler"

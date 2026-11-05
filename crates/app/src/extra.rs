@@ -366,21 +366,13 @@ pub(crate) fn is_web_address(s: &str) -> bool {
 }
 
 /// What the newest version brings (shown once after an automatic update).
-const WHATS_NEW: [&str; 14] = [
-    "A click on a file link in the browser goes straight to EdsDown: the browser's own Save As window no longer opens.",
-    "Downloads never wait for ever any more: when a server stops answering, EdsDown asks again by itself, so a file no longer stays at 0 KB/s.",
-    "Big files keep going by themselves when the server has trouble: EdsDown tries again later on its own.",
-    "A link that stops working (expired) is renewed by itself and checked first, then the download goes on from where it was.",
-    "The number of connections changes at once, even while a file downloads, and a connection much slower than the others is made again.",
-    "The windows are drawn without the graphics card: much less memory, and the program no longer closes by itself at start on some computers (Options > General switches it back).",
-    "When EdsDown is open but does not answer, opening it again offers to close it and start it fresh.",
-    "Torrents: .torrent files and magnet links open with EdsDown, and a .torrent file can be dropped on the window.",
-    "Removing downloads can delete their files from the disk too (if you tick it), and the question can be turned off.",
-    "Playlists have 240p and 144p, the MP3 quality can be chosen, and the subtitles of videos can be downloaded too (Options > Downloads).",
-    "The video button in the browser: a small style, hides in full screen, stays closed when you close it, and finds videos in the Facebook feed and on many more sites.",
-    "ffmpeg.exe is downloaded again by itself when an antivirus removed it.",
-    "Changing the folder or the name of a download no longer gives a small broken file, and a moved file never replaces another one.",
-    "The windows keep the size you gave them.",
+const WHATS_NEW: [&str; 6] = [
+    "A new look from scratch: a professional dark theme with one blue accent, new icons and a new logo.",
+    "The main window has a side bar with the views, categories, queues and the total speed with its graph.",
+    "All downloads are in one list you can sort, with the progress, speed and time left in each row.",
+    "The toolbar shows the names of its buttons, and only their icons when the window is narrow.",
+    "A status bar shows the speed, the downloads running, today's total, the speed limiter and the browser.",
+    "The browser add-in has the same new look.",
 ];
 
 thread_local! {

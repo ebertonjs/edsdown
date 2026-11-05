@@ -217,7 +217,7 @@
   }
   // size of the button: the slider in the add-in's menu (50% - 200%)
   const OLD_SIZES = { small: 0.85, normal: 1, large: 1.25 };
-  // its look: the add-in's menu > "Button style" (NetLAB glass by default)
+  // its look: the add-in's menu > "Button style" (the program's look by default)
   const STYLES = ["netlab", "compact", "blue", "dark", "light", "green", "icon"];
   let look = "netlab";
   const applyLook = () => {
@@ -283,16 +283,15 @@
   } catch (_) {
     // storage not reachable (add-in reloading): default size
   }
-  // NetNOC / NetLAB glass (the default look); the other looks only change
+  // the program's look (the default); the other looks only change
   // the button's colors
   const STYLE = `
     :host { all: initial; }
-    .wrap { font: 600 11px/1.25 "Inter", system-ui, "Segoe UI", sans-serif; color: #eef0f8; display: inline-block; zoom: var(--z, 1); }
-    .btn { display: inline-flex; align-items: stretch; color: #eef0f8; border: 1px solid rgba(255,255,255,.12);
-           background: rgba(36,38,64,.80); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2);
-           border-radius: 999px; box-shadow: 0 8px 22px rgba(5,6,20,.45); font: inherit; overflow: hidden;
+    .wrap { font: 600 11px/1.25 "Inter", system-ui, "Segoe UI", sans-serif; color: #e6edf7; display: inline-block; zoom: var(--z, 1); }
+    .btn { display: inline-flex; align-items: stretch; color: #e6edf7; border: 1px solid #2e3d5c;
+           background: #111a2e; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.45); font: inherit; overflow: hidden;
            opacity: var(--o, .92); transition: opacity .15s, background .15s; user-select: none; white-space: nowrap; }
-    .btn:hover, .btn.open { opacity: 1; background: rgba(52,55,88,.90); }
+    .btn:hover, .btn.open { opacity: 1; background: #16213a; }
     .btn.drag { opacity: 1; }
     .part { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px 4px 5px; cursor: grab; }
     .part:hover { background: rgba(255,255,255,.08); }
@@ -301,50 +300,33 @@
     .side:hover { background: rgba(255,255,255,.12); opacity: 1; }
     .ico { width: 16px; height: 16px; flex: none; }
     .caret { font-size: 9px; opacity: .7; }
-    .spin { width: 10px; height: 10px; margin: 0 3px; border: 2px solid rgba(245,158,46,.35); border-top-color: #f59e2e; border-radius: 50%;
+    .spin { width: 10px; height: 10px; margin: 0 3px; border: 2px solid rgba(59,130,246,.35); border-top-color: #3b82f6; border-radius: 50%;
             animation: r .8s linear infinite; flex: none; }
     @keyframes r { to { transform: rotate(360deg); } }
-    .list { width: 340px; margin-top: 6px; background: rgba(36,38,64,.92); border: 1px solid rgba(255,255,255,.1);
-            backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
-            border-radius: 16px; box-shadow: 0 18px 40px rgba(5,6,20,.5); overflow: hidden; max-height: 380px; overflow-y: auto; }
-    .head { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-weight: 700; color: #eef0f8;
+    .list { width: 340px; margin-top: 6px; background: #111a2e; border: 1px solid #2e3d5c;
+            border-radius: 10px; box-shadow: 0 14px 32px rgba(0,0,0,.5); overflow: hidden; max-height: 380px; overflow-y: auto; }
+    .head { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-weight: 700; color: #e6edf7;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; gap: 8px; }
     .item:last-child { border-bottom: 0; }
     .item:hover { background: rgba(255,255,255,.07); }
-    .num { color: #8c93ab; min-width: 16px; text-align: right; font-weight: 400; }
+    .num { color: #8a98b3; min-width: 16px; text-align: right; font-weight: 400; }
     .body { flex: 1; min-width: 0; }
     .t { font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-    .s { color: #8c93ab; font-size: 10.5px; font-weight: 400; overflow-wrap: anywhere; }
-    .tag { font-size: 9.5px; font-weight: 700; padding: 0 6px; border-radius: 999px; color: #fff; background: #8c93ab; line-height: 15px; }
-    .tag.HD { background: #36c06f; } .tag.FullHD { background: #4f8dff; } .tag.K2 { background: #9b7bff; }
-    .tag.K4 { background: #f59e2e; color: #2a1600; } .tag.K8 { background: #ef5350; }
-    .codec { font-size: 9.5px; color: #b9bfd3; border: 1px solid rgba(255,255,255,.2); border-radius: 999px; padding: 0 5px; line-height: 14px; }
-    .all { font-weight: 700; color: #ffb35c; }
-    .msg { padding: 10px 12px; color: #36c06f; }
-    .help { padding: 10px 12px; color: #d9dcea; background: rgba(245,158,46,.10); border-bottom: 1px solid rgba(245,158,46,.25); font-weight: 400; }
-    .act { margin-top: 8px; display: inline-block; background: linear-gradient(135deg, #f59e2e, #ffc56b); color: #2a1600;
-           border-radius: 999px; padding: 4px 12px; cursor: pointer; font-weight: 700; }
-    .act:hover { filter: brightness(1.06); }
+    .s { color: #8a98b3; font-size: 10.5px; font-weight: 400; overflow-wrap: anywhere; }
+    .tag { font-size: 9.5px; font-weight: 700; padding: 0 6px; border-radius: 4px; color: #fff; background: #64748b; line-height: 15px; }
+    .tag.HD { background: #16a34a; } .tag.FullHD { background: #2563eb; } .tag.K2 { background: #7c3aed; }
+    .tag.K4 { background: #d97706; } .tag.K8 { background: #dc2626; }
+    .codec { font-size: 9.5px; color: #b6c2d6; border: 1px solid #2e3d5c; border-radius: 4px; padding: 0 5px; line-height: 14px; }
+    .all { font-weight: 700; color: #60a5fa; }
+    .msg { padding: 10px 12px; color: #22c55e; }
+    .help { padding: 10px 12px; color: #c5d0e3; background: rgba(59,130,246,.10); border-bottom: 1px solid rgba(59,130,246,.25); font-weight: 400; }
+    .act { margin-top: 8px; display: inline-block; background: #3b82f6; color: #fff;
+           border-radius: 6px; padding: 4px 12px; cursor: pointer; font-weight: 700; }
+    .act:hover { background: #4c8ef7; }
     .off { cursor: default; opacity: .7; }
     .off:hover { background: transparent; }
-    .err { color: #ff6b66; }
-    @media (prefers-color-scheme: light) {
-      .netlab .btn, .wrap.netlab { color: #1c2333; }
-      .netlab .btn { background: rgba(240,244,250,.85); border-color: rgba(255,255,255,.85); box-shadow: 0 8px 22px rgba(48,70,110,.25); }
-      .netlab .btn:hover, .netlab .btn.open { background: rgba(255,255,255,.94); }
-      .netlab .side { border-left-color: rgba(28,35,51,.12); }
-      .list { background: rgba(240,244,250,.94); border-color: rgba(255,255,255,.85); box-shadow: 0 16px 36px rgba(48,70,110,.25); color: #1c2333; }
-      .head { color: #1c2333; border-bottom-color: rgba(28,35,51,.08); }
-      .item { border-bottom-color: rgba(28,35,51,.07); }
-      .item:hover { background: rgba(255,255,255,.75); }
-      .s, .num { color: #66728a; }
-      .codec { color: #3d475c; border-color: rgba(28,35,51,.2); }
-      .all { color: #c26a08; }
-      .msg { color: #168a4a; }
-      .help { color: #3d475c; }
-      .err { color: #d23b32; }
-    }
+    .err { color: #f87171; }
     /* other looks: only the button changes */
     .blue .btn { background: linear-gradient(#3f8cf5, #1d63d6); border-color: #0f4fb5; color: #fff; }
     .blue .btn:hover, .blue .btn.open { background: linear-gradient(#4b96fa, #1a5bc7); }
@@ -356,14 +338,14 @@
     .green .btn { background: linear-gradient(#35b36b, #1f8a4c); border-color: #176b3a; color: #fff; }
     .green .btn:hover, .green .btn.open { background: linear-gradient(#3cc276, #1d8048); }
     .green .ico path { fill: #1f8a4c; }
-    .compact .btn { border-radius: 7px; background: linear-gradient(#ffb547, #f08a1c); border-color: rgba(255,255,255,.18); color: #2a1600; }
-    .compact .btn:hover, .compact .btn.open { background: linear-gradient(#ffc36a, #f59a2e); }
+    .compact .btn { border-radius: 7px; background: #3b82f6; border-color: #2563eb; color: #fff; }
+    .compact .btn:hover, .compact .btn.open { background: #4c8ef7; }
     .compact #label, .compact .caret, .compact #help { display: none; }
     .compact .part { padding: 4px 7px; }
     .compact .ico { width: 18px; height: 18px; }
-    .compact .ico circle { fill: #2a1600; }
-    .compact .ico path { fill: #ffb547; }
-    .compact #close { padding: 4px 8px; font-size: 13px; border-left-color: rgba(42,22,0,.25); }
+    .compact .ico circle { fill: #ffffff; }
+    .compact .ico path { fill: #3b82f6; }
+    .compact #close { padding: 4px 8px; font-size: 13px; border-left-color: rgba(255,255,255,.3); }
     .icon .btn { border-radius: 50%; }
     .icon .part { padding: 5px; }
     .icon #label, .icon .caret, .icon .side { display: none; }
@@ -408,10 +390,10 @@
     svg.setAttribute("class", "ico");
     svg.setAttribute("viewBox", "0 0 16 16");
     const circle = document.createElementNS(svgNs, "circle");
-    for (const [k, v] of [["cx", "8"], ["cy", "8"], ["r", "7.5"], ["fill", "#f59e2e"]]) circle.setAttribute(k, v);
+    for (const [k, v] of [["cx", "8"], ["cy", "8"], ["r", "7.5"], ["fill", "#3b82f6"]]) circle.setAttribute(k, v);
     const arrow = document.createElementNS(svgNs, "path");
     arrow.setAttribute("d", "M6.6 3.5h2.8v4.6h2.3L8 12 4.3 8.1h2.3z");
-    arrow.setAttribute("fill", "#2a1600");
+    arrow.setAttribute("fill", "#ffffff");
     svg.append(circle, arrow);
     const list = el("div", { class: "list", id: "list" });
     list.hidden = true;

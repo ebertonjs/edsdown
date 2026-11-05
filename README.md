@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/icone-v020.png" width="96" alt="EdsDown">
+<img src="docs/images/icone.png" width="96" alt="EdsDown">
 
 # EdsDown
 
@@ -12,7 +12,7 @@ Gerenciador de downloads para Windows, escrito em Rust.
 
 <br>
 
-<img src="docs/images/main-netlab-escuro-v020.png" alt="EdsDown no tema NetLAB escuro" width="800">
+<img src="docs/images/principal.png" alt="Janela principal do EdsDown" width="860">
 
 </div>
 
@@ -20,24 +20,16 @@ Gerenciador de downloads para Windows, escrito em Rust.
 
 ## Telas
 
-Interface no layout do **NetLAB**: coluna lateral com a velocidade total e o gráfico do último minuto, pílulas de status no topo, downloads em andamento como cards de vidro, concluídos em linhas compactas e um dock flutuante de botões redondos. Temas **NetLAB escuro** e **NetLAB claro** (botão laranja ao lado do menu ⋯).
+Visual escuro e profissional: barra lateral com as visões, categorias, filas e a velocidade total; barra de ferramentas; todos os downloads numa lista ordenável com o progresso em cada linha; e barra de status com velocidade, limitador e navegador.
 
 <table>
 <tr>
-<td align="center"><b>NetLAB claro</b><br><img src="docs/images/main-netlab-claro-v020.png" alt="EdsDown no tema NetLAB claro" width="420"></td>
-<td align="center"><b>Menu ⋯</b><br><img src="docs/images/menu-v020.png" alt="Menu de opções" width="420"></td>
+<td align="center"><b>Clique direito</b><br><img src="docs/images/menu-contexto.png" alt="Menu do clique direito" width="420"></td>
+<td align="center"><b>Opções</b><br><img src="docs/images/opcoes.png" alt="Janela de opções" width="420"></td>
 </tr>
 <tr>
-<td align="center"><b>Clique direito</b><br><img src="docs/images/menu-contexto-v020.png" alt="Menu do clique direito" width="420"></td>
-<td align="center"><b>Opções</b><br><img src="docs/images/opcoes-v020.png" alt="Janela de opções" width="420"></td>
-</tr>
-<tr>
-<td align="center"><b>Progresso do download</b><br><img src="docs/images/progresso-v020.png" alt="Janela de progresso com as conexões" width="360"></td>
-<td align="center"><b>Sobre</b><br><img src="docs/images/sobre-v020.png" alt="Janela Sobre" width="220"></td>
-</tr>
-<tr>
-<td align="center"><b>Popup da extensão</b><br><img src="docs/images/popup-v020.png" alt="Popup da extensão" width="420"></td>
-<td align="center"><b>Botão "Baixar este vídeo"</b><br><img src="docs/images/botao-video-v020.png" alt="Botão de download sobre o vídeo" width="420"></td>
+<td align="center"><b>Popup da extensão</b><br><img src="docs/images/popup-extensao.png" alt="Popup da extensão" width="300"></td>
+<td align="center"><b>Remover com confirmação</b><br><img src="docs/images/confirmar-remocao.png" alt="Confirmação ao remover" width="420"></td>
 </tr>
 </table>
 
@@ -56,7 +48,7 @@ Interface no layout do **NetLAB**: coluna lateral com a velocidade total e o gr�
 | Filas e agendamento | Filas, horário de início e desligar o PC ao terminar |
 | Limite de velocidade | Global ou por download |
 | Grabber | Coleta todos os arquivos de uma página |
-| Interface | Layout do NetLAB, cards de vidro, dock, temas escuro e claro |
+| Interface | Tema escuro profissional, lista com progresso por linha, barra lateral e barra de status |
 | Idiomas | Português, English, Español, Français, Deutsch, Türkçe, Русский, العربية |
 
 ## Instalação

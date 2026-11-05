@@ -51,14 +51,14 @@ component Radio inherits Rectangle {
         border-radius: 7px;
         border-width: root.checked ? 0px : 1.5px;
         border-color: Theme.dark ? #ffffff40 : #1c233340;
-        background: root.checked ? (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f) : Theme.btn;
+        background: root.checked ? Theme.primary : Theme.btn;
         if root.checked: Rectangle {
             x: 4.5px;
             y: 4.5px;
             width: 5px;
             height: 5px;
             border-radius: 2.5px;
-            background: #2a1600;
+            background: Theme.on-primary;
         }
     }
     lbl := Text {
@@ -1782,14 +1782,14 @@ export component TipDialog inherits ThemedWindow {
                 width: 44px;
                 height: 44px;
                 border-radius: 22px;
-                background: (Theme.gradients ? @linear-gradient(135deg, #f59e2e 0%, #ffc56b 100%) : #f8ab3f);
+                background: Theme.primary;
                 Glyph {
                     x: 10px;
                     y: 10px;
                     width: 24px;
                     height: 24px;
                     kind: "bulb";
-                    tint: #2a1600;
+                    tint: Theme.on-primary;
                 }
             }
             VerticalLayout {
@@ -2117,20 +2117,6 @@ export component SettingsDialog inherits ThemedWindow {
                     HRow {
                         spacing: 8px;
                         Label {
-                            text: @tr("Theme");
-                        }
-                        ComboBox {
-                            width: 200px;
-                            model: [@tr("NetLAB dark"), @tr("NetLAB light")];
-                            current-index <=> root.theme;
-                        }
-                        Rectangle {
-                            horizontal-stretch: 1;
-                        }
-                    }
-                    HRow {
-                        spacing: 8px;
-                        Label {
                             text: @tr("Window opacity");
                         }
                         Slider {
@@ -2182,53 +2168,6 @@ export component SettingsDialog inherits ThemedWindow {
                             selected => {
                                 root.preview-look();
                             }
-                        }
-                        Rectangle {
-                            horizontal-stretch: 1;
-                        }
-                    }
-                    HRow {
-                        spacing: 8px;
-                        Label {
-                            text: @tr("Background picture");
-                        }
-                        LineEdit {
-                            horizontal-stretch: 1;
-                            read-only: true;
-                            placeholder-text: @tr("none (the theme's colors)");
-                            text: root.bg-image;
-                        }
-                        Button {
-                            text: @tr("Browse…");
-                            clicked => {
-                                root.browse-bg();
-                            }
-                        }
-                        Button {
-                            text: @tr("Remove");
-                            enabled: root.bg-image != "";
-                            clicked => {
-                                root.bg-image = "";
-                                root.preview-look();
-                            }
-                        }
-                    }
-                    if root.bg-image != "": HRow {
-                        spacing: 8px;
-                        Label {
-                            text: @tr("Picture visibility");
-                        }
-                        Slider {
-                            width: 200px;
-                            minimum: 10;
-                            maximum: 80;
-                            value <=> root.bg-strength;
-                            changed(v) => {
-                                root.preview-look();
-                            }
-                        }
-                        Label {
-                            text: Math.round(root.bg-strength) + "%";
                         }
                         Rectangle {
                             horizontal-stretch: 1;
@@ -3834,7 +3773,7 @@ export component AboutDialog inherits ThemedWindow {
                     }
                 }
                 Text {
-                    text: @tr("Download manager for Windows, in the look of NetLAB.");
+                    text: @tr("Fast download manager for Windows: many connections, videos, torrents and the browser add-in.");
                     horizontal-alignment: center;
                     wrap: word-wrap;
                     font-size: 12px * Theme.font-scale;
@@ -3924,7 +3863,7 @@ export component WhatsNewDialog inherits ThemedWindow {
                             col: root.rtl ? 1 : 0;
                             row: 0;
                             text: "•";
-                            color: Theme.orange;
+                            color: Theme.primary;
                             font-weight: 700;
                         }
                         Text {
